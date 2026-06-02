@@ -7,7 +7,7 @@ function normalizeBaseUrl(value) {
     .replace(/\/$/, "");
 }
 
-function getBaseUrl() {
+async function getBaseUrl() {
   const configuredBaseUrl = normalizeBaseUrl(
     process.env.API_BASE_URL ||
       process.env.NEXT_PUBLIC_API_BASE_URL ||
@@ -17,7 +17,7 @@ function getBaseUrl() {
     return configuredBaseUrl;
   }
 
-  const headerStore = headers();
+  const headerStore = await headers();
   const forwardedHost = normalizeBaseUrl(
     headerStore.get("x-forwarded-host") || headerStore.get("host") || "",
   );
@@ -41,7 +41,8 @@ function buildCookieHeader(cookieStore) {
 export async function apiGetServer(path) {
   try {
     const cookieStore = await cookies();
-    const response = await fetch(`${getBaseUrl()}${path}`, {
+    const baseUrl = await getBaseUrl();
+    const response = await fetch(`${baseUrl}${path}`, {
       cache: "no-store",
       headers: {
         Cookie: buildCookieHeader(cookieStore),

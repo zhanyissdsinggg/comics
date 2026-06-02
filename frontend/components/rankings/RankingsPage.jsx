@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Compass, Crown, Flame, Sparkles } from "lucide-react";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import CreatorShelfLinks from "../common/CreatorShelfLinks";
 import Cover from "../common/Cover";
+import { StorefrontPage } from "../storefront/StorefrontScaffold";
 import { apiGet } from "../../lib/apiClient";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
@@ -22,6 +24,14 @@ import {
   filterContentByMode,
   getContentModeQueryParam,
 } from "../../lib/contentFilters";
+import {
+  storefrontBadgeClass,
+  storefrontChipClass,
+  storefrontInfoCardClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+} from "../common/StorefrontPagePrimitives";
 import {
   formatTitleCardCreator,
   formatTitleCardFormatStatus,
@@ -165,17 +175,17 @@ function RankingsLoadingState() {
           <div className="space-y-3">
             <div className="h-3 w-28 rounded-full bg-white/20" />
             <div className="h-10 w-72 rounded-full bg-white/20" />
-            <div className="h-4 w-full max-w-2xl rounded-full bg-[#111111]" />
+            <div className="h-4 w-full max-w-2xl rounded-full bg-[rgba(255,255,255,0.035)]" />
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {Array.from({ length: 2 }).map((_, index) => (
               <div
                 key={index}
-                className="rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 shadow-[0_18px_40px_rgba(8,6,20,0.22)]"
+                className={`${storefrontInfoCardClass} p-4`}
               >
                 <div className="h-44 rounded-[20px] bg-white/20" />
                 <div className="mt-4 h-6 w-40 rounded-full bg-white/20" />
-                <div className="mt-3 h-4 w-full rounded-full bg-[#111111]" />
+                <div className="mt-3 h-4 w-full rounded-full bg-[rgba(255,255,255,0.035)]" />
               </div>
             ))}
           </div>
@@ -185,12 +195,12 @@ function RankingsLoadingState() {
       <SurfacePanel className="space-y-4" appearance="dark" accent="rose">
         <div className="h-3 w-24 rounded-full bg-white/20" />
         <div className="h-8 w-48 rounded-full bg-white/20" />
-        <div className="h-4 w-full rounded-full bg-[#111111]" />
+        <div className="h-4 w-full rounded-full bg-[rgba(255,255,255,0.035)]" />
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
-              className="h-20 rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-[0_18px_40px_rgba(8,6,20,0.22)]"
+              className={`h-20 ${storefrontSoftCardClass}`}
             />
           ))}
         </div>
@@ -235,12 +245,48 @@ function RankingsSectionHeader({
       </div>
       <div className="flex flex-wrap items-center gap-2.5">
         {meta ? (
-          <span className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-3.5 py-2 text-xs font-medium uppercase tracking-[0.16em] text-white/76 shadow-[0_10px_24px_rgba(8,6,20,0.18)]">
+          <span className={`${storefrontBadgeClass} px-3.5 py-2 text-xs tracking-[0.16em] text-white/76`}>
             {meta}
           </span>
         ) : null}
         {actions}
       </div>
+    </div>
+  );
+}
+
+function RankingsPulseCard({
+  label,
+  value,
+  detail,
+  icon: Icon,
+  tone = "rose",
+}) {
+  const toneClass =
+    tone === "cyan"
+      ? "text-cyan-100 bg-cyan-300/12 border-cyan-200/20"
+      : tone === "amber"
+        ? "text-amber-100 bg-amber-300/12 border-amber-200/20"
+        : "text-rose-100 bg-rose-300/12 border-rose-200/20";
+
+  return (
+    <div className={storefrontInfoCardClass}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+            {label}
+          </p>
+          <p className="mt-2 font-display text-[1.3rem] font-semibold tracking-[-0.04em] text-white">
+            {value}
+          </p>
+        </div>
+        <span
+          className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl border ${toneClass}`}
+        >
+          <Icon className="size-4.5" />
+        </span>
+      </div>
+      <p className="mt-3 text-sm leading-6 text-white/64">{detail}</p>
     </div>
   );
 }
@@ -316,6 +362,21 @@ export default function RankingsPage({
   const leadMeta = leadEntry ? getSeriesMeta(leadEntry) : null;
   const supportingEntries = curatedSeries.slice(1, 3);
   const boardEntries = curatedSeries.slice(3, 12);
+  const completedCount = useMemo(
+    () =>
+      curatedSeries.filter(
+        (series) => normalizeStatus(series?.status) === "completed",
+      ).length,
+    [curatedSeries],
+  );
+  const comicCount = useMemo(
+    () =>
+      curatedSeries.filter(
+        (series) => String(series?.type || "").trim().toLowerCase() === "comic",
+      ).length,
+    [curatedSeries],
+  );
+  const novelCount = Math.max(0, curatedSeries.length - comicCount);
   const handleSeriesClick = useCallback(
     (seriesId, entryPoint = "FEATURED_SERIES") => {
       const targetPath = `/series/${seriesId}`;
@@ -349,34 +410,157 @@ export default function RankingsPage({
     [handleSeriesClick],
   );
 
-  const primaryButtonClass =
-    "rounded-full border border-[rgba(255,79,154,0.28)] bg-[linear-gradient(135deg,#ff4f9a_0%,#ff76ad_100%)] px-4 py-2.5 text-sm font-semibold text-[#1a0e16] shadow-[0_18px_36px_rgba(255,79,154,0.2)] transition-transform hover:-translate-y-0.5";
-  const secondaryButtonClass =
-    "rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-4 py-2.5 text-sm font-medium text-white shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-transform hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.08)]";
-  const heroTitle = "Trending";
+  const secondaryButtonClass = `${storefrontSecondaryButtonClass} px-4 py-2.5`;
+  const primaryButtonClass = `${storefrontPrimaryButtonClass} px-4 py-2.5`;
+  const heroTitle =
+    activeView.id === "featured"
+      ? "Trending Tonight"
+      : activeView.id === "start-here"
+        ? "Start Here"
+        : activeView.label;
   const heroDescription = isAdultMode
-    ? "Adult-only stories readers are opening most right now."
-    : "The stories readers are opening most this week.";
-  const heroSecondary =
-    curatedSeries.length > 0 ? `${curatedSeries.length} titles` : "";
+    ? `${activeView.description} Adult-only stories only.`
+    : activeView.description;
+  const heroSecondary = leadEntry
+    ? `${leadEntry.title} is leading this view right now.`
+    : curatedSeries.length > 0
+      ? `${curatedSeries.length} titles in this view.`
+      : "";
+  const heroStats = [
+    {
+      label: "Live Board",
+      value: `${curatedSeries.length}`,
+      hint: curatedSeries.length > 0 ? "Titles in this rotation" : "No titles yet",
+    },
+    {
+      label: "Comics",
+      value: `${comicCount}`,
+      hint: comicCount > 0 ? "Fast reads and big panels" : "No comic titles",
+    },
+    {
+      label: "Novels",
+      value: `${novelCount}`,
+      hint: novelCount > 0 ? "Longer reads with late-night pull" : "No novel titles",
+    },
+    {
+      label: "Completed",
+      value: `${completedCount}`,
+      hint: completedCount > 0 ? "Whole stories, zero waiting" : "No finished runs",
+    },
+  ];
+  const pulseCards = [
+    {
+      label: "Leading Now",
+      value: leadEntry?.title || "No lead yet",
+      detail:
+        leadMeta?.genres ||
+        "The title readers are opening first in this ranking view.",
+      icon: Crown,
+      tone: "rose",
+    },
+    {
+      label: "Reader Heat",
+      value: activeView.label,
+      detail:
+        activeView.id === "completed"
+          ? "Whole runs worth binging tonight."
+          : activeView.id === "start-here"
+            ? "Easy-entry stories with fast early momentum."
+            : "The strongest opens and repeat taps in this mode.",
+      icon: Flame,
+      tone: "amber",
+    },
+    {
+      label: "Next Move",
+      value: isAdultMode ? "Adult Only" : "Normal Mode",
+      detail:
+        isAdultMode
+          ? "This preview only surfaces 18+ stories in the current mode."
+          : "This preview only surfaces standard catalog titles.",
+      icon: Sparkles,
+      tone: "cyan",
+    },
+  ];
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#0a0c13_0%,#0f1118_34%,#13131d_100%)] text-white">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[760px] bg-[radial-gradient(circle_at_14%_12%,rgba(255,79,154,0.12),transparent_22%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.1),transparent_18%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-5 px-4 py-6 md:gap-8 md:px-8 md:py-10">
-        <section>
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.16)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.1)]">
+      <div className="flex flex-col gap-5 md:gap-8">
+        <section className="space-y-5">
           <EditorialHero
-            eyebrow=""
+            eyebrow="Rankings"
             title={heroTitle}
             description={heroDescription}
             secondary={heroSecondary}
             className="min-h-full"
             appearance="dark"
             accent="rose"
+            stats={heroStats}
+            actions={
+              <>
+                <button
+                  type="button"
+                  onClick={() =>
+                    leadEntry
+                      ? handleSeriesClick(leadEntry.id, "RANKINGS_HERO")
+                      : router.push("/search")
+                  }
+                  className={primaryButtonClass}
+                >
+                  {leadEntry ? "Open Top Title" : "Open Search"}
+                </button>
+                <Link href="/search" className={secondaryButtonClass}>
+                  Browse Search
+                </Link>
+              </>
+            }
           />
-          <h2 className="mt-4 text-sm font-semibold uppercase tracking-[0.24em] text-white/60">
-            Featured stories.
-          </h2>
+          <SurfacePanel
+            appearance="dark"
+            accent="rose"
+            tone="muted"
+            className="space-y-5"
+          >
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-[40rem]">
+                <p className={`${storefrontBadgeClass} gap-2 text-white/64`}>
+                  <Compass className="size-3.5" />
+                  Browse Views
+                </p>
+                <h2 className="mt-3 font-display text-[1.8rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.3rem]">
+                  Switch the shelf by mood, format, or binge factor
+                </h2>
+                <p className="mt-2 text-sm leading-7 text-white/66">
+                  Featured, quick starts, completed runs, comics, and novels all
+                  keep the current content mode intact.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {VIEWS.map((view) => {
+                  const isActive = view.id === activeView.id;
+                  return (
+                    <button
+                      key={view.id}
+                      type="button"
+                      onClick={() => router.push(`/rankings?view=${view.id}`)}
+                      className={
+                        isActive
+                          ? `${primaryButtonClass} shadow-[0_20px_38px_rgba(255,79,154,0.22)]`
+                          : secondaryButtonClass
+                      }
+                    >
+                      {view.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-3">
+              {pulseCards.map((card) => (
+                <RankingsPulseCard key={card.label} {...card} />
+              ))}
+            </div>
+          </SurfacePanel>
         </section>
 
         {commerceNotice ? (
@@ -385,22 +569,6 @@ export default function RankingsPage({
             onDismiss={() => setCommerceNotice(null)}
           />
         ) : null}
-
-        <section className="flex flex-wrap gap-2">
-          {VIEWS.map((view) => {
-            const isActive = view.id === activeView.id;
-            return (
-              <button
-                key={view.id}
-                type="button"
-                onClick={() => router.push(`/rankings?view=${view.id}`)}
-                className={isActive ? primaryButtonClass : secondaryButtonClass}
-              >
-                {view.label}
-              </button>
-            );
-          })}
-        </section>
 
         {loading ? (
           <RankingsLoadingState />
@@ -580,7 +748,7 @@ export default function RankingsPage({
                               "FEATURED_LIST",
                             )
                           }
-                          className="flex w-full items-center gap-4 rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-3 text-left text-white shadow-[0_16px_40px_rgba(8,6,20,0.2)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/16"
+                          className={`flex w-full items-center gap-4 ${storefrontSoftCardClass} p-3 text-left text-white transition-all duration-200 hover:-translate-y-0.5 hover:border-white/16`}
                           aria-label={`View ${series.title}`}
                         >
                           <Cover
@@ -614,7 +782,7 @@ export default function RankingsPage({
                               </p>
                             ) : null}
                           </div>
-                          <span className="inline-flex rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-white shadow-[0_10px_24px_rgba(8,6,20,0.18)]">
+                          <span className={`${storefrontChipClass} min-h-[38px] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-white`}>
                             View title
                           </span>
                         </Link>
@@ -641,6 +809,6 @@ export default function RankingsPage({
           </div>
         )}
       </div>
-    </main>
+    </StorefrontPage>
   );
 }

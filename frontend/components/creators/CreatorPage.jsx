@@ -1,7 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import Cover from "../common/Cover";
 import EmptyState from "../common/EmptyState";
@@ -24,7 +27,17 @@ import {
   humanizeCreatorSlug,
   slugifyCreatorName,
 } from "../../lib/creators";
-import { storefrontPrimaryButtonClass } from "../common/StorefrontPagePrimitives";
+import {
+  storefrontBadgeClass,
+  storefrontChipClass,
+  storefrontInfoCardClass,
+  storefrontInsetCardClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+  StorefrontSectionHeading,
+} from "../common/StorefrontPagePrimitives";
+import { StorefrontPage } from "../storefront/StorefrontScaffold";
 import {
   resolveCreatorIdentity,
   resolveSeriesCreatorIdentity,
@@ -170,30 +183,88 @@ function buildGridItems(items) {
   }));
 }
 
+function buildCreatorHeroStats({
+  creatorItems,
+  completedCount,
+  ongoingCount,
+  topGenres,
+}) {
+  const topGenreLabel =
+    Array.isArray(topGenres) && topGenres.length > 0
+      ? topGenres.slice(0, 2).join(" / ")
+      : "Open shelf";
+
+  return [
+    {
+      label: "Titles",
+      value: `${Math.max(0, creatorItems.length)}`,
+      hint: "Public stories credited on this shelf.",
+    },
+    {
+      label: "Completed",
+      value: `${Math.max(0, completedCount)}`,
+      hint: "Finished arcs ready to binge.",
+    },
+    {
+      label: "Ongoing",
+      value: `${Math.max(0, ongoingCount)}`,
+      hint: "Stories still getting fresh drops.",
+    },
+    {
+      label: "Known for",
+      value: topGenreLabel,
+      hint: "The tone readers are most likely to feel first.",
+    },
+  ];
+}
+
+function CreatorQuickFacts({ cards = [] }) {
+  if (!Array.isArray(cards) || cards.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      {cards.map((card) => (
+        <div
+          key={card.id}
+          className={storefrontInfoCardClass}
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/46">
+            {card.label}
+          </p>
+          <p className="mt-2 text-sm leading-[1.68] text-white/78">
+            {card.value}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function CreatorPageSkeleton() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.12),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.12)]">
+      <div className="flex flex-col gap-6">
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
           <div className="h-4 w-24 animate-pulse rounded-full bg-white/20" />
           <div className="h-12 w-full max-w-2xl animate-pulse rounded-[24px] bg-white/20" />
-          <div className="h-16 w-full max-w-3xl animate-pulse rounded-[24px] bg-[#111111]" />
+          <div className="h-16 w-full max-w-3xl animate-pulse rounded-[24px] bg-[rgba(255,255,255,0.035)]" />
         </SurfacePanel>
 
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
-            <div className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-2 shadow-[0_20px_48px_rgba(8,6,20,0.22)]">
-              <div className="aspect-[3/4] animate-pulse rounded-[24px] bg-[#111111]" />
+            <div className={`rounded-[30px] ${storefrontSoftCardClass} p-2 shadow-[0_20px_48px_rgba(8,6,20,0.22)]`}>
+              <div className="aspect-[3/4] animate-pulse rounded-[24px] bg-[rgba(255,255,255,0.035)]" />
             </div>
             <div className="space-y-3">
               <div className="h-8 w-48 animate-pulse rounded-full bg-white/20" />
-              <div className="h-14 w-full animate-pulse rounded-[24px] bg-[#111111]" />
+              <div className="h-14 w-full animate-pulse rounded-[24px] bg-[rgba(255,255,255,0.035)]" />
               <div className="grid gap-3 sm:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div
                     key={`creator-stat-${index}`}
-                    className="h-24 animate-pulse rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.04)]"
+                    className={`h-24 animate-pulse ${storefrontInfoCardClass}`}
                   />
                 ))}
               </div>
@@ -201,7 +272,7 @@ function CreatorPageSkeleton() {
           </div>
         </SurfacePanel>
       </div>
-    </main>
+    </StorefrontPage>
   );
 }
 
@@ -339,6 +410,16 @@ export default function CreatorPage({
       }),
     [completedCount, latestUpdatedAt, ongoingCount, topGenres],
   );
+  const heroStats = useMemo(
+    () =>
+      buildCreatorHeroStats({
+        creatorItems,
+        completedCount,
+        ongoingCount,
+        topGenres,
+      }),
+    [completedCount, creatorItems, ongoingCount, topGenres],
+  );
 
   const handleOpenTitle = useCallback(
     (series) => {
@@ -370,8 +451,8 @@ export default function CreatorPage({
 
   if (error) {
     return (
-      <main className="min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-white">
-        <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
+      <StorefrontPage accentClass="from-[rgba(255,79,154,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.12)]">
+        <div>
           <SurfacePanel appearance="dark" accent="cyan">
             <EmptyState
               appearance="dark"
@@ -383,14 +464,14 @@ export default function CreatorPage({
             />
           </SurfacePanel>
         </div>
-      </main>
+      </StorefrontPage>
     );
   }
 
   if (!creatorItems.length) {
     return (
-      <main className="min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-white">
-        <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
+      <StorefrontPage accentClass="from-[rgba(255,79,154,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.12)]">
+        <div className="flex flex-col gap-6">
           <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/56">
               {formatCreditTypeLabel(creatorIdentity.creditType)}
@@ -411,16 +492,41 @@ export default function CreatorPage({
             />
           </SurfacePanel>
         </div>
-      </main>
+      </StorefrontPage>
     );
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-white">
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.12)]">
+      <div className="flex flex-col gap-6">
+        <EditorialHero
+          accent="cyan"
+          eyebrow={formatCreditTypeLabel(creatorIdentity.creditType)}
+          secondary="Creator shelf"
+          title={creatorName}
+          description={creatorHook}
+          actions={
+            <>
+              {spotlightSeries ? (
+                <button
+                  type="button"
+                  onClick={() => handleOpenTitle(spotlightSeries)}
+                  className={storefrontPrimaryButtonClass}
+                >
+                  Open featured title
+                </button>
+              ) : null}
+              <Link href="/creators" className={storefrontSecondaryButtonClass}>
+                Back to creators
+              </Link>
+            </>
+          }
+          stats={heroStats}
+        />
+
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-5">
-          <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start">
-            <div className="overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-2 shadow-[0_20px_48px_rgba(8,6,20,0.26)]">
+          <div className="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
+            <div className={`overflow-hidden rounded-[30px] ${storefrontSoftCardClass} p-2 shadow-[0_20px_48px_rgba(8,6,20,0.26)]`}>
               <Cover
                 tone={spotlightSeries?.coverTone}
                 coverUrl={spotlightSeries?.coverUrl}
@@ -432,76 +538,90 @@ export default function CreatorPage({
               />
             </div>
 
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56">
-                {formatCreditTypeLabel(creatorIdentity.creditType)}
-              </p>
-              <h1 className="mt-3 font-display text-[2.4rem] font-semibold leading-[0.92] tracking-[-0.06em] text-white sm:text-[3rem]">
-                {creatorName}
-              </h1>
-              <p className="mt-3 max-w-3xl text-sm leading-[1.72] text-white/68 sm:text-[0.98rem]">
-                {creatorHook}
-              </p>
-
-              {topGenres.length > 0 ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {topGenres.map((genre) => (
-                    <span
-                      key={`${creatorSlugKey}-${genre}`}
-                      className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/72 shadow-[0_10px_24px_rgba(8,6,20,0.16)]"
-                    >
-                      {genre}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {creatorMetaCards.map((card) => (
-                  <div
-                    key={card.id}
-                    className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] px-4 py-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]"
-                  >
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/46">
-                      {card.label}
-                    </p>
-                    <p className="mt-2 text-sm leading-[1.68] text-white/78">
-                      {card.value}
-                    </p>
+            <div className="space-y-5">
+              <div className={`${storefrontInfoCardClass} p-5`}>
+                <p className={`${storefrontBadgeClass} text-white/80`}>
+                  Shelf overview
+                </p>
+                <p className="mt-4 max-w-3xl text-sm leading-[1.72] text-white/70">
+                  {creatorHook}
+                </p>
+                {topGenres.length > 0 ? (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {topGenres.map((genre) => (
+                      <span
+                        key={`${creatorSlugKey}-${genre}`}
+                        className={`${storefrontChipClass} min-h-[38px] px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] text-white/72`}
+                      >
+                        {genre}
+                      </span>
+                    ))}
                   </div>
-                ))}
+                ) : null}
               </div>
+
+              <CreatorQuickFacts cards={creatorMetaCards} />
             </div>
           </div>
         </SurfacePanel>
 
         {spotlightSeries ? (
-          <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <SurfacePanel appearance="dark" accent="cyan" className="space-y-5">
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.08fr)_320px]">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56">
-                  Start here
-                </p>
-                <h2 className="mt-2 font-display text-[1.9rem] font-semibold leading-[0.94] tracking-[-0.06em] text-white">
-                  {spotlightSeries.title}
-                </h2>
+                <StorefrontSectionHeading
+                  eyebrow="Start here"
+                  title={spotlightSeries.title}
+                  description={spotlightHook}
+                />
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenTitle(spotlightSeries)}
+                    className={storefrontPrimaryButtonClass}
+                  >
+                    View title
+                  </button>
+                  <Link
+                    href="/creators"
+                    className={storefrontSecondaryButtonClass}
+                  >
+                    Browse more creators
+                  </Link>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => handleOpenTitle(spotlightSeries)}
-                className={storefrontPrimaryButtonClass}
-              >
-                View title
-              </button>
-            </div>
 
-            <p className="max-w-3xl text-sm leading-[1.72] text-white/72">
-              {spotlightHook}
-            </p>
+              <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(155deg,rgba(23,21,36,0.98)_0%,rgba(12,12,22,0.98)_54%,rgba(9,17,31,0.98)_100%)] p-4 shadow-[0_24px_60px_rgba(8,6,20,0.3)]">
+                <div className={`${storefrontInsetCardClass} overflow-hidden rounded-[24px] p-2`}>
+                  <Cover
+                    tone={spotlightSeries?.coverTone}
+                    coverUrl={spotlightSeries?.coverUrl}
+                    label={spotlightSeries?.title || creatorName}
+                    eyebrow={creatorName}
+                    badge=""
+                    fallbackVariant="minimal-card"
+                    className="aspect-[4/5] rounded-[18px]"
+                  />
+                </div>
+                <div className={`mt-4 ${storefrontSoftCardClass} flex items-center justify-between px-4 py-3`}>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/46">
+                      Spotlight title
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-white">
+                      {spotlightSeries.title}
+                    </p>
+                  </div>
+                  <span className={`${storefrontChipClass} h-10 w-10 min-h-0 justify-center px-0 text-white`}>
+                    <ArrowRight className="size-4" />
+                  </span>
+                </div>
+              </div>
+            </div>
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
+        <SurfacePanel appearance="dark" accent="cyan" className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56">
@@ -523,11 +643,12 @@ export default function CreatorPage({
                 item={item}
                 tone={item.coverTone}
                 onClick={() => handleOpenTitle(item)}
+                interactionMode="button"
               />
             ))}
           </div>
         </SurfacePanel>
       </div>
-    </main>
+    </StorefrontPage>
   );
 }

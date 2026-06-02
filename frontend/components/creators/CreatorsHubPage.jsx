@@ -1,14 +1,31 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import EmptyState from "../common/EmptyState";
 import Cover from "../common/Cover";
 import { apiGet } from "../../lib/apiClient";
-import { buildCreatorDirectory } from "../../lib/creatorDirectory";
+import {
+  buildCreatorDirectory,
+  getCreatorDirectoryStats,
+} from "../../lib/creatorDirectory";
 import { buildCreatorEditorialHook } from "../../lib/editorialHooks";
 import { filterBlockedPublicSeries } from "../../lib/publicCatalogVisibility";
+import {
+  storefrontAccentChipClass,
+  storefrontChipClass,
+  storefrontHighlightBadgeClass,
+  storefrontInfoCardClass,
+  storefrontInputClass,
+  StorefrontSectionHeading,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+} from "../common/StorefrontPagePrimitives";
+import { StorefrontPage } from "../storefront/StorefrontScaffold";
 
 function formatCreditTypeLabel(creditType) {
   if (creditType === "studio") {
@@ -123,6 +140,14 @@ function getLatestUpdatedSeries(creator) {
   );
 }
 
+function formatCompactCount(value) {
+  const safeValue = Math.max(0, Number(value || 0));
+  if (safeValue >= 1000) {
+    return `${(safeValue / 1000).toFixed(safeValue >= 10000 ? 0 : 1)}k`;
+  }
+  return `${safeValue}`;
+}
+
 function CreatorCard({ creator }) {
   const role = normalizeCreatorRole(creator);
   const latestSeries = getLatestUpdatedSeries(creator);
@@ -140,7 +165,7 @@ function CreatorCard({ creator }) {
       aria-label={`View ${creator.name}`}
     >
       <div className="grid gap-4 sm:grid-cols-[120px_minmax(0,1fr)]">
-        <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-2 shadow-[0_16px_36px_rgba(8,6,20,0.2)]">
+        <div className={`overflow-hidden rounded-[24px] ${storefrontSoftCardClass} p-2`}>
           <Cover
             tone={latestSeries?.coverTone}
             coverUrl={latestSeries?.coverUrl}
@@ -162,7 +187,7 @@ function CreatorCard({ creator }) {
                 {creator.name}
               </h2>
             </div>
-            <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70 shadow-[0_10px_24px_rgba(8,6,20,0.18)]">
+            <span className={`${storefrontChipClass} min-h-[38px] px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-white/70`}>
               View creator
             </span>
           </div>
@@ -172,7 +197,7 @@ function CreatorCard({ creator }) {
               {topGenres.map((genre) => (
                 <span
                   key={`${creator.slug}-${genre}`}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/72 shadow-[0_10px_24px_rgba(8,6,20,0.16)]"
+                  className={`${storefrontChipClass} min-h-[38px] px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] text-white/72`}
                 >
                   {genre}
                 </span>
@@ -208,8 +233,125 @@ function CreatorCard({ creator }) {
   );
 }
 
-const creatorFilterChipClass =
-  "rounded-full border px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-[transform,border-color,background-color,color,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(255,79,154,0.16)]";
+function FeaturedCreatorSpotlight({ creator }) {
+  const spotlightSeries = creator?.spotlightSeries || null;
+  const creatorHook = buildCreatorEditorialHook(creator, { maxLength: 140 });
+  const updatedLabel = formatDateLabel(creator?.latestUpdatedAt);
+  const role = normalizeCreatorRole(creator);
+  const topGenres = Array.isArray(creator?.topGenres)
+    ? creator.topGenres.slice(0, 3)
+    : [];
+
+  return (
+    <Link
+      href={creator.path || "/creators"}
+      className="group grid overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(140deg,rgba(24,19,34,0.98)_0%,rgba(12,10,20,0.98)_58%,rgba(11,15,28,0.98)_100%)] shadow-[0_30px_80px_rgba(6,5,18,0.4)] transition-all duration-200 hover:-translate-y-1.5 hover:border-white/18 hover:shadow-[0_36px_96px_rgba(6,5,18,0.46)] lg:grid-cols-[220px_minmax(0,1fr)]"
+    >
+      <div className="relative overflow-hidden p-3">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.18),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(103,232,249,0.12),transparent_28%)]" />
+        <Cover
+          tone={spotlightSeries?.coverTone}
+          coverUrl={spotlightSeries?.coverUrl}
+          label={spotlightSeries?.title || creator?.name}
+          eyebrow={creator?.name}
+          badge=""
+          fallbackVariant="minimal-card"
+          className="relative h-full min-h-[240px] rounded-[26px] border border-white/12 shadow-[0_18px_44px_rgba(8,6,20,0.28)]"
+        />
+      </div>
+
+      <div className="relative flex min-w-0 flex-col justify-between gap-5 p-5 sm:p-6">
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={storefrontHighlightBadgeClass}>
+              Spotlight
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/48">
+              {formatCreditTypeLabel(role)}
+            </span>
+          </div>
+
+          <div>
+            <h2 className="font-display text-[2rem] font-semibold leading-[0.92] tracking-[-0.06em] text-white sm:text-[2.35rem]">
+              {creator?.name}
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-[1.72] text-white/70">
+              {creatorHook}
+            </p>
+          </div>
+
+          {topGenres.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {topGenres.map((genre) => (
+                <span
+                  key={`${creator?.slug || creator?.name}-${genre}-spotlight`}
+                  className={`${storefrontChipClass} min-h-[38px] px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] text-white/76`}
+                >
+                  {genre}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
+          <div className={storefrontInfoCardClass}>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46">
+              Open with
+            </p>
+            <p className="mt-2 text-base font-semibold tracking-[-0.03em] text-white">
+              {spotlightSeries?.title || "Featured shelf"}
+            </p>
+            <p className="mt-1 text-sm text-white/58">
+              {updatedLabel ? `Updated ${updatedLabel}` : "Latest shelf pick"}
+            </p>
+          </div>
+
+          <span className={`${storefrontChipClass} min-h-11 gap-2 px-4 text-white group-hover:border-[rgba(255,79,154,0.28)] group-hover:bg-[rgba(255,79,154,0.12)]`}>
+            View creator
+            <ArrowRight className="size-4" />
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function FeaturedCreatorRailCard({ creator }) {
+  const spotlightSeries = creator?.spotlightSeries || null;
+  const creatorHook = buildCreatorEditorialHook(creator, { maxLength: 88 });
+
+  return (
+    <Link
+      href={creator.path || "/creators"}
+      className="group flex items-center gap-4 rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(22,18,32,0.96)_0%,rgba(14,12,22,0.98)_100%)] p-4 shadow-[0_18px_44px_rgba(8,6,20,0.28)] transition-all duration-200 hover:-translate-y-1 hover:border-white/18 hover:shadow-[0_24px_56px_rgba(8,6,20,0.34)]"
+    >
+      <div className={`w-[90px] shrink-0 overflow-hidden ${storefrontSoftCardClass} p-2`}>
+        <Cover
+          tone={spotlightSeries?.coverTone}
+          coverUrl={spotlightSeries?.coverUrl}
+          label={spotlightSeries?.title || creator?.name}
+          eyebrow={creator?.name}
+          badge=""
+          fallbackVariant="minimal-card"
+          className="aspect-[3/4] rounded-[16px]"
+        />
+      </div>
+
+      <div className="min-w-0">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/48">
+          {formatCreditTypeLabel(normalizeCreatorRole(creator))}
+        </p>
+        <h3 className="mt-2 line-clamp-1 font-display text-[1.2rem] font-semibold tracking-[-0.05em] text-white">
+          {creator?.name}
+        </h3>
+        <p className="mt-2 line-clamp-2 text-sm leading-[1.64] text-white/64">
+          {creatorHook}
+        </p>
+      </div>
+    </Link>
+  );
+}
 
 function normalizeRoleFilter(value) {
   const normalized = String(value || "")
@@ -325,23 +467,22 @@ function buildCreatorsFilterHref({ role, genre }) {
 
 function CreatorsHubSkeleton() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.12),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.12)]">
+      <div className="flex flex-col gap-6">
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
           <div className="h-4 w-24 animate-pulse rounded-full bg-white/20" />
           <div className="h-12 w-full max-w-2xl animate-pulse rounded-[24px] bg-white/20" />
-          <div className="h-14 w-full max-w-xl animate-pulse rounded-[24px] bg-[#111111]" />
+          <div className="h-14 w-full max-w-xl animate-pulse rounded-[24px] bg-[rgba(255,255,255,0.035)]" />
         </SurfacePanel>
 
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
           <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
-            <div className="h-12 animate-pulse rounded-full bg-[#111111]" />
+            <div className="h-12 animate-pulse rounded-full bg-[rgba(255,255,255,0.035)]" />
             <div className="flex gap-2">
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={`creator-chip-${index}`}
-                  className="h-12 w-24 animate-pulse rounded-full border border-white/10 bg-[rgba(255,255,255,0.04)]"
+                  className={`h-12 w-24 animate-pulse ${storefrontChipClass}`}
                 />
               ))}
             </div>
@@ -352,12 +493,12 @@ function CreatorsHubSkeleton() {
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={`creator-card-${index}`}
-              className="h-[260px] animate-pulse rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)]"
+              className={`h-[260px] animate-pulse ${storefrontInfoCardClass}`}
             />
           ))}
         </div>
       </div>
-    </main>
+    </StorefrontPage>
   );
 }
 
@@ -424,6 +565,10 @@ export default function CreatorsHubPage({
   );
   const genreOptions = useMemo(() => buildGenreOptions(creators), [creators]);
   const featuredCreators = useMemo(() => creators.slice(0, 3), [creators]);
+  const creatorStats = useMemo(
+    () => getCreatorDirectoryStats(creators),
+    [creators],
+  );
 
   useEffect(() => {
     setActiveRole(normalizeRoleFilter(initialTypeFilter));
@@ -462,8 +607,8 @@ export default function CreatorsHubPage({
 
   const filterButtonClass = (active) =>
     active
-      ? `${creatorFilterChipClass} border-[rgba(255,79,154,0.24)] bg-[rgba(255,79,154,0.14)] text-white`
-      : `${creatorFilterChipClass} border-white/10 bg-[rgba(255,255,255,0.03)] text-white/78 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.06)] hover:text-white`;
+      ? `${storefrontAccentChipClass} px-4 text-sm font-semibold uppercase tracking-[0.14em]`
+      : `${storefrontChipClass} px-4 text-sm font-semibold uppercase tracking-[0.14em]`;
   const normalizedQuery = String(query || "")
     .trim()
     .toLowerCase();
@@ -474,160 +619,235 @@ export default function CreatorsHubPage({
   const creatorResultsCountLabel = formatCreatorMatchCount(
     filteredCreators.length,
   );
+  const genrePreview = genreOptions.slice(0, 6);
 
   if (loading) {
     return <CreatorsHubSkeleton />;
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-white">
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
-        <SurfacePanel appearance="dark" accent="cyan" className="space-y-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="space-y-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56">
-                Creator Directory
-              </p>
-              <h1 className="font-display text-[2.45rem] font-semibold leading-[0.92] tracking-[-0.06em] text-white sm:text-[3rem]">
-                Creators
-              </h1>
-              <p className="max-w-2xl text-sm leading-[1.72] text-white/70 sm:text-base">
-                Artists, writers, studios, and teams with shelves worth
-                following.
-              </p>
-            </div>
-
-            <div className="max-w-md rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 shadow-[0_16px_36px_rgba(8,6,20,0.2)]">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/46">
-                Why browse here
-              </p>
-              <p className="mt-2 text-sm leading-[1.68] text-white/72">
-                Find the shelves behind your favorite stories, then follow the
-                creators whose pacing, drama, or art style keeps hitting.
-              </p>
-            </div>
-          </div>
-        </SurfacePanel>
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.12)]">
+      <div className="flex flex-col gap-6">
+        <EditorialHero
+          accent="cyan"
+          eyebrow="Creator Directory"
+          secondary="Writers, artists, studios, teams"
+          title="Find the shelf behind the story you keep opening."
+          description="Browse the people and teams shaping the drama, pacing, chemistry, and cover art that keeps readers tapping into the next chapter."
+          actions={
+            <>
+              <Link
+                href="/creators?type=creator"
+                className={storefrontPrimaryButtonClass}
+              >
+                Browse creators
+              </Link>
+              <Link
+                href="/creators?type=studio-team"
+                className={storefrontSecondaryButtonClass}
+              >
+                Browse studios + teams
+              </Link>
+            </>
+          }
+          stats={[
+            {
+              label: "Profiles",
+              value: formatCompactCount(creatorStats.creators),
+              hint: "Public creator shelves ready to browse.",
+            },
+            {
+              label: "Titles",
+              value: formatCompactCount(creatorStats.titles),
+              hint: "Stories credited across the directory.",
+            },
+            {
+              label: "Completed",
+              value: formatCompactCount(creatorStats.completedTitles),
+              hint: "Finished series ready for a binge.",
+            },
+            {
+              label: "Reader proof",
+              value: formatCompactCount(creatorStats.readerProof),
+              hint: "Shelf activity built from current title volume.",
+            },
+          ]}
+        />
 
         {showFeaturedCreators && featuredCreators.length > 0 ? (
           <SurfacePanel
             appearance="dark"
             accent="cyan"
-            className="space-y-4"
+            className="space-y-5"
             data-testid="creator-featured-section"
           >
-            <div className="flex items-end justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56">
-                  Spotlight
-                </p>
-                <h2 className="mt-2 font-display text-[1.9rem] font-semibold leading-[0.94] tracking-[-0.06em] text-white">
-                  Editors' picks
-                </h2>
-              </div>
-            </div>
+            <StorefrontSectionHeading
+              eyebrow="Spotlight"
+              title="Creators to open tonight"
+              description="A faster way into the shelves shaping the site's strongest moods right now."
+            />
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {featuredCreators.map((creator) => (
-                <CreatorCard
-                  key={`featured-${creator.slug}`}
-                  creator={creator}
-                />
-              ))}
+            <div className="grid gap-4 xl:grid-cols-[minmax(0,1.18fr)_minmax(300px,0.82fr)]">
+              <FeaturedCreatorSpotlight creator={featuredCreators[0]} />
+              <div className="grid gap-4">
+                {featuredCreators.slice(1).map((creator) => (
+                  <FeaturedCreatorRailCard
+                    key={`featured-${creator.slug}`}
+                    creator={creator}
+                  />
+                ))}
+                {featuredCreators.length === 1 ? (
+                  <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.03)_100%)] p-5 shadow-[0_18px_44px_rgba(8,6,20,0.22)]">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/48">
+                      Why it matters
+                    </p>
+                    <p className="mt-3 text-sm leading-[1.72] text-white/68">
+                      Creator pages turn one favorite title into a whole shelf
+                      with the same voice, tone, and emotional pull.
+                    </p>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
-          <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
-            <label className="block">
-              <span className="sr-only">Search creators</span>
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search creators, studios, or genres"
-                className="w-full rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-4 py-3 text-sm font-medium text-white shadow-[0_14px_32px_rgba(8,6,20,0.18)] outline-none placeholder:text-white/38 focus:border-[rgba(255,79,154,0.3)] focus:ring-4 focus:ring-[rgba(255,79,154,0.12)]"
+        <SurfacePanel appearance="dark" accent="cyan" className="space-y-5">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.08fr)_320px]">
+            <div className="space-y-4">
+              <StorefrontSectionHeading
+                eyebrow="Browse filters"
+                title="Search by voice, genre, or team"
+                description="Keep the current content flow. Just open the shelf that matches tonight's mood."
               />
-            </label>
 
-            <div
-              role="group"
-              aria-labelledby="creator-type-filters-label"
-              aria-controls="creator-results-grid"
-              data-testid="creator-type-filters"
-              className="space-y-2"
-            >
-              <p
-                id="creator-type-filters-label"
-                className="text-xs font-medium uppercase tracking-[0.12em] text-white/42"
+              <label className="block">
+                <span className="sr-only">Search creators</span>
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search creators, studios, or genres"
+                  className={`${storefrontInputClass} mt-0 min-h-[48px]`}
+                />
+              </label>
+
+              <div
+                role="group"
+                aria-labelledby="creator-type-filters-label"
+                aria-controls="creator-results-grid"
+                data-testid="creator-type-filters"
+                className="space-y-2"
               >
-                Profile type
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {roleFilters.map((item) => {
-                  const active = activeRole === item.id;
-                  return (
+                <p
+                  id="creator-type-filters-label"
+                  className="text-xs font-medium uppercase tracking-[0.12em] text-white/42"
+                >
+                  Profile type
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {roleFilters.map((item) => {
+                    const active = activeRole === item.id;
+                    return (
+                      <Link
+                        key={item.id}
+                        href={buildCreatorsFilterHref({
+                          role: item.id,
+                          genre: activeGenre,
+                        })}
+                        aria-current={active ? "true" : undefined}
+                        className={filterButtonClass(active)}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {genreOptions.length > 0 ? (
+                <div
+                  role="group"
+                  aria-labelledby="creator-genre-filters-label"
+                  aria-controls="creator-results-grid"
+                  data-testid="creator-genre-filters"
+                  className="space-y-2"
+                >
+                  <p
+                    id="creator-genre-filters-label"
+                    className="text-xs font-medium uppercase tracking-[0.12em] text-white/42"
+                  >
+                    Genres
+                  </p>
+                  <div className="flex flex-wrap gap-2">
                     <Link
-                      key={item.id}
                       href={buildCreatorsFilterHref({
-                        role: item.id,
-                        genre: activeGenre,
+                        role: activeRole,
+                        genre: "All",
                       })}
-                      aria-current={active ? "true" : undefined}
-                      className={filterButtonClass(active)}
+                      aria-current={activeGenre === "All" ? "true" : undefined}
+                      className={filterButtonClass(activeGenre === "All")}
                     >
-                      {item.label}
+                      All
                     </Link>
-                  );
-                })}
+                    {genreOptions.map((genre) => {
+                      const active = activeGenre === genre;
+                      return (
+                        <Link
+                          key={genre}
+                          href={buildCreatorsFilterHref({
+                            role: activeRole,
+                            genre,
+                          })}
+                          aria-current={active ? "true" : undefined}
+                          className={filterButtonClass(active)}
+                        >
+                          {genre}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="space-y-4">
+              <div className={`${storefrontInfoCardClass} p-5`}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/48">
+                  Directory mood
+                </p>
+                <p className="mt-3 text-sm leading-[1.72] text-white/72">
+                  Find the shelf behind your favorite cover, then keep going
+                  until you hit the next title with the same taste level.
+                </p>
+              </div>
+
+              <div className={`${storefrontSoftCardClass} rounded-[28px] p-5 shadow-[0_20px_48px_rgba(8,6,20,0.26)]`}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/48">
+                  Genre preview
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {genrePreview.length > 0 ? (
+                    genrePreview.map((genre) => (
+                      <Link
+                        key={`${genre}-preview`}
+                        href={buildCreatorsFilterHref({
+                          role: "all",
+                          genre,
+                        })}
+                        className={`${storefrontChipClass} min-h-[38px] px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] text-white/76`}
+                      >
+                        {genre}
+                      </Link>
+                    ))
+                  ) : (
+                    <p className="text-sm text-white/56">
+                      Browse the current directory first.
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-
-          {genreOptions.length > 0 ? (
-            <div
-              role="group"
-              aria-labelledby="creator-genre-filters-label"
-              aria-controls="creator-results-grid"
-              data-testid="creator-genre-filters"
-              className="space-y-2"
-            >
-              <p
-                id="creator-genre-filters-label"
-                className="text-xs font-medium uppercase tracking-[0.12em] text-white/42"
-              >
-                Genres
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Link
-                  href={buildCreatorsFilterHref({
-                    role: activeRole,
-                    genre: "All",
-                  })}
-                  aria-current={activeGenre === "All" ? "true" : undefined}
-                  className={filterButtonClass(activeGenre === "All")}
-                >
-                  All
-                </Link>
-                {genreOptions.map((genre) => {
-                  const active = activeGenre === genre;
-                  return (
-                    <Link
-                      key={genre}
-                      href={buildCreatorsFilterHref({
-                        role: activeRole,
-                        genre,
-                      })}
-                      aria-current={active ? "true" : undefined}
-                      className={filterButtonClass(active)}
-                    >
-                      {genre}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
         </SurfacePanel>
 
         {error ? (
@@ -660,7 +880,7 @@ export default function CreatorsHubPage({
         ) : null}
 
         {!error && filteredCreators.length > 0 ? (
-          <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
+          <SurfacePanel appearance="dark" accent="cyan" className="space-y-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p
@@ -695,6 +915,6 @@ export default function CreatorsHubPage({
           </SurfacePanel>
         ) : null}
       </div>
-    </main>
+    </StorefrontPage>
   );
 }

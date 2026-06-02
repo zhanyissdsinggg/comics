@@ -7,8 +7,13 @@ import { siteConfig } from "../../lib/siteConfig";
 import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
 import ShareButton from "../common/ShareButton";
 import {
+  storefrontBadgeClass,
+  storefrontHighlightBadgeClass,
+  storefrontInfoCardClass,
+  storefrontNoticeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
+  StorefrontSectionHeading,
 } from "../common/StorefrontPagePrimitives";
 
 function formatPointsLabel(value) {
@@ -31,7 +36,7 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
   const accentTextClass = "text-[color:var(--gush-accent,#3157d6)]";
 
   return (
-    <div className="rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-3 shadow-[0_16px_34px_rgba(0,0,0,0.22)]">
+    <div className={`${storefrontNoticeClass} px-4 py-3`}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p
@@ -57,13 +62,28 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
   );
 }
 
+function CompactFact({ label, value }) {
+  if (!value) {
+    return null;
+  }
+
+  return (
+    <div className={`${storefrontInfoCardClass} rounded-[20px] px-4 py-3 text-white`}>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/44">
+        {label}
+      </p>
+      <p className="mt-2 text-sm font-semibold text-white/78">{value}</p>
+    </div>
+  );
+}
+
 function MetaPill({ children, accent = false }) {
   return (
     <span
       className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] ${
         accent
-          ? "border-cyan-300/28 bg-[linear-gradient(135deg,rgba(86,215,255,0.24)_0%,rgba(124,92,255,0.18)_100%)] text-white"
-          : "border-white/16 bg-white/[0.05] text-white/70"
+          ? `${storefrontHighlightBadgeClass} border-cyan-300/28 bg-[linear-gradient(135deg,rgba(86,215,255,0.24)_0%,rgba(124,92,255,0.18)_100%)] text-white`
+          : `${storefrontBadgeClass} text-white/70`
       }`}
     >
       {children}
@@ -191,20 +211,23 @@ export default function EndOfEpisodeOverlay({
 
   return (
     <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center px-4">
-      <div className="w-full max-w-2xl rounded-[32px] border border-white/12 bg-[linear-gradient(180deg,rgba(15,16,28,0.96)_0%,rgba(10,12,20,0.98)_100%)] p-5 text-white shadow-[0_28px_70px_rgba(0,0,0,0.38)] backdrop-blur-[26px]">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.26em] text-white/55">
-              Next {installmentLabel.toLowerCase()}
-            </p>
-            <p className="text-lg font-black uppercase tracking-[-0.03em] text-white">
-              {nextEpisode.title}
-            </p>
-            {seriesTitle ? (
-              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-white/58">
-                {seriesTitle}
-              </p>
-            ) : null}
+      <div className="relative w-full max-w-2xl overflow-hidden rounded-[32px] border border-white/12 bg-[linear-gradient(180deg,rgba(15,16,28,0.96)_0%,rgba(10,12,20,0.98)_100%)] p-5 text-white shadow-[0_28px_70px_rgba(0,0,0,0.38)] backdrop-blur-[26px]">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.14),transparent_26%),radial-gradient(circle_at_top_right,rgba(86,215,255,0.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.06),transparent_22%)]" />
+        <div className="pointer-events-none absolute inset-[1px] rounded-[31px] border border-white/6" />
+
+        <div className="relative flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className={storefrontBadgeClass}>Episode finished</p>
+            <StorefrontSectionHeading
+              className="mt-4"
+              eyebrow={`Next ${installmentLabel.toLowerCase()}`}
+              title={nextEpisode.title}
+              description={
+                seriesTitle
+                  ? `${seriesTitle}${episodeTitle ? ` - ${episodeTitle}` : ""}`
+                  : episodeTitle || "Pick your next move."
+              }
+            />
           </div>
           <ShareButton
             url={typeof window !== "undefined" ? window.location.href : ""}
@@ -214,14 +237,38 @@ export default function EndOfEpisodeOverlay({
           />
         </div>
 
-        <div className="mt-4 space-y-4">
+        <div className="relative mt-4 space-y-4">
           <DiscoveryContextCard
             discoveryContext={discoveryContext}
             onReturnToSource={onReturnToSource}
           />
 
+          <div className="grid gap-3 md:grid-cols-3">
+            <CompactFact label="Status" value={nextEpisodeStatusLabel} />
+            <CompactFact
+              label={isSubscriber ? "Member state" : "Wallet"}
+              value={
+                isSubscriber
+                  ? "Subscriber pricing active"
+                  : formatPointsLabel(walletBalance)
+              }
+            />
+            <CompactFact
+              label="Tonight's route"
+              value={
+                nextUnlocked
+                  ? "Keep reading now"
+                  : showPackPrimary
+                    ? "Pack unlock route"
+                    : showSubscribe
+                      ? "Unlock or compare plans"
+                      : "Single unlock route"
+              }
+            />
+          </div>
+
           {nextUnlocked ? (
-            <div className="rounded-[26px] border border-white/10 bg-white/[0.04] px-4 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]">
+            <div className="rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] px-4 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <p
@@ -236,6 +283,10 @@ export default function EndOfEpisodeOverlay({
                     <MetaPill accent>{nextEpisodeStatusLabel}</MetaPill>
                     <MetaPill>{isSubscriber ? "Member" : "Ready"}</MetaPill>
                   </div>
+                  <p className="mt-3 text-sm leading-6 text-white/64">
+                    No friction here. Jump straight into the next beat or open
+                    the full series shelf first.
+                  </p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -260,7 +311,7 @@ export default function EndOfEpisodeOverlay({
               </div>
             </div>
           ) : (
-            <div className="rounded-[26px] border border-white/10 bg-white/[0.04] px-4 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]">
+            <div className="rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] px-4 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-xl">
                   <p
@@ -277,6 +328,11 @@ export default function EndOfEpisodeOverlay({
                     <MetaPill>{isSubscriber ? "Member" : "Points"}</MetaPill>
                     {pricingNote ? <MetaPill>{pricingNote}</MetaPill> : null}
                   </div>
+                  <p className="mt-3 text-sm leading-6 text-white/64">
+                    Pick the unlock path that matches tonight's pace. Single
+                    episode, pack, or membership upsell all stay on the same
+                    exit ramp.
+                  </p>
 
                   {showTtf ? (
                     isReady ? (
@@ -289,10 +345,10 @@ export default function EndOfEpisodeOverlay({
                       </button>
                     ) : (
                       <div
-                        className={`mt-4 ${
+                        className={`mt-4 ${storefrontNoticeClass} ${
                           countdownVariant === "B"
-                            ? "flex flex-col gap-2 rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-semibold text-white/70 shadow-[0_16px_32px_rgba(0,0,0,0.22)]"
-                            : "flex flex-wrap items-center gap-3 rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-white/70 shadow-[0_16px_32px_rgba(0,0,0,0.22)]"
+                            ? "flex flex-col gap-2 px-4 py-3 text-xs font-semibold text-white/70"
+                            : "flex flex-wrap items-center gap-3 px-4 py-2 text-xs font-semibold text-white/70"
                         }`}
                       >
                         <span>Free in {formatted || "--:--:--"}</span>
@@ -313,7 +369,7 @@ export default function EndOfEpisodeOverlay({
                     ref={primaryActionRef}
                     type="button"
                     onClick={handlePrimary}
-                    className={`w-full px-4 py-2 text-sm ${primaryButtonClass}`}
+                    className={`min-h-[44px] w-full px-4 py-2 text-sm ${primaryButtonClass}`}
                   >
                     {previewOnlyMode ? previewPrimaryLabel : primaryLabel}
                   </button>
@@ -334,7 +390,7 @@ export default function EndOfEpisodeOverlay({
                           onOfferClick?.("subscribe_basic");
                           onSubscribe();
                         }}
-                        className={`w-full px-4 py-2 text-sm ${secondaryButtonClass}`}
+                        className={`min-h-[44px] w-full px-4 py-2 text-sm ${secondaryButtonClass}`}
                       >
                         {previewOnlyMode
                           ? previewSecondaryLabel
@@ -356,7 +412,7 @@ export default function EndOfEpisodeOverlay({
                       <button
                         type="button"
                         onClick={handleSecondary}
-                        className={`w-full px-4 py-2 text-sm ${secondaryButtonClass}`}
+                        className={`min-h-[44px] w-full px-4 py-2 text-sm ${secondaryButtonClass}`}
                       >
                         {previewOnlyMode
                           ? previewSecondaryLabel
@@ -408,3 +464,4 @@ export default function EndOfEpisodeOverlay({
     </div>
   );
 }
+

@@ -1,12 +1,5 @@
-import Link from "next/link";
-import EditorialHero from "../../components/common/EditorialHero";
-import {
-  StorefrontDesk,
-  StorefrontInfoCard,
-  storefrontPrimaryButtonClass,
-  storefrontSecondaryButtonClass,
-} from "../../components/common/StorefrontPagePrimitives";
-import SurfacePanel from "../../components/common/SurfacePanel";
+import LegalEditorialLayout from "../../components/common/LegalEditorialLayout";
+import { StorefrontInfoCard } from "../../components/common/StorefrontPagePrimitives";
 import { createPageMetadata } from "../../lib/seo";
 import { siteConfig } from "../../lib/siteConfig";
 
@@ -96,125 +89,106 @@ const PRIVACY_SECTIONS = [
   },
 ];
 
-function LegalSection({
-  title,
-  paragraphs = [],
-  bullets = [],
-  className = "",
-  children = null,
-}) {
-  return (
-    <SurfacePanel className={className} appearance="dark" accent="cyan">
-      <h2 className="font-display text-[1.8rem] font-semibold leading-[0.96] tracking-[-0.06em] text-white">
-        {title}
-      </h2>
-      <div className="mt-4 space-y-4 text-sm leading-[1.72] text-white/72">
-        {paragraphs.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
-        ))}
-        {bullets.length > 0 ? (
-          <ul className="list-disc space-y-2 pl-5 text-white/72 marker:text-[#FF007A]">
-            {bullets.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        ) : null}
-        {children}
-      </div>
-    </SurfacePanel>
-  );
-}
+const overviewCards = [
+  {
+    label: "Effective",
+    value: effectiveDate,
+    hint: "This is the version currently published on the site.",
+  },
+  {
+    label: "Focus",
+    value: "Account + reading data",
+    hint: "The main categories most readers care about first.",
+  },
+  {
+    label: "Requests",
+    value: "Privacy inbox",
+    hint: "Use the direct privacy contact for access or deletion requests.",
+  },
+];
 
 function ContactCard() {
   return (
-    <StorefrontInfoCard title="Privacy contact">
-      <p className="mt-3 text-sm text-white/68">
-        <span className="font-semibold uppercase tracking-[0.08em] text-white">
-          Email:
-        </span>{" "}
-        <a
-          href={`mailto:${siteConfig.privacyEmail}`}
-          className="font-semibold text-[#ff77b0] transition hover:text-[#ff9cc0]"
-        >
-          {siteConfig.privacyEmail}
-        </a>
-      </p>
+    <div className="grid gap-3 lg:grid-cols-2">
+      <StorefrontInfoCard
+        eyebrow="Privacy"
+        title={siteConfig.privacyEmail}
+        description="Use this inbox for access, correction, deletion, or related data requests."
+      />
+      <StorefrontInfoCard
+        eyebrow="Support"
+        title={siteConfig.supportEmail}
+        description="Use support when the issue is about reading, billing, or account flow instead of a privacy request."
+      />
       {siteConfig.companyAddress ? (
-        <p className="mt-3 text-sm text-white/68">
-          <span className="font-semibold uppercase tracking-[0.08em] text-white">
-            Address:
-          </span>{" "}
-          {siteConfig.companyAddress}
-        </p>
+        <StorefrontInfoCard
+          eyebrow="Address"
+          title={siteConfig.companyAddress}
+          description="Business contact location."
+          className="lg:col-span-2"
+        />
       ) : null}
-    </StorefrontInfoCard>
+    </div>
   );
 }
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.12),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
-      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <EditorialHero
-            appearance="dark"
-            accent="cyan"
-            eyebrow="Privacy"
-            title="Privacy."
-            description=""
-            stats={[
-              {
-                label: "Effective",
-                value: effectiveDate,
-              },
-              {
-                label: "Covers",
-                value: "Account + reading",
-              },
-            ]}
-          />
-
-          <StorefrontDesk
-            eyebrow="Contact"
-            title="Contact."
-            actions={
-              <ul className="grid gap-2.5">
-                <li>
-                  <a
-                    href={`mailto:${siteConfig.privacyEmail}`}
-                    className={storefrontPrimaryButtonClass}
-                  >
-                    Email privacy team
-                  </a>
-                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/45">
-                    For privacy requests.
-                  </p>
-                </li>
-                <li>
-                  <Link
-                    href="/support"
-                    className={storefrontSecondaryButtonClass}
-                  >
-                    Contact support
-                  </Link>
-                </li>
-              </ul>
-            }
-            description="Choose the privacy contact link you need below."
-          />
-        </section>
-
-        <div className="grid gap-4 xl:grid-cols-2">
-          {PRIVACY_SECTIONS.map((section) => (
-            <LegalSection key={section.title} {...section} />
-          ))}
-
-          <LegalSection title="Privacy requests" className="xl:col-span-2">
-            <ContactCard />
-          </LegalSection>
-        </div>
-      </main>
-    </div>
+    <LegalEditorialLayout
+      eyebrow="Privacy"
+      title="Privacy that keeps the reading flow clear."
+      description={`This page covers what ${siteConfig.siteName} collects, why it is used, and where to go if you need a privacy-specific answer instead of general support.`}
+      heroStats={[
+        {
+          label: "Effective",
+          value: effectiveDate,
+        },
+        {
+          label: "Covers",
+          value: "Account + reading",
+        },
+        {
+          label: "Contact",
+          value: "Privacy inbox",
+        },
+      ]}
+      sideDesk={{
+        eyebrow: "Contact",
+        title: "Use the right privacy lane.",
+        description:
+          "If the issue is about personal data, use the privacy inbox. If the issue is reading or billing, support is faster.",
+        actions: [
+          {
+            label: "Email privacy team",
+            href: `mailto:${siteConfig.privacyEmail}`,
+            external: true,
+            primary: true,
+            note: "For privacy-specific requests.",
+          },
+          {
+            label: "Contact support",
+            href: "/support",
+          },
+        ],
+      }}
+      overviewTitle="The short version first"
+      overviewDescription="Most readers are trying to answer one of three things here: what data is involved, why it exists, and where to send a request."
+      overviewCards={overviewCards}
+      quickLinks={PRIVACY_SECTIONS.map((section) => ({
+        title: section.title,
+        description:
+          section.title === "What we collect"
+            ? "The main data buckets tied to using Gush."
+            : section.title === "Your privacy choices"
+              ? "Where requests and opt-out style questions usually start."
+              : section.title === "Mature content controls"
+                ? "How 18+ settings and visibility choices are handled."
+                : "",
+      }))}
+      sections={PRIVACY_SECTIONS}
+      contactTitle="Privacy requests"
+      contactDescription="Use the direct inbox below when the request is specifically about personal data, policy, or legal privacy rights."
+      contactCard={<ContactCard />}
+    />
   );
 }

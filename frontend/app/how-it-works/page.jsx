@@ -9,6 +9,7 @@ import {
 } from "../../components/common/StorefrontPagePrimitives";
 import StructuredDataScript from "../../components/common/StructuredDataScript";
 import SurfacePanel from "../../components/common/SurfacePanel";
+import { StorefrontPage } from "../../components/storefront/StorefrontScaffold";
 import { createPageMetadata } from "../../lib/seo";
 import {
   buildBreadcrumbStructuredData,
@@ -24,19 +25,22 @@ export const metadata = createPageMetadata({
 
 const HOW_IT_WORKS_STEPS = [
   {
-    eyebrow: "1. Start",
-    title: "Start free.",
-    body: "Start with free chapters.",
+    eyebrow: "1. Open",
+    title: "Start with the free part of the shelf.",
+    body:
+      "Some stories begin free so readers can test the hook before deciding where to go next.",
   },
   {
     eyebrow: "2. Unlock",
-    title: "Unlock.",
-    body: "Use points to keep going.",
+    title: "Use points when the route turns premium.",
+    body:
+      "Locked chapters and some premium beats use points so you can keep reading without losing your place.",
   },
   {
-    eyebrow: "3. Keep reading",
-    title: "Read on.",
-    body: "Your progress saves.",
+    eyebrow: "3. Keep going",
+    title: "Your progress stays with you.",
+    body:
+      "The reader saves progress so your next session starts where you actually left off.",
   },
 ];
 
@@ -67,6 +71,18 @@ const FAQ_ITEMS = [
   },
 ];
 
+const READING_BASICS = [
+  "Some series start free.",
+  "Locked chapters use points.",
+  "Your place saves automatically.",
+];
+
+const BILLING_BASICS = [
+  "Orders shows receipts and order IDs.",
+  "Account shows your current plan state.",
+  "Support handles purchase and billing issues.",
+];
+
 export default function HowItWorksPage() {
   const structuredData = [
     buildBreadcrumbStructuredData([
@@ -82,21 +98,20 @@ export default function HowItWorksPage() {
   ].filter(Boolean);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.12),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.12)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.12)]">
       <StructuredDataScript id="how-it-works-jsonld" data={structuredData} />
-      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
+      <div className="flex flex-col gap-8">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="dark"
             accent="cyan"
-            eyebrow="Reading"
-            title="How reading works."
-            description=""
+            eyebrow="Reading flow"
+            title="How reading works when the story is free, premium, or somewhere in between."
+            description="The short version: start free where available, use points when the story turns locked, and let your progress stay synced."
             stats={[
               {
-                label: "Free access",
-                value: "Title-based",
+                label: "Start point",
+                value: "Free chapters",
               },
               {
                 label: "Unlocks",
@@ -110,21 +125,22 @@ export default function HowItWorksPage() {
             actions={
               <>
                 <Link href="/store" className={storefrontPrimaryButtonClass}>
-                  Store
+                  Open store
                 </Link>
                 <Link
                   href="/subscribe"
                   className={storefrontSecondaryButtonClass}
                 >
-                  Plans
+                  View plans
                 </Link>
               </>
             }
           />
 
           <StorefrontDesk
-            eyebrow="More"
-            title="Billing."
+            eyebrow="Billing lane"
+            title="Need the money side?"
+            description="Orders, plans, and support all stay close to the reading flow."
             actions={
               <>
                 <Link href="/orders" className={storefrontPrimaryButtonClass}>
@@ -142,8 +158,12 @@ export default function HowItWorksPage() {
         </section>
 
         <section className="grid gap-4 lg:grid-cols-3">
-          {HOW_IT_WORKS_STEPS.map((step) => (
-            <SurfacePanel key={step.title} appearance="dark" accent="cyan">
+          {HOW_IT_WORKS_STEPS.map((step, index) => (
+            <SurfacePanel
+              key={step.title}
+              appearance="dark"
+              accent={index === 0 ? "cyan" : index === 1 ? "rose" : "amber"}
+            >
               <StorefrontSectionHeading
                 eyebrow={step.eyebrow}
                 title={step.title}
@@ -157,21 +177,39 @@ export default function HowItWorksPage() {
 
         <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
           <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
-            <StorefrontSectionHeading eyebrow="Reading" title="Basics." />
-            <ul className="space-y-3 text-sm leading-[1.72] text-white/70">
-              <li>Some series start free.</li>
-              <li>Locked chapters use points.</li>
-              <li>Your place saves automatically.</li>
-            </ul>
+            <StorefrontSectionHeading
+              eyebrow="Reading basics"
+              title="What happens on the shelf"
+              description="The point is to keep the path obvious: open a story, see what is free, unlock what is not, and get back in fast."
+            />
+            <div className="grid gap-3">
+              {READING_BASICS.map((item) => (
+                <StorefrontInfoCard
+                  key={item}
+                  eyebrow="Reading"
+                  title={item}
+                  description=""
+                />
+              ))}
+            </div>
           </SurfacePanel>
 
-          <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
-            <StorefrontSectionHeading eyebrow="Billing" title="Billing." />
-            <ul className="space-y-3 text-sm leading-[1.72] text-white/70">
-              <li>Orders shows receipts.</li>
-              <li>Account shows your plan.</li>
-              <li>Support handles billing issues.</li>
-            </ul>
+          <SurfacePanel className="space-y-5" appearance="dark" accent="rose">
+            <StorefrontSectionHeading
+              eyebrow="Billing basics"
+              title="Where the receipts and plan questions go"
+              description="If the issue is commercial, the path stays simple: orders for proof, account for plan state, support for humans."
+            />
+            <div className="grid gap-3">
+              {BILLING_BASICS.map((item) => (
+                <StorefrontInfoCard
+                  key={item}
+                  eyebrow="Billing"
+                  title={item}
+                  description=""
+                />
+              ))}
+            </div>
             <div className="flex flex-wrap gap-3">
               <Link href="/orders" className={storefrontPrimaryButtonClass}>
                 Orders
@@ -184,18 +222,23 @@ export default function HowItWorksPage() {
         </section>
 
         <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
-          <StorefrontSectionHeading eyebrow="FAQ" title="Answers." />
+          <StorefrontSectionHeading
+            eyebrow="FAQ"
+            title="Reading + billing answers"
+            description="These are the short answers that keep showing up once readers start spending points, managing plans, or checking receipts."
+          />
           <div className="grid gap-3 lg:grid-cols-2">
-            {FAQ_ITEMS.map((item) => (
+            {FAQ_ITEMS.map((item, index) => (
               <StorefrontInfoCard
                 key={item.question}
+                eyebrow={`FAQ ${index + 1}`}
                 title={item.question}
                 description={item.answer}
               />
             ))}
           </div>
         </SurfacePanel>
-      </main>
-    </div>
+      </div>
+    </StorefrontPage>
   );
 }

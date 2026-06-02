@@ -8,6 +8,11 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Chip from "./Chip";
+import {
+  storefrontBadgeClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+} from "./StorefrontPagePrimitives";
 
 export default function FilterBar({
   genres = [],
@@ -112,11 +117,11 @@ export default function FilterBar({
     ? isQuiet
       ? "rounded-[24px] border border-[rgba(29,29,31,0.12)] bg-[rgba(255,255,255,0.95)] px-3 py-2.5 shadow-[0_14px_34px_rgba(58,44,86,0.12)]"
       : "rounded-[28px] border border-[rgba(29,29,31,0.12)] bg-[rgba(255,255,255,0.95)] px-4 py-3.5 shadow-[0_16px_38px_rgba(58,44,86,0.12)]"
-    : "rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 shadow-[0_18px_46px_rgba(8,6,20,0.22)]";
+    : `rounded-[28px] px-4 py-4 ${storefrontSoftCardClass}`;
   const labelClass = isLight ? "text-white/70" : "text-white/70";
   const subtleButtonClass = isLight
     ? "rounded-full border border-[rgba(29,29,31,0.12)] bg-white text-slate-700 shadow-[0_10px_24px_rgba(58,44,86,0.1)] transition-all duration-150 hover:-translate-y-0.5 hover:border-[rgba(29,29,31,0.18)] hover:bg-[rgba(29,29,31,0.04)]"
-    : "border border-white/10 bg-[rgba(255,255,255,0.04)] text-white shadow-[0_10px_24px_rgba(8,6,20,0.18)] hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.08)]";
+    : storefrontSecondaryButtonClass;
   const sectionLabelClass = cn(
     "font-semibold uppercase",
     isQuiet ? "text-[10px] tracking-[0.18em]" : "text-[11px] tracking-[0.24em]",
@@ -146,7 +151,7 @@ export default function FilterBar({
                     "border px-2.5 py-1 text-[11px] font-semibold",
                     isLight
                       ? "rounded-full border-[rgba(29,29,31,0.14)] bg-[rgba(29,29,31,0.06)] text-slate-900 shadow-[0_10px_24px_rgba(58,44,86,0.1)]"
-                      : "rounded-full border-white/10 bg-[rgba(255,255,255,0.04)] text-white shadow-[0_10px_24px_rgba(8,6,20,0.18)]",
+                        : `${storefrontBadgeClass} text-white`,
                   )}
                 >
                   {activeFilterCount} active
@@ -159,7 +164,7 @@ export default function FilterBar({
                 "border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]",
                 isLight
                   ? "rounded-full border-[rgba(29,29,31,0.14)] bg-[rgba(29,29,31,0.06)] text-slate-900 shadow-[0_10px_24px_rgba(58,44,86,0.1)]"
-                  : "rounded-full border-white/10 bg-[rgba(255,255,255,0.04)] text-white shadow-[0_10px_24px_rgba(8,6,20,0.18)]",
+                  : `${storefrontBadgeClass} text-white`,
               )}
             >
               {activeFilterCount} active
@@ -179,7 +184,7 @@ export default function FilterBar({
               } font-semibold transition-colors ${
                 isLight
                   ? "rounded-full border border-[rgba(29,29,31,0.12)] bg-white text-slate-700 shadow-[0_10px_24px_rgba(58,44,86,0.1)] transition-all duration-150 hover:-translate-y-0.5 hover:border-[rgba(29,29,31,0.18)] hover:bg-[rgba(29,29,31,0.04)]"
-                  : "rounded-full border border-white/10 bg-[rgba(255,255,255,0.04)] text-white shadow-[0_10px_24px_rgba(8,6,20,0.18)] hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.08)]"
+                  : `${storefrontSecondaryButtonClass} text-white`
               }`}
             >
               <RotateCcw size={14} />

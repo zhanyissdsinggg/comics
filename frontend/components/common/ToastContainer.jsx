@@ -12,6 +12,7 @@ import {
   getToastLabel,
   normalizeToastMessage,
 } from "../../lib/toastPresentation";
+import { storefrontSecondaryButtonClass } from "./StorefrontPagePrimitives";
 
 export default function ToastContainer() {
   const { toasts, removeToast } = useToast();
@@ -96,7 +97,7 @@ function ToastItem({ toast, onClose }) {
       <button
         type="button"
         onClick={onClose}
-        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] text-white/62 shadow-[0_12px_26px_rgba(8,6,20,0.18)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)] hover:text-white active:translate-y-px"
+        className={`${storefrontSecondaryButtonClass} h-9 w-9 flex-shrink-0 px-0 text-white/62 hover:text-white active:translate-y-px`}
         aria-label={isAdminUi ? "关闭" : "Close"}
       >
         <X size={16} />

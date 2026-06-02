@@ -8,9 +8,17 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import SurfacePanel from "../common/SurfacePanel";
 import {
+  storefrontAccentChipClass,
+  storefrontBadgeClass,
+  storefrontChipClass,
+  storefrontInfoCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+  StorefrontInfoCard,
+  StorefrontSectionHeading,
 } from "../common/StorefrontPagePrimitives";
+import { StorefrontPage } from "../storefront/StorefrontScaffold";
 
 function normalizeText(value) {
   return String(value || "")
@@ -158,6 +166,48 @@ function getStoryWhyPlayItems(story) {
   return [];
 }
 
+function getStoryVisual(story) {
+  const slug = normalizeText(story?.slug).toLowerCase();
+  if (slug.includes("solar") || slug.includes("signal")) {
+    return {
+      accent: "cyan",
+      posterClass:
+        "bg-[linear-gradient(135deg,#09111d_0%,#10305a_48%,#63d4ff_100%)]",
+      glowClass:
+        "bg-[radial-gradient(circle_at_18%_18%,rgba(103,232,249,0.36),transparent_24%),radial-gradient(circle_at_78%_24%,rgba(167,139,250,0.24),transparent_28%)]",
+      vibe: "Signal Route",
+    };
+  }
+  if (slug.includes("chat") || slug.includes("locker")) {
+    return {
+      accent: "rose",
+      posterClass:
+        "bg-[linear-gradient(135deg,#170912_0%,#4f1738_46%,#ff7ab1_100%)]",
+      glowClass:
+        "bg-[radial-gradient(circle_at_20%_18%,rgba(255,79,154,0.34),transparent_24%),radial-gradient(circle_at_80%_20%,rgba(125,211,252,0.16),transparent_26%)]",
+      vibe: "Rumor Route",
+    };
+  }
+  if (slug.includes("pool") || slug.includes("bus")) {
+    return {
+      accent: "amber",
+      posterClass:
+        "bg-[linear-gradient(135deg,#1c1207_0%,#6e3511_44%,#ffb15e_100%)]",
+      glowClass:
+        "bg-[radial-gradient(circle_at_20%_18%,rgba(251,191,36,0.34),transparent_22%),radial-gradient(circle_at_80%_20%,rgba(255,79,154,0.14),transparent_28%)]",
+      vibe: "Midnight Route",
+    };
+  }
+  return {
+    accent: "cyan",
+    posterClass:
+      "bg-[linear-gradient(135deg,#0b1020_0%,#2a1955_48%,#ff4f9a_100%)]",
+    glowClass:
+      "bg-[radial-gradient(circle_at_20%_18%,rgba(125,244,255,0.24),transparent_24%),radial-gradient(circle_at_80%_20%,rgba(255,79,154,0.22),transparent_28%)]",
+    vibe: "Story Route",
+  };
+}
+
 function getAnalyticsPayload({
   story,
   progress,
@@ -180,15 +230,15 @@ function getAnalyticsPayload({
 
 function LoadingShell() {
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-white">
-      <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.14)]">
+      <div className="py-3">
         <div className="grid gap-4">
           <SurfacePanel tone="muted" accent="cyan" appearance="dark" className="min-h-[200px]" />
           <SurfacePanel tone="muted" accent="blue" appearance="dark" className="min-h-[220px]" />
           <SurfacePanel tone="muted" accent="amber" appearance="dark" className="min-h-[240px]" />
         </div>
       </div>
-    </main>
+    </StorefrontPage>
   );
 }
 
@@ -578,10 +628,44 @@ export default function InteractiveStoryPage({
   const showSignInStart = authRequired && !node?.id;
   const showRawState = isInteractiveDebugEnabled();
   const whyPlayItems = useMemo(() => getStoryWhyPlayItems(story), [story]);
+  const storyVisual = useMemo(() => getStoryVisual(story), [story]);
+  const linkedSeriesId = normalizeText(
+    seriesId || story?.seriesId || progress?.story?.seriesId,
+  );
+  const genreItems = useMemo(
+    () =>
+      Array.isArray(story?.genre)
+        ? story.genre.map((item) => normalizeText(item)).filter(Boolean).slice(0, 3)
+        : [],
+    [story?.genre],
+  );
+  const routeInsightCards = useMemo(
+    () => [
+      {
+        eyebrow: "Start State",
+        value: progress?.node?.title ? "Already in progress" : "Fresh entry",
+        description: progress?.node?.title
+          ? `Resume from ${normalizeText(progress.node.title)} without losing your path.`
+          : "Jump in from the opening scene and let the branch build from your first choice.",
+      },
+      {
+        eyebrow: "Choice Pressure",
+        value: `${Number(story?.choicesCount || 0)} decision points`,
+        description:
+          "Choices shape the route rather than acting like passive flavor text, so each branch feels deliberate.",
+      },
+      {
+        eyebrow: "Ending Spread",
+        value: `${Number(story?.endingsCount || 0)} possible endings`,
+        description:
+          "Short runs with multiple outcomes make replaying feel like discovery instead of grind.",
+      },
+    ],
+    [progress?.node?.title, story?.choicesCount, story?.endingsCount],
+  );
   const panelEyebrowClass =
     "text-[10px] font-semibold uppercase tracking-[0.2em] text-white/64";
-  const statCardClass =
-    "rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] px-4 py-3.5 shadow-[0_18px_38px_rgba(8,6,20,0.18)]";
+  const statCardClass = `${storefrontSoftCardClass} px-4 py-3.5`;
 
   if (loading) {
     return <LoadingShell />;
@@ -589,10 +673,13 @@ export default function InteractiveStoryPage({
 
   if (mode !== "play") {
     return (
-      <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.14),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.14),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.1),transparent_24%)]" />
-        <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
-          <SurfacePanel tone="highlight" accent="cyan" appearance="dark">
+      <StorefrontPage accentClass="from-[rgba(255,79,154,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.14)]">
+        <div className="flex flex-col gap-6">
+          <SurfacePanel
+            tone="highlight"
+            accent={storyVisual.accent}
+            appearance="dark"
+          >
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
               <div>
                 <p className={panelEyebrowClass}>
@@ -607,24 +694,22 @@ export default function InteractiveStoryPage({
                   </p>
                 ) : null}
                 <div className="mt-5 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60">
-                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2">
+                  <span className={storefrontBadgeClass}>
                     {normalizeText(story?.contentMode || "NORMAL")}
                   </span>
-                  {Array.isArray(story?.genre)
-                    ? story.genre.slice(0, 3).map((item) => (
-                        <span key={item} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2">
-                          {normalizeText(item)}
-                        </span>
-                      ))
-                    : null}
+                  {genreItems.map((item) => (
+                    <span key={item} className={storefrontBadgeClass}>
+                      {item}
+                    </span>
+                  ))}
                 </div>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Link href={playHref} className={storefrontPrimaryButtonClass}>
                     {continueLabel}
                   </Link>
-                  {seriesId || story?.seriesId ? (
+                  {linkedSeriesId ? (
                     <Link
-                      href={`/series/${encodeURIComponent(seriesId || story.seriesId)}`}
+                      href={`/series/${encodeURIComponent(linkedSeriesId)}`}
                       className={storefrontSecondaryButtonClass}
                     >
                       View Series
@@ -632,89 +717,237 @@ export default function InteractiveStoryPage({
                   ) : null}
                 </div>
               </div>
-              <div className="grid gap-3">
-                <SurfacePanel tone="muted" accent="rose" appearance="dark">
-                  <div className={panelEyebrowClass}>
-                    Endings
+              <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.035))] px-5 py-5 shadow-[0_24px_58px_rgba(8,6,20,0.28)] backdrop-blur-xl">
+                <div className={`absolute inset-0 ${storyVisual.posterClass}`} />
+                <div className={`absolute inset-0 ${storyVisual.glowClass}`} />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,10,18,0.08)_0%,rgba(8,10,18,0.76)_58%,rgba(8,10,18,0.94)_100%)]" />
+                <div className="relative">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className={`${storefrontBadgeClass} px-3 py-1 text-[10px] tracking-[0.18em] text-white/72`}>
+                      {normalizeText(story?.contentMode || "normal")}
+                    </span>
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/54">
+                      {storyVisual.vibe}
+                    </span>
                   </div>
-                  <div className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.06em] text-white">
-                    {Number(story?.endingsCount || 0)}
-                  </div>
-                </SurfacePanel>
-                <SurfacePanel tone="muted" accent="blue" appearance="dark">
-                  <div className={panelEyebrowClass}>
-                    Choices
-                  </div>
-                  <div className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.06em] text-white">
-                    {Number(story?.choicesCount || 0)}
-                  </div>
-                </SurfacePanel>
-                <SurfacePanel tone="muted" accent="amber" appearance="dark">
-                  <div className={panelEyebrowClass}>
-                    Progress
-                  </div>
-                  <div className="mt-2 text-sm leading-[1.68] text-white/80">
-                    {progress?.node?.title
-                      ? `Now reading: ${normalizeText(progress.node.title)}`
-                      : "You haven't started yet."}
-                  </div>
-                </SurfacePanel>
-                {whyPlayItems.length > 0 ? (
-                  <SurfacePanel tone="muted" accent="cyan" appearance="dark">
-                    <div className={panelEyebrowClass}>
-                      Why you'll like it
+                  <div className="mt-16 space-y-3">
+                    <div className={storefrontInfoCardClass}>
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">
+                        Endings
+                      </div>
+                      <div className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.06em] text-white">
+                        {Number(story?.endingsCount || 0)}
+                      </div>
                     </div>
-                    <div className="mt-3 grid gap-2">
-                      {whyPlayItems.map((item) => (
-                        <div key={item} className={statCardClass}>
-                          {item}
-                        </div>
-                      ))}
+                    <div className={storefrontInfoCardClass}>
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">
+                        Choices
+                      </div>
+                      <div className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.06em] text-white">
+                        {Number(story?.choicesCount || 0)}
+                      </div>
                     </div>
-                  </SurfacePanel>
-                ) : null}
+                    <div className={storefrontInfoCardClass}>
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">
+                        Progress
+                      </div>
+                      <div className="mt-2 text-sm leading-[1.68] text-white/80">
+                        {progress?.node?.title
+                          ? `Now reading: ${normalizeText(progress.node.title)}`
+                          : "You haven't started yet."}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </SurfacePanel>
+
+          <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <SurfacePanel
+              tone="muted"
+              accent={storyVisual.accent}
+              appearance="dark"
+              className="space-y-5"
+            >
+              <StorefrontSectionHeading
+                eyebrow="Why Start"
+                title="A short branch with real route pressure"
+                description="Interactive stories should feel like a playable shelf, not a plain synopsis page. This layout keeps the hook, decision structure, and replay angle in one pass."
+              />
+
+              {whyPlayItems.length > 0 ? (
+                <div className="grid gap-3 md:grid-cols-2">
+                  {whyPlayItems.map((item) => (
+                    <div key={item} className={storefrontSoftCardClass}>
+                      <p className="text-sm font-semibold tracking-[-0.02em] text-white">
+                        {item}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              <div className="grid gap-3 md:grid-cols-3">
+                {routeInsightCards.map((item) => (
+                  <div key={item.eyebrow} className={storefrontInfoCardClass}>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+                      {item.eyebrow}
+                    </p>
+                    <p className="mt-2 font-display text-[1.25rem] font-semibold tracking-[-0.04em] text-white">
+                      {item.value}
+                    </p>
+                    <p className="mt-3 text-sm leading-[1.72] text-white/66">
+                      {item.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </SurfacePanel>
+
+            <div className="grid gap-4">
+              <StorefrontInfoCard
+                eyebrow="Current Route"
+                title={progress?.node?.title ? normalizeText(progress.node.title) : "Ready to begin"}
+                description={
+                  progress?.node?.title
+                    ? "Your latest scene is waiting. Pick back up from the current branch without resetting your path."
+                    : "You have not started this branch yet. The first choice will define the route tone immediately."
+                }
+              />
+
+              <StorefrontInfoCard
+                eyebrow="How It Plays"
+                title="Read, choose, land an ending"
+                description="The flow stays simple on purpose so the story tension does the work."
+              >
+                <div className="mt-4 grid gap-3">
+                  <div className={storefrontSoftCardClass}>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">
+                      Step 01
+                    </p>
+                    <p className="mt-2 text-sm leading-[1.72] text-white/72">
+                      Open the current scene and read the setup before the branch options appear.
+                    </p>
+                  </div>
+                  <div className={storefrontSoftCardClass}>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">
+                      Step 02
+                    </p>
+                    <p className="mt-2 text-sm leading-[1.72] text-white/72">
+                      Choose a route. Some choices stay premium or unlock later, but the decision flow remains clear.
+                    </p>
+                  </div>
+                  <div className={storefrontSoftCardClass}>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">
+                      Step 03
+                    </p>
+                    <p className="mt-2 text-sm leading-[1.72] text-white/72">
+                      Reach an ending, restart, and test another route without losing the branch structure.
+                    </p>
+                  </div>
+                </div>
+              </StorefrontInfoCard>
+
+              {linkedSeriesId ? (
+                <StorefrontInfoCard
+                  eyebrow="Series Tie-In"
+                  title="Want the broader world behind this branch?"
+                  description="This interactive route sits inside the same universe as the linked main series."
+                >
+                  <div className="mt-4">
+                    <Link
+                      href={`/series/${encodeURIComponent(linkedSeriesId)}`}
+                      className={storefrontSecondaryButtonClass}
+                    >
+                      Open linked series
+                    </Link>
+                  </div>
+                </StorefrontInfoCard>
+              ) : null}
+            </div>
+          </section>
         </div>
-      </main>
+      </StorefrontPage>
     );
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.14),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.14),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.1),transparent_24%)]" />
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-6 md:px-8 md:py-8">
-        <SurfacePanel tone="muted" accent="cyan" appearance="dark">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.14)]">
+      <div className="flex flex-col gap-6">
+        <SurfacePanel tone="highlight" accent={storyVisual.accent} appearance="dark">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
             <div>
-              <p className={panelEyebrowClass}>
-                Interactive
-              </p>
-              <h1 className="mt-2 font-display text-[2rem] font-semibold leading-[0.94] tracking-[-0.06em] text-white">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className={`${storefrontBadgeClass} px-3 py-1 text-[10px] tracking-[0.18em] text-white/74`}>
+                  Interactive
+                </span>
+                <span className={`${storefrontAccentChipClass} min-h-[32px] px-3 py-1 text-[10px] tracking-[0.18em] text-cyan-100`}>
+                  {storyVisual.vibe}
+                </span>
+              </div>
+              <h1 className="mt-4 font-display text-[2.35rem] font-semibold leading-[0.9] tracking-[-0.07em] text-white md:text-[2.9rem]">
                 {storyTitle}
               </h1>
               {storyDescription ? (
-                <p className="mt-2 max-w-2xl text-sm leading-[1.68] text-white/78">
+                <p className="mt-4 max-w-2xl text-sm leading-[1.72] text-white/78">
                   {storyDescription}
                 </p>
               ) : null}
-            </div>
-            <div className="flex flex-wrap gap-2">
+              <div className="mt-5 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60">
+                <span className={`${storefrontBadgeClass} px-3 py-2`}>
+                  Step {routeDepth}
+                </span>
+                <span className={`${storefrontBadgeClass} px-3 py-2`}>
+                  {Number(story?.choicesCount || 0)} choices
+                </span>
+                <span className={`${storefrontBadgeClass} px-3 py-2`}>
+                  {Number(story?.endingsCount || 0)} endings
+                </span>
+              </div>
+              <div className="mt-6 flex flex-wrap gap-2">
                 <Link
                   href={detailHref}
-                  className={`${storefrontSecondaryButtonClass} h-10 px-4 text-[11px] tracking-[0.08em]`}
+                  className={`${storefrontSecondaryButtonClass} min-h-[44px] px-4 text-[11px] tracking-[0.08em]`}
                 >
                   Story Page
                 </Link>
-              {seriesId || story?.seriesId ? (
-                <Link
-                  href={`/series/${encodeURIComponent(seriesId || story.seriesId)}`}
-                  className={`${storefrontSecondaryButtonClass} h-10 px-4 text-[11px] tracking-[0.08em]`}
-                >
-                  Series
-                </Link>
-              ) : null}
+                {seriesId || story?.seriesId ? (
+                  <Link
+                    href={`/series/${encodeURIComponent(seriesId || story.seriesId)}`}
+                    className={`${storefrontSecondaryButtonClass} min-h-[44px] px-4 text-[11px] tracking-[0.08em]`}
+                  >
+                    Series
+                  </Link>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.035))] px-5 py-5 shadow-[0_22px_54px_rgba(8,6,20,0.24)] backdrop-blur-xl">
+              <div className={`absolute inset-0 ${storyVisual.posterClass}`} />
+              <div className={`absolute inset-0 ${storyVisual.glowClass}`} />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,10,18,0.08)_0%,rgba(8,10,18,0.78)_64%,rgba(8,10,18,0.94)_100%)]" />
+              <div className="relative">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/52">
+                  Current route
+                </div>
+                <div className={storefrontInfoCardClass}>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">
+                    Scene
+                  </div>
+                  <div className="mt-2 text-sm font-semibold leading-[1.6] text-white">
+                    {normalizeText(node?.title || "Opening scene")}
+                  </div>
+                </div>
+                <div className={`mt-3 ${storefrontInfoCardClass}`}>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">
+                    Endings reached
+                  </div>
+                  <div className="mt-2 font-display text-[1.75rem] font-semibold tracking-[-0.05em] text-white">
+                    {Number(progress?.endingsReached || 0)}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </SurfacePanel>
@@ -745,7 +978,11 @@ export default function InteractiveStoryPage({
         <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="grid gap-4">
             <div ref={storyBodyRef} className="scroll-mt-24">
-              <SurfacePanel tone="muted" accent={isEnding ? "rose" : "cyan"} appearance="dark">
+              <SurfacePanel
+                tone="muted"
+                accent={isEnding ? "rose" : storyVisual.accent}
+                appearance="dark"
+              >
                 {showSignInStart ? (
                   <div className="grid gap-4">
                     <p className={panelEyebrowClass}>
@@ -769,33 +1006,40 @@ export default function InteractiveStoryPage({
                   </div>
                 ) : (
                   <>
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        {isEnding ? (
-                          <div className="mb-3 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-xl">
-                            Ending
+                    <div className="relative mb-5 overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.035))] backdrop-blur-xl">
+                      <div className={`absolute inset-x-0 top-0 h-[220px] ${storyVisual.posterClass}`} />
+                      <div className={`absolute inset-x-0 top-0 h-[220px] ${storyVisual.glowClass}`} />
+                      <div className="absolute inset-x-0 top-0 h-[220px] bg-[linear-gradient(180deg,rgba(8,10,18,0.08)_0%,rgba(8,10,18,0.82)_88%,rgba(8,10,18,0.96)_100%)]" />
+                      <div className="relative px-5 pb-5 pt-5">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            {isEnding ? (
+                              <div className={`${storefrontAccentChipClass} mb-3 inline-flex min-h-[32px] px-3 py-1 text-[10px] tracking-[0.2em] text-white`}>
+                                Ending
+                              </div>
+                            ) : null}
+                            <p className={panelEyebrowClass}>
+                              Now Reading
+                            </p>
+                            <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
+                              {normalizeText(node?.title || "Opening scene")}
+                            </h2>
                           </div>
-                        ) : null}
-                        <p className={panelEyebrowClass}>
-                          Now Reading
-                        </p>
-                        <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
-                          {normalizeText(node?.title || "Opening scene")}
-                        </h2>
-                      </div>
-                      <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/65 shadow-[0_12px_24px_rgba(8,6,20,0.14)] backdrop-blur-xl">
-                        Step {routeDepth}
+                          <div className={`${storefrontBadgeClass} px-3 py-2 text-[10px] tracking-[0.16em] text-white/65`}>
+                            Step {routeDepth}
+                          </div>
+                        </div>
+
+                        <div className="mt-6 h-2 overflow-hidden rounded-full bg-white/10">
+                          <div
+                            className="h-full rounded-full bg-[linear-gradient(90deg,#67e8f9_0%,#fda4af_100%)] transition-all duration-500"
+                            style={{ width: `${Math.min(100, Math.max(18, routeDepth * 18))}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
 
-                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
-                      <div
-                        className="h-full rounded-full bg-[linear-gradient(90deg,#67e8f9_0%,#fda4af_100%)] transition-all duration-500"
-                        style={{ width: `${Math.min(100, Math.max(18, routeDepth * 18))}%` }}
-                      />
-                    </div>
-
-                    <p className="mt-5 whitespace-pre-line text-[15px] leading-[1.9] text-white/85 transition-opacity duration-300">
+                    <p className="whitespace-pre-line text-[15px] leading-[1.9] text-white/85 transition-opacity duration-300">
                       {normalizeText(node?.content || story?.baseContext)}
                     </p>
 
@@ -870,7 +1114,7 @@ export default function InteractiveStoryPage({
                             ) : null}
                           </div>
                           {choice.locked ? (
-                            <span className="rounded-full border border-white/20 bg-white/[0.05] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/70">
+                            <span className={`${storefrontBadgeClass} px-2.5 py-1 text-[10px] tracking-[0.14em] text-white/70`}>
                               {lockCopy}
                             </span>
                           ) : null}
@@ -887,7 +1131,7 @@ export default function InteractiveStoryPage({
                               disabled || choice.locked ? "opacity-60" : "",
                             ].join(" ")}
                           >
-                            {choice.locked ? "Locked" : "Choose"}
+                            {choice.locked ? "Locked" : "Choose This Route"}
                           </button>
                           {choice.locked ? (
                             <button
@@ -901,7 +1145,7 @@ export default function InteractiveStoryPage({
                                 disabled ? "opacity-60" : "",
                               ].join(" ")}
                             >
-                              Unlock
+                              Unlock Route
                             </button>
                           ) : null}
                         </div>
@@ -981,6 +1225,6 @@ export default function InteractiveStoryPage({
           </div>
         </section>
       </div>
-    </main>
+    </StorefrontPage>
   );
 }

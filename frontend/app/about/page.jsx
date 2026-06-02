@@ -3,10 +3,12 @@ import EditorialHero from "../../components/common/EditorialHero";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import {
   StorefrontDesk,
+  StorefrontInfoCard,
   StorefrontSectionHeading,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../../components/common/StorefrontPagePrimitives";
+import { StorefrontPage } from "../../components/storefront/StorefrontScaffold";
 import { createPageMetadata } from "../../lib/seo";
 import { siteConfig } from "../../lib/siteConfig";
 
@@ -18,7 +20,7 @@ export const metadata = createPageMetadata({
 
 const CONTACT_LINKS = [
   {
-    label: "Email us",
+    label: "Email support",
     href: `mailto:${siteConfig.supportEmail}`,
     external: true,
   },
@@ -32,18 +34,50 @@ const CONTACT_LINKS = [
   { label: "Terms", href: "/terms-of-service", external: false },
 ];
 
+const PRINCIPLES = [
+  {
+    label: "Entertainment first",
+    value:
+      "Gush is built to feel like opening a story app, not digging through a dusty catalog.",
+  },
+  {
+    label: "One shelf, more formats",
+    value:
+      "Comics, novels, and interactive stories all live in one reading home with the same discovery rhythm.",
+  },
+  {
+    label: "Cleaner discovery",
+    value:
+      "The front page, search, rankings, and details are designed to get readers into the next obsession faster.",
+  },
+];
+
+const STATUS_CARDS = [
+  {
+    label: "Formats",
+    value: "Comics, novels, interactive",
+  },
+  {
+    label: "Audience",
+    value: "US teen entertainment",
+  },
+  {
+    label: "Vibe",
+    value: "Story-first, fast, bingeable",
+  },
+];
+
 export default function AboutPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.12),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
-      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.12)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.12)]">
+      <div className="flex flex-col gap-8">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="dark"
             accent="cyan"
             eyebrow="About Gush"
-            title="About Gush."
-            description=""
+            title="Stories should feel easy to open and hard to forget."
+            description={siteConfig.aboutSummary}
             actions={
               <>
                 <Link href="/support" className={storefrontPrimaryButtonClass}>
@@ -54,15 +88,17 @@ export default function AboutPage() {
                 </Link>
               </>
             }
+            stats={STATUS_CARDS}
           />
 
           <StorefrontDesk
             eyebrow="Contact"
-            title="Contact."
+            title="Talk to the right lane."
+            description="Support, privacy, and legal contacts stay one click away."
             actions={
               <>
                 <Link href="/support" className={storefrontPrimaryButtonClass}>
-                  Support
+                  Open support
                 </Link>
                 <a
                   href={`mailto:${siteConfig.legalEmail}`}
@@ -75,28 +111,15 @@ export default function AboutPage() {
           />
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+        <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
           <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
             <StorefrontSectionHeading
-              eyebrow="Principles"
-              title="Readers first."
-              description={siteConfig.aboutSummary}
+              eyebrow="What we are building"
+              title="A reading platform that behaves like entertainment."
+              description="The goal is simple: discovery should feel alive, browsing should feel intentional, and every route back into a story should be fast."
             />
             <div className="grid gap-3 sm:grid-cols-3">
-              {[
-                {
-                  label: "Focus",
-                  value: "Comics, novels, and interactive stories in one reading home.",
-                },
-                {
-                  label: "Approach",
-                  value: "Fast discovery, cleaner shelves, and less friction between curiosity and the next chapter.",
-                },
-                {
-                  label: "Promise",
-                  value: "A front page that feels like entertainment, not a dusty archive.",
-                },
-              ].map((item) => (
+              {PRINCIPLES.map((item) => (
                 <div
                   key={item.label}
                   className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] px-4 py-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]"
@@ -104,7 +127,7 @@ export default function AboutPage() {
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/48">
                     {item.label}
                   </p>
-                  <p className="mt-2 text-sm leading-[1.68] text-white/76">
+                  <p className="mt-3 text-sm leading-[1.68] text-white/76">
                     {item.value}
                   </p>
                 </div>
@@ -112,26 +135,34 @@ export default function AboutPage() {
             </div>
           </SurfacePanel>
 
-          <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
-            <StorefrontSectionHeading eyebrow="Details" title="Contact." />
-            <div className="space-y-3 text-sm leading-[1.68] text-white/70">
-              <p>
-                <span className="font-semibold text-white">Support:</span>{" "}
-                {siteConfig.supportEmail}
-              </p>
-              <p>
-                <span className="font-semibold text-white">Privacy:</span>{" "}
-                {siteConfig.privacyEmail}
-              </p>
-              <p>
-                <span className="font-semibold text-white">Legal:</span>{" "}
-                {siteConfig.legalEmail}
-              </p>
+          <SurfacePanel className="space-y-5" appearance="dark" accent="rose">
+            <StorefrontSectionHeading
+              eyebrow="Contact details"
+              title="Reach the right inbox."
+              description="Use the support form for reader issues. Use the direct addresses below when the conversation belongs to privacy or legal."
+            />
+            <div className="grid gap-3">
+              <StorefrontInfoCard
+                eyebrow="Support"
+                title={siteConfig.supportEmail}
+                description="Reading issues, billing questions, and account help."
+              />
+              <StorefrontInfoCard
+                eyebrow="Privacy"
+                title={siteConfig.privacyEmail}
+                description="Requests related to privacy, data, and policy."
+              />
+              <StorefrontInfoCard
+                eyebrow="Legal"
+                title={siteConfig.legalEmail}
+                description="Legal notices and formal contact."
+              />
               {siteConfig.companyAddress ? (
-                <p>
-                  <span className="font-semibold text-white">Address:</span>{" "}
-                  {siteConfig.companyAddress}
-                </p>
+                <StorefrontInfoCard
+                  eyebrow="Address"
+                  title={siteConfig.companyAddress}
+                  description="Business contact location."
+                />
               ) : null}
             </div>
             <div className="flex flex-wrap gap-3">
@@ -157,7 +188,7 @@ export default function AboutPage() {
             </div>
           </SurfacePanel>
         </section>
-      </main>
-    </div>
+      </div>
+    </StorefrontPage>
   );
 }

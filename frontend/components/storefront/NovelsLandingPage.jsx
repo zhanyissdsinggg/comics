@@ -19,6 +19,10 @@ import {
   useCatalogFeed,
 } from "./StorefrontScaffold";
 import {
+  storefrontInfoCardClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
+import {
   buildCompletedRail,
   buildContinueReadingItems,
   buildGenreLabel,
@@ -177,17 +181,17 @@ export default function NovelsLandingPage({
       </section>
 
       {lowInventory ? (
-        <section className="rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-[var(--gush-shadow-panel)]">
+        <section className={`${storefrontInfoCardClass} rounded-[28px] p-5 text-white shadow-[var(--gush-shadow-panel)]`}>
           <SectionHeading
             eyebrow="Coming Next"
             title="More novel drops soon"
             description="This shelf is still growing. Fresh late-night reads are on the way."
           />
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <div className="rounded-[22px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] p-4 text-sm leading-6 text-white/74 shadow-[0_14px_30px_rgba(8,6,20,0.18)]">
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <div className={`${storefrontInfoCardClass} rounded-[22px] p-4 text-sm leading-6 text-white/74`}>
               Featured Novel, Latest Chapters, and Short Reads stay up front while the catalog fills out.
             </div>
-            <div className="rounded-[22px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] p-4 text-sm leading-6 text-white/74 shadow-[0_14px_30px_rgba(8,6,20,0.18)]">
+            <div className={`${storefrontInfoCardClass} rounded-[22px] p-4 text-sm leading-6 text-white/74`}>
               Check back soon for more chapter drops, longer binge runs, and a fuller novel shelf.
             </div>
           </div>
@@ -209,7 +213,7 @@ export default function NovelsLandingPage({
         </div>
       ) : (
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <section className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-[var(--gush-shadow-panel)]">
+          <section className={`${storefrontInfoCardClass} rounded-[30px] p-5 text-white shadow-[var(--gush-shadow-panel)]`}>
             <SectionHeading
               eyebrow="Late-Night Reads"
               title="Stories built for one more chapter."
@@ -222,7 +226,7 @@ export default function NovelsLandingPage({
               ].map((item) => (
                 <div
                   key={item}
-                  className="rounded-[22px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] p-4 text-sm leading-6 text-white/72 shadow-[0_14px_30px_rgba(8,6,20,0.18)]"
+                  className={`${storefrontInfoCardClass} rounded-[22px] p-4 text-sm leading-6 text-white/72`}
                 >
                   {item}
                 </div>
@@ -248,7 +252,7 @@ export default function NovelsLandingPage({
             action={
               <Link
                 href="/library"
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-white/76"
+                className={`inline-flex min-h-[44px] items-center gap-2 px-4 text-sm font-medium text-white/76 ${storefrontSecondaryButtonClass}`}
               >
                 <Library className="size-4" />
                 Open Library

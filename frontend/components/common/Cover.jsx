@@ -158,7 +158,7 @@ function CoverFallback({
           style={{ borderColor: artDirection.border }}
         />
         <div
-          className="absolute mt-6 h-20 w-20 rounded-full border bg-[#111111] blur-[0.5px]"
+          className="absolute mt-6 h-20 w-20 rounded-full border bg-[rgba(7,10,21,0.82)] blur-[0.5px]"
           style={{ borderColor: artDirection.border }}
         />
       </div>
@@ -271,7 +271,7 @@ export default function Cover({
       >
         {isLoading && (
           <div
-            className="absolute inset-0 animate-pulse bg-neutral-800"
+            className="absolute inset-0 animate-pulse"
             style={{
               background: getCoverArtDirection({
                 tone,

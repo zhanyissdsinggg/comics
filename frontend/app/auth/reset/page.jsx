@@ -13,6 +13,7 @@ import {
   storefrontSecondaryButtonClass,
 } from "../../../components/common/StorefrontPagePrimitives";
 import { apiPost } from "../../../lib/apiClient";
+import { StorefrontPage } from "../../../components/storefront/StorefrontScaffold";
 
 function StatusNotice({ tone = "neutral", title = "", message = "" }) {
   if (!title && !message) {
@@ -248,7 +249,11 @@ export default function ResetPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen overflow-hidden bg-black text-white" />
+        <StorefrontPage accentClass="from-[rgba(103,232,249,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(255,79,154,0.1)]">
+          <div className="mx-auto w-full max-w-[960px]">
+            <div className="h-56 animate-pulse rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(22,18,30,0.92)_0%,rgba(13,12,23,0.86)_100%)] shadow-[0_24px_58px_rgba(8,6,20,0.34)]" />
+          </div>
+        </StorefrontPage>
       }
     >
       <ResetPageContent />

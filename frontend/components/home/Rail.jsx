@@ -6,7 +6,10 @@ import CreatorShelfLinks from "../common/CreatorShelfLinks";
 import PortraitCard from "./PortraitCard";
 import { ensureArray } from "../../lib/validators";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import {
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+} from "../common/StorefrontPagePrimitives";
 
 const RAIL_THEME_BY_ID = {
   following: {
@@ -134,20 +137,19 @@ export default function Rail({
             </div>
 
             {href ? (
-              <Button
+              <button
                 type="button"
-                variant="ghost"
                 onClick={() => router.push(href)}
-                className="h-10 justify-start gap-2 rounded-full border border-white/12 bg-white/[0.04] px-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white shadow-[0_12px_26px_rgba(0,0,0,0.18)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.08]"
+                className={`${storefrontSecondaryButtonClass} h-10 gap-2 px-4 text-[11px] uppercase tracking-[0.12em]`}
               >
                 {ctaLabel}
                 <ArrowRight className="size-4" />
-              </Button>
+              </button>
             ) : null}
           </div>
 
           {showCreatorShelfLinks && safeItems.length > 0 ? (
-            <div className="mt-5 rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.03)] py-0 shadow-[0_14px_34px_rgba(8,6,20,0.2)]">
+            <div className={`mt-5 rounded-[22px] ${storefrontSoftCardClass} py-0`}>
               <div className="p-4">
                 <CreatorShelfLinks
                   items={safeItems}
@@ -163,7 +165,7 @@ export default function Rail({
           ) : null}
 
           {safeItems.length === 0 ? (
-            <div className="mt-5 rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.03)] py-0 shadow-[0_14px_34px_rgba(8,6,20,0.2)]">
+            <div className={`mt-5 rounded-[22px] ${storefrontSoftCardClass} py-0`}>
               <div className="p-8 text-center">
                 <p className="text-sm font-semibold text-white/70">
                   Nothing here yet.

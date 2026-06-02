@@ -4,6 +4,12 @@ import Link from "next/link";
 import { useMemo, useCallback } from "react";
 import Cover from "../common/Cover";
 import SurfacePanel from "../common/SurfacePanel";
+import {
+  storefrontBadgeClass,
+  storefrontInfoCardClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+} from "../common/StorefrontPagePrimitives";
 import { buildCreatorDirectory } from "../../lib/creatorDirectory";
 import { normalizeCreatorName } from "../../lib/creators";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
@@ -232,7 +238,7 @@ export default function SearchCreatorMatchesPanel({
           <Link
             href={getCreatorHref(leadCreatorMatch)}
             onClick={() => handleCreatorClick(leadCreatorMatch)}
-            className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
+            className={`${storefrontSecondaryButtonClass} px-4`}
           >
             View creator
           </Link>
@@ -245,7 +251,7 @@ export default function SearchCreatorMatchesPanel({
         {matchedCreators.map((creator) => (
           <article
             key={creator.slug}
-            className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(30,25,38,0.98)_0%,rgba(17,13,24,0.98)_100%)] p-4 shadow-[0_20px_50px_rgba(8,6,20,0.28)]"
+            className={`${storefrontInfoCardClass} rounded-[30px] bg-[linear-gradient(180deg,rgba(30,25,38,0.98)_0%,rgba(17,13,24,0.98)_100%)] p-4 text-white shadow-[0_20px_50px_rgba(8,6,20,0.28)]`}
           >
             <Cover
               tone={creator.spotlightSeries?.coverTone}
@@ -254,7 +260,7 @@ export default function SearchCreatorMatchesPanel({
             />
             <div className="mt-4 space-y-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/55">
+                <p className={`${storefrontBadgeClass} text-white/68`}>
                   {creator.matchLabel}
                 </p>
                 <h3 className="mt-2 font-display text-2xl font-semibold tracking-[-0.05em] text-white">
@@ -272,12 +278,16 @@ export default function SearchCreatorMatchesPanel({
                 <p className="text-sm leading-6 text-white/68">Creator</p>
               )}
 
-              <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.12em] text-white/55">
+              <div className="flex flex-wrap gap-2 text-xs uppercase tracking-[0.12em] text-white/55">
                 {creator.matchDescription ? (
-                  <span>{creator.matchDescription}</span>
+                  <span className={`${storefrontSoftCardClass} px-3 py-2 text-[11px] tracking-[0.16em] text-white/62`}>
+                    {creator.matchDescription}
+                  </span>
                 ) : null}
                 {creator.matchedGenres?.[0] ? (
-                  <span>{creator.matchedGenres[0]}</span>
+                  <span className={`${storefrontSoftCardClass} px-3 py-2 text-[11px] tracking-[0.16em] text-white/62`}>
+                    {creator.matchedGenres[0]}
+                  </span>
                 ) : null}
               </div>
 
@@ -285,7 +295,7 @@ export default function SearchCreatorMatchesPanel({
                 <Link
                   href={getCreatorHref(creator)}
                   onClick={() => handleCreatorClick(creator)}
-                  className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-3.5 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
+                  className={`${storefrontSecondaryButtonClass} px-3.5`}
                 >
                   View creator
                 </Link>

@@ -6,9 +6,12 @@ import Link from "next/link";
 import { LockKeyhole, ShieldCheck, UserRound } from "lucide-react";
 import SurfacePanel from "../common/SurfacePanel";
 import {
+  storefrontInfoCardClass,
+  storefrontSoftCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
+import { StorefrontPage } from "../storefront/StorefrontScaffold";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import LoginGateModal from "../layout/LoginGateModal";
@@ -134,9 +137,7 @@ export default function AdultGatePage() {
   }, [reason, returnTo]);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.16),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.1),transparent_24%)]" />
-      <main className="mx-auto flex max-w-[1180px] flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.16)] via-[rgba(167,139,250,0.1)] to-[rgba(103,232,249,0.12)]">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_340px]">
           <SurfacePanel
             appearance="dark"
@@ -154,7 +155,7 @@ export default function AdultGatePage() {
                     {titleMap[reason]}
                   </h1>
                 </div>
-                <div className="inline-flex size-12 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.06] text-[#ffd8e6] shadow-[0_14px_34px_rgba(8,6,20,0.24)]">
+                <div className={`inline-flex size-12 items-center justify-center rounded-2xl ${storefrontSoftCardClass} px-0 text-[#ffd8e6]`}>
                   <GateIcon className="size-5" />
                 </div>
               </div>
@@ -190,13 +191,13 @@ export default function AdultGatePage() {
                 Before you continue
               </p>
               <div className="space-y-3">
-                <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]">
+                <div className={`${storefrontInfoCardClass} p-4`}>
                   <p className="text-sm font-medium text-white">18+ only</p>
                   <p className="mt-2 text-sm leading-[1.68] text-white/66">
                     Mature content uses access controls and noindex rules.
                   </p>
                 </div>
-                <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]">
+                <div className={`${storefrontInfoCardClass} p-4`}>
                   <p className="text-sm font-medium text-white">
                     Separate mode
                   </p>
@@ -225,8 +226,6 @@ export default function AdultGatePage() {
             </div>
           </SurfacePanel>
         </section>
-      </main>
-
       <LoginGateModal
         open={activeModal === "login"}
         onClose={() => {
@@ -243,6 +242,6 @@ export default function AdultGatePage() {
         ageRuleKey={ageRuleKey}
         legalAge={legalAge}
       />
-    </div>
+    </StorefrontPage>
   );
 }

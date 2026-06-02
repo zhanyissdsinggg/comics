@@ -1,16 +1,48 @@
 import { z } from "zod";
 import { resolve } from "path";
+import { readFileSync } from "fs";
 
 const envLoader = process as NodeJS.Process & {
   loadEnvFile?: (path?: string) => void;
 };
 
-if (typeof envLoader.loadEnvFile === "function") {
+function loadEnvFileCompat(filePath: string): void {
+  if (typeof envLoader.loadEnvFile === "function") {
+    try {
+      envLoader.loadEnvFile(filePath);
+    } catch {
+      // Fall through to the compat loader below.
+    }
+  }
+
   try {
-    envLoader.loadEnvFile(resolve(process.cwd(), ".env"));
+    const source = readFileSync(filePath, "utf8").replace(/^\uFEFF/, "");
+    source.split(/\r?\n/).forEach((line) => {
+      const trimmed = String(line || "").trim();
+      if (!trimmed || trimmed.startsWith("#")) {
+        return;
+      }
+
+      const separatorIndex = trimmed.indexOf("=");
+      if (separatorIndex <= 0) {
+        return;
+      }
+
+      const key = trimmed.slice(0, separatorIndex).trim();
+      if (!key || Object.prototype.hasOwnProperty.call(process.env, key)) {
+        return;
+      }
+
+      const rawValue = trimmed.slice(separatorIndex + 1).trim();
+      process.env[key] = rawValue.replace(/^['"]|['"]$/g, "");
+    });
   } catch {
     // Ignore missing local env files. Production should inject process env directly.
   }
+}
+
+for (const fileName of [".env.local", ".env"]) {
+  loadEnvFileCompat(resolve(process.cwd(), fileName));
 }
 
 const DEFAULT_PORT = 4000;

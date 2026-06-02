@@ -17,8 +17,13 @@ import {
 import { getRegionConfig } from "../../lib/region/config";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
 import {
+  storefrontAccentChipClass,
+  storefrontBadgeClass,
+  storefrontInfoCardClass,
+  storefrontNoticeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
 } from "../common/StorefrontPagePrimitives";
 import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
 
@@ -314,7 +319,7 @@ export default function UnlockChapterModal({
         <div className="relative border-b border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.01))] p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.06] text-[#ffd6e5] shadow-[0_16px_34px_rgba(8,6,20,0.22)]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-[rgba(255,255,255,0.035)] text-[#ffd6e5] shadow-[0_16px_34px_rgba(8,6,20,0.22)]">
                 {view === "packs" ? (
                   <Wallet size={20} />
                 ) : (
@@ -338,7 +343,7 @@ export default function UnlockChapterModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-full border border-white/12 bg-white/[0.05] text-white/78 shadow-[0_14px_30px_rgba(8,6,20,0.18)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.08]"
+              className={`${storefrontBadgeClass} min-h-[40px] min-w-[40px] justify-center px-0 py-0 text-white`}
               aria-label="Close unlock modal"
             >
               <X size={18} />
@@ -366,7 +371,7 @@ export default function UnlockChapterModal({
               </p>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+                <div className={`${storefrontInfoCardClass} px-4 text-white`}>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
                     Your balance
                   </p>
@@ -379,7 +384,7 @@ export default function UnlockChapterModal({
                       : "Sign in for balance."}
                   </p>
                 </div>
-                <div className="rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+                <div className={`${storefrontInfoCardClass} px-4 text-white`}>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
                     {installmentLabel} price
                   </p>
@@ -396,7 +401,7 @@ export default function UnlockChapterModal({
                 </div>
               </div>
 
-              <div className="mt-5 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-white/74 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+              <div className={`mt-5 ${storefrontNoticeClass}`}>
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-cyan-200/18 bg-cyan-300/10 text-cyan-100">
                     <ShieldCheck size={16} />
@@ -455,7 +460,7 @@ export default function UnlockChapterModal({
                 </button>
               </div>
 
-              <div className="mt-5 rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white/74 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+              <div className={`mt-5 ${storefrontNoticeClass}`}>
                 <div className="flex items-center justify-between gap-3">
                   <span>
                     {previewOnlyTopup
@@ -480,10 +485,10 @@ export default function UnlockChapterModal({
                   return (
                     <div
                       key={pkg.id}
-                      className={`rounded-[24px] border px-4 py-4 transition-all shadow-[0_18px_40px_rgba(8,6,20,0.22)] ${
+                      className={`px-4 text-white transition-all ${
                         isHighlighted
-                          ? "border-[rgba(255,79,154,0.24)] bg-[rgba(255,79,154,0.08)]"
-                          : "border-white/10 bg-white/[0.03]"
+                          ? `${storefrontInfoCardClass} border-[rgba(255,79,154,0.24)] bg-[rgba(255,79,154,0.08)]`
+                          : storefrontSoftCardClass
                       }`}
                     >
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -493,7 +498,7 @@ export default function UnlockChapterModal({
                               {pkg.name}
                             </span>
                             {pkg.tag ? (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-amber-200/18 bg-amber-300/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-100">
+                              <span className={`${storefrontAccentChipClass} min-h-0 gap-1 px-2.5 py-1 text-[10px] tracking-[0.18em] text-amber-100`}>
                                 <Sparkles size={10} />
                                 {pkg.tag}
                               </span>
@@ -532,7 +537,7 @@ export default function UnlockChapterModal({
                 })}
               </div>
 
-              <div className="mt-5 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-white/74 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+              <div className={`mt-5 ${storefrontNoticeClass}`}>
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-cyan-200/18 bg-cyan-300/10 text-cyan-100">
                     <ShieldCheck size={16} />
@@ -571,7 +576,7 @@ export default function UnlockChapterModal({
                     Store
                   </button>
                 ) : null}
-                <span className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.12em] text-white/62">
+                <span className={`${storefrontBadgeClass} px-5 py-2.5 text-sm tracking-[0.12em] text-white/62`}>
                   {isLoadingPackages ? "Refreshing..." : "Point options"}
                 </span>
               </div>

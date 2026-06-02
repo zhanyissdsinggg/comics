@@ -7,9 +7,13 @@ import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import {
   StorefrontInfoCard,
   StorefrontSectionHeading,
+  storefrontInfoCardClass,
+  storefrontInputClass,
+  storefrontNoticeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
+import { StorefrontPage } from "../storefront/StorefrontScaffold";
 import { apiPost } from "../../lib/apiClient";
 import {
   consumeCommerceSuccessForPath,
@@ -363,7 +367,7 @@ export default function SupportPage() {
   const fieldLabelClass =
     "text-[10px] font-semibold uppercase tracking-[0.24em] text-white/58";
   const fieldClass =
-    "mt-2 w-full rounded-[22px] border border-white/12 bg-[rgba(255,255,255,0.04)] px-4 py-3.5 text-sm font-medium text-white outline-none shadow-[0_14px_32px_rgba(8,6,20,0.18)] backdrop-blur-xl transition-all duration-150 placeholder:text-white/35 focus:border-cyan-300/40 focus:bg-[rgba(255,255,255,0.06)] focus:ring-4 focus:ring-cyan-400/10";
+    `${storefrontInputClass} bg-[rgba(255,255,255,0.035)] placeholder:text-white/35`;
   const primaryButtonClass = `${storefrontPrimaryButtonClass} disabled:cursor-not-allowed disabled:opacity-60`;
   const topicCardClass =
     "rounded-[24px] border bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 text-left shadow-[0_18px_36px_rgba(8,6,20,0.18)] backdrop-blur-xl transition-all duration-150 hover:-translate-y-0.5";
@@ -378,17 +382,19 @@ export default function SupportPage() {
       label: "Backup",
       value: "Email",
     },
+    {
+      label: "Topics",
+      value: `${SUPPORT_TOPICS.length}`,
+    },
   ];
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.12),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
-      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.12)] via-[rgba(167,139,250,0.06)] to-[rgba(103,232,249,0.1)]">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             eyebrow="Support"
-            title="Support"
-            description="Send one message and we'll reply by email."
+            title="Support that feels like part of the app."
+            description="Send one message, attach the right context, and get a reply by email without leaving your reading flow."
             stats={supportHeroStats}
             appearance="dark"
             accent="blue"
@@ -401,8 +407,8 @@ export default function SupportPage() {
           >
             <StorefrontSectionHeading
               eyebrow="Help"
-              title="Need another way?"
-              description="If the form is down, email support."
+              title="Need another lane?"
+              description="If the form is down, jump straight to email support."
             />
 
             <StorefrontInfoCard
@@ -414,6 +420,25 @@ export default function SupportPage() {
                 Expected reply time: {EXPECTED_REPLY_TIME}.
               </p>
             </StorefrontInfoCard>
+
+            <div className="grid gap-3">
+              <div className={`${storefrontInfoCardClass} p-4`}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/55">
+                  Best for
+                </div>
+                <div className="mt-2 text-sm leading-[1.68] text-white/72">
+                  Billing issues, login trouble, purchase questions, and reader problems that need a human.
+                </div>
+              </div>
+              <div className={`${storefrontInfoCardClass} p-4`}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/55">
+                  Tip
+                </div>
+                <div className="mt-2 text-sm leading-[1.68] text-white/72">
+                  Add the title, episode, route, or order ID once so support can move faster.
+                </div>
+              </div>
+            </div>
 
             <a
               href={`mailto:${siteConfig.supportEmail}`}
@@ -431,7 +456,7 @@ export default function SupportPage() {
           />
         ) : null}
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <SurfacePanel
             className="space-y-5"
             appearance="dark"
@@ -453,7 +478,7 @@ export default function SupportPage() {
                   }
                 />
 
-                <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]">
+                <div className={`${storefrontInfoCardClass} p-4`}>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/55">
                     Reply email
                   </p>
@@ -494,11 +519,11 @@ export default function SupportPage() {
                 <StorefrontSectionHeading
                   eyebrow="Support form"
                   title="Send a request"
-                  description={`We'll reply in ${EXPECTED_REPLY_TIME}.`}
+                  description={`Choose the issue type, add the context once, and we'll reply in ${EXPECTED_REPLY_TIME}.`}
                 />
 
                 {feedback.text ? (
-                  <div className="rounded-[22px] border border-[rgba(255,79,154,0.36)] bg-[rgba(255,79,154,0.12)] px-4 py-3 text-sm font-medium text-[#ff9cc0] shadow-[0_14px_30px_rgba(255,79,154,0.14)]">
+                  <div className={`${storefrontNoticeClass} border-[rgba(255,79,154,0.36)] bg-[rgba(255,79,154,0.12)] text-[#ff9cc0]`}>
                     {feedback.text}
                   </div>
                 ) : null}
@@ -585,12 +610,10 @@ export default function SupportPage() {
                                     <span className="block text-sm font-black uppercase tracking-[0.04em] text-white">
                                       {preset.title}
                                     </span>
-                                    <br />
                                     <span
                                       id={descriptionId}
                                       className="mt-3 block border-t border-white/10 pt-3 text-sm leading-6 text-inherit"
                                     >
-                                      {" "}
                                       {preset.description}
                                     </span>
                                   </label>
@@ -707,10 +730,10 @@ export default function SupportPage() {
                   >
                     <h2
                       id="support-email-backup-heading"
-                    className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/60"
-                  >
-                     Email backup
-                   </h2>
+                      className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/60"
+                    >
+                      Email backup
+                    </h2>
                     <p className="mt-2 text-sm leading-[1.68] text-white/70">
                       If the form is unavailable, use your email app instead.
                     </p>
@@ -734,7 +757,7 @@ export default function SupportPage() {
             <StorefrontSectionHeading
               eyebrow="What to include"
               title="Make it easy to fix"
-              description="Add the title, chapter, order ID, or screenshot details in your message."
+              description="The better the context, the faster support can route and answer it."
             />
 
             <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]">
@@ -744,9 +767,27 @@ export default function SupportPage() {
                 <li>Add an order ID for billing problems when you have one.</li>
               </ul>
             </div>
+
+            <div className="grid gap-3">
+              <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/55">
+                  Reader issues
+                </div>
+                <div className="mt-2 text-sm leading-[1.68] text-white/72">
+                  Share the story title, chapter, route, page, and device if the problem happens inside the reader.
+                </div>
+              </div>
+              <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/55">
+                  Billing issues
+                </div>
+                <div className="mt-2 text-sm leading-[1.68] text-white/72">
+                  Add the order ID and what you expected to receive so support does not need a second follow-up.
+                </div>
+              </div>
+            </div>
           </SurfacePanel>
-        </div>
-      </main>
-    </div>
+      </section>
+    </StorefrontPage>
   );
 }

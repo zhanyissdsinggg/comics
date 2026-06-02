@@ -2,8 +2,10 @@
 
 import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import {
+  storefrontBadgeClass,
+  storefrontSecondaryButtonClass,
+} from "./StorefrontPagePrimitives";
 
 export default function StorefrontPathwaysGrid({
   cards = [],
@@ -25,12 +27,9 @@ export default function StorefrontPathwaysGrid({
           )}
         >
           <div className="flex h-full flex-col p-5 sm:p-6">
-            <Badge
-              variant="outline"
-              className="w-fit rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/68"
-            >
+            <span className={`w-fit ${storefrontBadgeClass} text-white/68`}>
               {card.eyebrow}
-            </Badge>
+            </span>
             <h3 className="mt-5 font-display text-[1.22rem] font-semibold leading-tight tracking-[-0.04em] text-white">
               {card.title}
             </h3>
@@ -39,15 +38,14 @@ export default function StorefrontPathwaysGrid({
                 {card.description}
               </p>
             ) : null}
-            <Button
+            <button
               type="button"
-              variant="ghost"
               onClick={card.onClick}
-              className="mt-auto h-10 justify-start gap-2 px-0 pt-5 text-sm font-semibold tracking-[0.02em] text-white/78 hover:bg-transparent hover:text-[var(--gush-accent)]"
+              className={`mt-auto h-10 justify-start gap-2 px-0 pt-5 text-sm font-semibold tracking-[0.02em] text-white/78 hover:bg-transparent hover:text-[var(--gush-accent)] ${storefrontSecondaryButtonClass}`}
             >
               {card.cta || card.ctaLabel}
               <ArrowUpRight className="size-4" />
-            </Button>
+            </button>
           </div>
         </div>
       ))}

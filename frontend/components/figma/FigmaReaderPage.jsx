@@ -29,6 +29,7 @@ import ReaderSkeleton from "../reader/ReaderSkeleton";
 import ReaderErrorState from "../reader/ReaderErrorState";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import FigmaCommentsSection from "./FigmaCommentsSection";
+import { storefrontSoftCardClass } from "../common/StorefrontPagePrimitives";
 import {
   canAccessInContentMode,
   getContentModeQueryParam,
@@ -278,7 +279,7 @@ function Pill({ className = "", children }) {
 
 function Metric({ label, value, hint }) {
   return (
-    <div className="rounded-[22px] border border-white/10 bg-black/20 p-4">
+    <div className={`${storefrontSoftCardClass} p-4`}>
       <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
         {label}
       </p>
@@ -298,6 +299,27 @@ function ReaderMetaPill({ children, className = "" }) {
     >
       {children}
     </span>
+  );
+}
+
+function ReaderStatCard({ label, value, hint, className = "" }) {
+  return (
+    <div
+      className={cn(
+        "rounded-[22px] border px-4 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.22)] backdrop-blur-xl",
+        className,
+      )}
+    >
+      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/48">
+        {label}
+      </p>
+      <p className="mt-3 text-base font-black tracking-[-0.03em] text-white">
+        {value}
+      </p>
+      {hint ? (
+        <p className="mt-2 text-xs leading-5 text-white/60">{hint}</p>
+      ) : null}
+    </div>
   );
 }
 
@@ -809,7 +831,7 @@ function ReaderContent({
         : "rounded-[28px] border border-[#e5e7eb] bg-white";
   const readerMutedClass = isComic ? "text-white/58" : novelMutedClass;
   const readerPanelClass = isComic
-    ? "border-white/10 bg-white/[0.04]"
+    ? "border-white/10 bg-[rgba(255,255,255,0.035)]"
     : novelReaderFrameClass;
   const fallbackSeriesType =
     String(
@@ -827,8 +849,8 @@ function ReaderContent({
   const loadingRootClass = loadingIsComic ? palette.rootBg : novelShellClass;
   const loadingMutedClass = loadingIsComic ? "text-white/55" : novelMutedClass;
   const loadingBorderClass = loadingIsComic
-    ? "border-white/10 bg-white/[0.04]"
-    : `${novelBorderClass} bg-black/[0.03]`;
+    ? "border-white/10 bg-[rgba(255,255,255,0.035)]"
+    : `${novelBorderClass} bg-black/[0.02]`;
   const readerAnalyticsPayload = useMemo(
     () => ({
       seriesId,
@@ -846,6 +868,50 @@ function ReaderContent({
         allowReaderEntry: true,
       }),
     [activeAttribution, seriesData?.series],
+  );
+  const readerStatCards = useMemo(
+    () => [
+      {
+        label: "Progress",
+        value: `${progressPercent}%`,
+        hint: unlocked
+          ? "Live reading progress in this chapter."
+          : "Preview progress before unlock.",
+      },
+      {
+        label: "Access",
+        value: unlocked ? "Unlocked" : formatPriceLabel(currentPricePts),
+        hint: unlocked
+          ? "Full chapter is open right now."
+          : `${safeVisibleUnits} free ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} before the gate.`,
+      },
+      {
+        label: "Creator",
+        value: creatorName,
+        hint: seriesData?.series?.title || "Story credit",
+      },
+      {
+        label: "Up Next",
+        value: nextEpisode
+          ? formatInstallmentLabel(seriesType, nextEpisode?.number || currentNumber + 1)
+          : "Series page",
+        hint: nextEpisode
+          ? "Keep momentum without leaving the reader."
+          : "You are at the end of the available run.",
+      },
+    ],
+    [
+      creatorName,
+      currentNumber,
+      currentPricePts,
+      isComic,
+      nextEpisode,
+      progressPercent,
+      safeVisibleUnits,
+      seriesData?.series?.title,
+      seriesType,
+      unlocked,
+    ],
   );
 
   useEffect(() => {
@@ -1313,60 +1379,114 @@ function ReaderContent({
 
   if (modeBlock === "adult") {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-[#06080a] px-4 py-20 text-center text-white">
-        <Lock className="mb-6 h-16 w-16 text-red-500 opacity-80" />
-        <h1 className="mb-4 text-3xl font-black">Mature Chapter</h1>
-        <p className="mb-8 max-w-md text-gray-400">
-          This chapter is in the mature catalog. Turn on adult mode to start
-          reading.
-        </p>
-        <button
-          type="button"
-          onClick={handleEnterAdultReader}
-          className={cn(
-            "rounded-xl px-8 py-3.5 font-black text-white shadow-[0_0_20px_rgba(220,38,38,0.4)]",
-            palette.primaryBg,
-          )}
-        >
-          Turn On Adult Mode
-        </button>
-        <button
-          type="button"
-          onClick={handleAdultGateExit}
-          className="mt-6 font-bold text-gray-500 transition-colors hover:text-white"
-        >
-          View Series
-        </button>
+      <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(255,79,154,0.16),transparent_24%),radial-gradient(circle_at_78%_12%,rgba(103,232,249,0.08),transparent_22%),linear-gradient(180deg,#06080d_0%,#0a0d16_44%,#06080d_100%)] px-4 py-14 text-white">
+        <div className="mx-auto max-w-[920px]">
+          <section className="overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(145deg,rgba(20,16,28,0.98)_0%,rgba(10,11,18,0.96)_48%,rgba(16,10,20,0.98)_100%)] shadow-[0_28px_80px_rgba(0,0,0,0.34)]">
+            <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
+              <div>
+                <ReaderMetaPill className="border-[rgba(255,151,189,0.28)] bg-[rgba(255,79,154,0.14)] text-[#ffd6e5]">
+                  Mature reader gate
+                </ReaderMetaPill>
+                <h1 className="mt-5 font-display text-[2.6rem] font-semibold leading-[0.92] tracking-[-0.05em] text-white sm:text-[3.35rem]">
+                  Mature Chapter
+                </h1>
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-white/68">
+                  This chapter lives in the adult-only catalog. Turn on adult mode to keep the same reading flow and open the full reader.
+                </p>
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                  <button
+                    type="button"
+                    onClick={handleEnterAdultReader}
+                    className={cn(
+                      "inline-flex min-h-[52px] items-center justify-center rounded-full px-6 py-3 text-sm font-black text-white shadow-[0_18px_40px_rgba(255,79,154,0.22)] transition-transform active:scale-[0.98]",
+                      palette.primaryBg,
+                    )}
+                  >
+                    Turn On Adult Mode
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAdultGateExit}
+                    className="inline-flex min-h-[52px] items-center justify-center rounded-full border border-white/10 bg-[rgba(255,255,255,0.035)] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[rgba(255,255,255,0.075)]"
+                  >
+                    View Series
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                <ReaderStatCard
+                  label="Mode"
+                  value="18+ only"
+                  hint="Adult mode is required before the chapter can load."
+                  className="border-white/10 bg-[rgba(255,255,255,0.035)]"
+                />
+                <ReaderStatCard
+                  label="Return"
+                  value="Series page"
+                  hint="You can leave this gate and browse the title page instead."
+                  className="border-white/10 bg-[rgba(255,255,255,0.035)]"
+                />
+              </div>
+            </div>
+          </section>
+        </div>
       </main>
     );
   }
 
   if (modeBlock === "normal") {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-[#06080a] px-4 py-20 text-center text-white">
-        <Lock className="mb-6 h-16 w-16 text-red-500 opacity-80" />
-        <h1 className="mb-4 text-3xl font-black">Switch to Normal Mode</h1>
-        <p className="mb-8 max-w-md text-gray-400">
-          This chapter is in the normal catalog. Switch back to normal mode to
-          keep reading.
-        </p>
-        <button
-          type="button"
-          onClick={handleAdultToggle}
-          className={cn(
-            "rounded-xl px-8 py-3.5 font-black text-white shadow-[0_0_20px_rgba(220,38,38,0.4)]",
-            palette.primaryBg,
-          )}
-        >
-          Back to Normal Mode
-        </button>
-        <button
-          type="button"
-          onClick={() => router.push(backToSeriesHref)}
-          className="mt-6 font-bold text-gray-500 transition-colors hover:text-white"
-        >
-          View Series
-        </button>
+      <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(255,79,154,0.1),transparent_24%),radial-gradient(circle_at_82%_14%,rgba(103,232,249,0.12),transparent_22%),linear-gradient(180deg,#06080d_0%,#0a0d16_44%,#06080d_100%)] px-4 py-14 text-white">
+        <div className="mx-auto max-w-[920px]">
+          <section className="overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(145deg,rgba(14,17,28,0.98)_0%,rgba(10,11,18,0.96)_50%,rgba(11,15,24,0.98)_100%)] shadow-[0_28px_80px_rgba(0,0,0,0.34)]">
+            <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
+              <div>
+                <ReaderMetaPill className="border-white/10 bg-[rgba(255,255,255,0.035)] text-white/76">
+                  Reader mode gate
+                </ReaderMetaPill>
+                <h1 className="mt-5 font-display text-[2.6rem] font-semibold leading-[0.92] tracking-[-0.05em] text-white sm:text-[3.35rem]">
+                  Switch to Normal Mode
+                </h1>
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-white/68">
+                  This chapter belongs to the standard catalog. Switch back to normal mode to keep reading from the same place without changing routes.
+                </p>
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                  <button
+                    type="button"
+                    onClick={handleAdultToggle}
+                    className={cn(
+                      "inline-flex min-h-[52px] items-center justify-center rounded-full px-6 py-3 text-sm font-black text-white shadow-[0_18px_40px_rgba(103,232,249,0.18)] transition-transform active:scale-[0.98]",
+                      palette.primaryBg,
+                    )}
+                  >
+                    Back to Normal Mode
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push(backToSeriesHref)}
+                    className="inline-flex min-h-[52px] items-center justify-center rounded-full border border-white/10 bg-[rgba(255,255,255,0.035)] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[rgba(255,255,255,0.075)]"
+                  >
+                    View Series
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                <ReaderStatCard
+                  label="Mode"
+                  value="Normal only"
+                  hint="Adult mode is currently hiding this standard-catalog chapter."
+                  className="border-white/10 bg-[rgba(255,255,255,0.035)]"
+                />
+                <ReaderStatCard
+                  label="Return"
+                  value="Series page"
+                  hint="You can leave the reader gate and go back to the title page."
+                  className="border-white/10 bg-[rgba(255,255,255,0.035)]"
+                />
+              </div>
+            </div>
+          </section>
+        </div>
       </main>
     );
   }
@@ -1388,7 +1508,7 @@ function ReaderContent({
           "rounded-2xl border px-6 py-3 font-bold transition-colors",
           loadingIsComic
             ? "border-white/10 text-gray-300 hover:bg-white/5 hover:text-white"
-            : `${novelBorderClass} text-current hover:bg-black/[0.05]`,
+            : `${novelBorderClass} text-current hover:bg-black/[0.035]`,
         )}
         onRetry={() => router.refresh()}
         onBack={() => router.push(backToSeriesHref)}
@@ -1466,86 +1586,124 @@ function ReaderContent({
         <div
           className={cn(
             "mx-auto w-full",
-            isComic ? "max-w-[960px]" : "max-w-[760px]",
+            isComic ? "max-w-[1080px]" : "max-w-[940px]",
           )}
         >
           <div
             className={cn(
-              "relative overflow-hidden border",
+              "relative overflow-hidden border shadow-[0_26px_80px_rgba(0,0,0,0.28)]",
               isComic
-                ? "rounded-[26px] border-white/8 bg-[linear-gradient(180deg,rgba(10,10,10,0.96)_0%,rgba(6,6,6,0.92)_100%)] px-5 py-5 md:px-6 md:py-6"
-                : "rounded-[26px] border-[#e5dccd] bg-[linear-gradient(180deg,rgba(255,251,244,0.98)_0%,rgba(250,244,235,0.98)_100%)] px-5 py-5 shadow-[0_24px_60px_rgba(82,56,28,0.08)] md:px-6 md:py-6",
+                ? "rounded-[30px] border-white/10 bg-[linear-gradient(145deg,rgba(17,20,30,0.98)_0%,rgba(8,10,16,0.98)_48%,rgba(18,13,24,0.98)_100%)] px-5 py-5 md:px-6 md:py-6"
+                : "rounded-[30px] border-[#e5dccd] bg-[linear-gradient(180deg,rgba(255,251,244,0.98)_0%,rgba(250,244,235,0.98)_100%)] px-5 py-5 shadow-[0_24px_60px_rgba(82,56,28,0.08)] md:px-6 md:py-6",
             )}
           >
+            {isComic ? (
+              <>
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.16),transparent_26%),radial-gradient(circle_at_84%_18%,rgba(103,232,249,0.14),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent_28%,rgba(0,0,0,0.22)_100%)]" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.18))]" />
+              </>
+            ) : null}
             <div className="relative">
-              <div className="flex flex-wrap items-center gap-2">
-                <ReaderMetaPill
-                  className={cn(
-                    isComic
-                      ? cn("border-white/10", palette.primarySoft)
-                      : `${novelBorderClass} bg-transparent ${readerMutedClass}`,
-                  )}
-                >
-                  {isComic ? "Reader" : "Chapter"}
-                </ReaderMetaPill>
-                <ReaderMetaPill
-                  className={cn(
-                    isComic
-                      ? "border-white/10"
-                      : `${novelBorderClass} bg-transparent`,
-                    readerMutedClass,
-                  )}
-                >
-                  {isComic ? "Comic" : currentInstallmentLabel}
-                </ReaderMetaPill>
-                <Pill
-                  className={
-                    isComic
-                      ? "border-white/10 bg-black/20 text-gray-300"
-                      : `${novelBorderClass} bg-transparent ${readerMutedClass}`
-                  }
-                >
-                  {unlocked ? "Unlocked" : formatPriceLabel(currentPricePts)}
-                </Pill>
+              <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <ReaderMetaPill
+                      className={cn(
+                        isComic
+                          ? cn("border-white/10", palette.primarySoft)
+                          : `${novelBorderClass} bg-transparent ${readerMutedClass}`,
+                      )}
+                    >
+                      {isComic ? "Reader" : "Chapter"}
+                    </ReaderMetaPill>
+                    <ReaderMetaPill
+                      className={cn(
+                        isComic
+                          ? "border-white/10 bg-[rgba(255,255,255,0.035)] text-white/72"
+                          : `${novelBorderClass} bg-transparent`,
+                        readerMutedClass,
+                      )}
+                    >
+                      {isComic ? "Comic" : currentInstallmentLabel}
+                    </ReaderMetaPill>
+                    <Pill
+                      className={
+                        isComic
+                          ? "border-white/10 bg-[rgba(255,255,255,0.035)] text-gray-300"
+                          : `${novelBorderClass} bg-transparent ${readerMutedClass}`
+                      }
+                    >
+                      {unlocked ? "Unlocked" : formatPriceLabel(currentPricePts)}
+                    </Pill>
+                  </div>
+
+                  <h2
+                    className={cn(
+                      "mt-4 font-display font-semibold leading-[0.95] tracking-[-0.05em]",
+                      isComic
+                        ? "text-[clamp(1.8rem,3vw,3.15rem)] text-white"
+                        : "text-[clamp(1.85rem,3vw,2.7rem)] text-current",
+                    )}
+                  >
+                    {currentEpisodeTitle}
+                  </h2>
+                  <p
+                    className={cn(
+                      "mt-3 max-w-3xl font-semibold",
+                      isComic
+                        ? "text-base text-gray-100 md:text-lg"
+                        : "text-base text-current/80 md:text-lg",
+                    )}
+                  >
+                    {seriesData.series.title}
+                  </p>
+                  <p
+                    className={cn(
+                      "mt-3 max-w-3xl text-sm",
+                      isComic ? "leading-6" : "leading-7",
+                      readerMutedClass,
+                    )}
+                  >
+                    {creatorName}{" / "}
+                    {formatMetaDate(
+                      currentEpisode?.releasedAt ||
+                        episodeData?.releasedAt ||
+                        seriesData.series.updatedAt,
+                    )}{" / "}
+                    {unlocked
+                      ? `Full ${installmentLabel.toLowerCase()} unlocked.`
+                      : `${safeVisibleUnits} free ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} open now.`}
+                  </p>
+                </div>
+
+                {isComic ? (
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                    {readerStatCards.slice(0, 2).map((card) => (
+                      <ReaderStatCard
+                        key={card.label}
+                        label={card.label}
+                        value={card.value}
+                        hint={card.hint}
+                        className="border-white/10 bg-[rgba(255,255,255,0.035)]"
+                      />
+                    ))}
+                  </div>
+                ) : null}
               </div>
 
-              <h2
-                className={cn(
-                  "mt-4 font-black leading-[1.08] tracking-[-0.04em]",
-                  isComic
-                    ? "text-[clamp(1.5rem,2.4vw,2.4rem)] text-white"
-                    : "text-[clamp(1.85rem,3vw,2.7rem)] text-current",
-                )}
-              >
-                {currentEpisodeTitle}
-              </h2>
-              <p
-                className={cn(
-                  "mt-2 max-w-3xl font-semibold",
-                  isComic
-                    ? "text-sm text-gray-200 md:text-base"
-                    : "text-base text-current/80 md:text-lg",
-                )}
-              >
-                {seriesData.series.title}
-              </p>
-              <p
-                className={cn(
-                  "mt-3 max-w-3xl text-sm",
-                  isComic ? "leading-5" : "leading-7",
-                  readerMutedClass,
-                )}
-              >
-                {creatorName}{" / "}
-                {formatMetaDate(
-                  currentEpisode?.releasedAt ||
-                    episodeData?.releasedAt ||
-                    seriesData.series.updatedAt,
-                )}{" / "}
-                {unlocked
-                  ? `Full ${installmentLabel.toLowerCase()} unlocked.`
-                  : `${safeVisibleUnits} free ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} open now.`}
-              </p>
+              {isComic ? (
+                <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  {readerStatCards.map((card) => (
+                    <ReaderStatCard
+                      key={`footer-${card.label}`}
+                      label={card.label}
+                      value={card.value}
+                      hint={card.hint}
+                      className="border-white/10 bg-[rgba(255,255,255,0.035)]"
+                    />
+                  ))}
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -1617,8 +1775,9 @@ function ReaderContent({
                 palette.border,
               )}
             >
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.14),transparent_28%),radial-gradient(circle_at_82%_14%,rgba(103,232,249,0.08),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent_26%,rgba(0,0,0,0.16)_100%)]" />
               <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_320px]">
-                <div>
+                <div className="relative">
                   <div className="flex flex-wrap items-center gap-2">
                     <Pill className="border-amber-500/25 bg-amber-500/10 text-amber-200">
                       Free preview ends here
@@ -1627,11 +1786,11 @@ function ReaderContent({
                       {formatPriceLabel(currentPricePts)}
                     </Pill>
                   </div>
-                  <h2 className="mt-4 text-3xl font-black tracking-tight text-white md:text-4xl">
+                  <h2 className="mt-4 font-display text-3xl font-semibold tracking-[-0.05em] text-white md:text-4xl">
                     Unlock the rest of this {installmentLabel.toLowerCase()}.
                   </h2>
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">
-                    Unlock the rest to keep reading.
+                  <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-300">
+                    Keep the flow going without leaving the reader. Unlock now and stay inside the same chapter experience.
                   </p>
 
                   <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -1716,7 +1875,7 @@ function ReaderContent({
                   </div>
                 </div>
 
-                <div className="rounded-[28px] border border-white/10 bg-black/20 p-5">
+                <div className="relative rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.035))] p-5 backdrop-blur-xl">
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
                     Unlock Includes
                   </p>
@@ -1754,12 +1913,12 @@ function ReaderContent({
         borderClassName={
           isComic
             ? "border-white/10 bg-white/5 text-white hover:bg-white/10"
-            : `${novelBorderClass} bg-black/[0.03] text-current hover:bg-black/[0.05]`
+            : `${novelBorderClass} bg-black/[0.02] text-current hover:bg-black/[0.035]`
         }
         primaryButtonClassName={cn(
           "inline-flex min-h-[56px] items-center justify-center rounded-2xl px-5 py-3 text-sm font-black text-white transition-transform active:scale-[0.98]",
           unlocked && !nextEpisode && !isComic
-            ? `${novelBorderClass} bg-black/[0.04] text-current`
+            ? `${novelBorderClass} bg-black/[0.035] text-current`
             : unlocked && !nextEpisode
               ? "border border-white/10 bg-white/5"
               : palette.primaryBg,
@@ -1768,7 +1927,7 @@ function ReaderContent({
           "inline-flex min-h-[52px] items-center justify-center rounded-2xl border px-5 py-3 text-sm font-bold transition-colors",
           isComic
             ? "border-white/10 bg-white/5 text-white hover:bg-white/10"
-            : `${novelBorderClass} bg-black/[0.03] text-current hover:bg-black/[0.05]`,
+            : `${novelBorderClass} bg-black/[0.02] text-current hover:bg-black/[0.035]`,
         )}
         heading={
           unlocked
@@ -1843,7 +2002,7 @@ function ReaderContent({
             isComic ? "max-w-5xl" : "max-w-[760px]",
           )}
         >
-          <div className="mb-5">
+          <div className="mb-5 rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.035)] px-5 py-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)] backdrop-blur-xl">
             <p
               className={cn(
                 "text-[10px] font-black uppercase tracking-[0.22em]",
@@ -1854,12 +2013,20 @@ function ReaderContent({
             </p>
             <h3
               className={cn(
-                "mt-2 text-2xl font-black",
+                "mt-2 font-display text-2xl font-semibold tracking-[-0.04em]",
                 isComic ? "text-white" : "text-current",
               )}
             >
               Talk about this chapter
             </h3>
+            <p
+              className={cn(
+                "mt-2 text-sm leading-6",
+                isComic ? "text-white/62" : "text-current/62",
+              )}
+            >
+              Reactions, theories, and chapter takes stay threaded right below the read.
+            </p>
           </div>
           <FigmaCommentsSection seriesTitle={seriesData.series.title} />
         </div>
@@ -1878,18 +2045,18 @@ function ReaderContent({
           "inline-flex min-h-[42px] min-w-[108px] items-center justify-center rounded-full border px-4 text-sm font-bold transition-colors",
           isComic
             ? "border-white/10 bg-white/5 text-white hover:bg-white/10"
-            : `${novelBorderClass} bg-black/[0.03] text-current hover:bg-black/[0.05]`,
+            : `${novelBorderClass} bg-black/[0.02] text-current hover:bg-black/[0.035]`,
         )}
         centerButtonClassName={cn(
           "inline-flex min-h-[42px] items-center gap-2 rounded-full border px-4 text-sm font-bold transition-colors",
           isComic
             ? "border-white/10 bg-white/10 text-white hover:bg-white/15"
-            : `${novelBorderClass} bg-black/[0.03] text-current hover:bg-black/[0.05]`,
+            : `${novelBorderClass} bg-black/[0.02] text-current hover:bg-black/[0.035]`,
         )}
         iconButtonClassName={cn(
           isComic
             ? "border-white/10 bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white"
-            : `${novelBorderClass} bg-black/[0.03] text-current hover:bg-black/[0.05]`,
+            : `${novelBorderClass} bg-black/[0.02] text-current hover:bg-black/[0.035]`,
         )}
         activeButtonClassName={
           isComic
@@ -1901,7 +2068,7 @@ function ReaderContent({
           nextEpisode ? palette.primaryBg : "border border-white/10 bg-white/5",
           !nextEpisode &&
             !isComic &&
-            `${novelBorderClass} bg-black/[0.04] text-current`,
+            `${novelBorderClass} bg-black/[0.035] text-current`,
         )}
         progressPercent={progressPercent}
         hasPrev={Boolean(prevEpisode)}

@@ -3,11 +3,24 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bell, CheckCheck, Gift, LoaderCircle, Sparkles } from "lucide-react";
+import EditorialHero from "../common/EditorialHero";
+import SurfacePanel from "../common/SurfacePanel";
+import {
+  storefrontBadgeClass,
+  storefrontInfoCardClass,
+  storefrontNoticeClass,
+  storefrontSoftCardClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+  StorefrontInfoCard,
+  StorefrontSectionHeading,
+} from "../common/StorefrontPagePrimitives";
+import { StorefrontPage } from "../storefront/StorefrontScaffold";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import FigmaChrome from "./FigmaChrome";
-import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
+import { FigmaSiteProvider } from "./FigmaSiteContext";
 import { buildNotificationCards, cn } from "./figma-utils";
 
 function resolveNotificationHref(item) {
@@ -54,7 +67,6 @@ function resolveNotificationHref(item) {
 }
 
 function NotificationCard({ card, workingId, onOpen }) {
-  const { palette } = useFigmaSite();
   const icon =
     card.kind === "PROMO" || card.kind === "SUB_VOUCHER"
       ? Gift
@@ -69,46 +81,46 @@ function NotificationCard({ card, workingId, onOpen }) {
       type="button"
       onClick={() => onOpen(card)}
       className={cn(
-        "group flex w-full items-start gap-3 rounded-[24px] border p-4 text-left shadow-xl transition-all hover:-translate-y-0.5 hover:bg-white/[0.03] active:scale-[0.99] md:gap-4 md:rounded-[26px] md:p-5",
+        "group flex w-full items-start gap-4 rounded-[28px] border p-4 text-left shadow-[0_22px_48px_rgba(8,6,20,0.28)] transition-all duration-150 hover:-translate-y-1 hover:border-white/18 hover:bg-[rgba(255,255,255,0.075)] active:scale-[0.99] md:p-5",
         card.read
-          ? cn(palette.surface, palette.border)
-          : "border-indigo-500/25 bg-indigo-500/8",
+          ? "border-white/10 bg-[rgba(255,255,255,0.035)] backdrop-blur-xl"
+          : "border-cyan-300/18 bg-[linear-gradient(135deg,rgba(255,79,154,0.12)_0%,rgba(86,215,255,0.12)_100%)] backdrop-blur-xl",
       )}
     >
       <div
         className={cn(
-          "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl md:h-12 md:w-12 md:rounded-2xl",
+          "flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border shadow-[0_16px_30px_rgba(8,6,20,0.22)]",
           card.kind === "PROMO" || card.kind === "SUB_VOUCHER"
-            ? "bg-yellow-500/12 text-yellow-400"
+            ? "border-amber-300/20 bg-amber-400/10 text-amber-200"
             : card.kind === "TTF_READY"
-              ? "bg-emerald-500/12 text-emerald-400"
-              : "bg-indigo-500/12 text-indigo-400",
+              ? "border-emerald-300/20 bg-emerald-400/10 text-emerald-200"
+              : "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
         )}
       >
-        <Icon className="h-5 w-5 md:h-6 md:w-6" />
+        <Icon className="h-5 w-5" />
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="font-display text-[1.1rem] font-semibold leading-tight tracking-[-0.04em] text-white md:text-[1.25rem]">
+          <h3 className="font-display text-[1.15rem] font-semibold leading-tight tracking-[-0.04em] text-white">
             {card.title}
           </h3>
           {!card.read ? (
-            <span className="rounded-full border border-[rgba(255,143,195,0.28)] bg-[linear-gradient(135deg,rgba(255,79,154,0.24)_0%,rgba(125,244,255,0.16)_100%)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_22px_rgba(255,79,154,0.16)]">
+            <span className="inline-flex items-center rounded-full border border-[rgba(255,143,195,0.28)] bg-[linear-gradient(135deg,rgba(255,79,154,0.22)_0%,rgba(124,58,237,0.18)_100%)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_12px_24px_rgba(255,79,154,0.18)]">
               New
             </span>
           ) : null}
         </div>
-        <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-gray-300">
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/44">
+          <span className={storefrontBadgeClass}>
             {card.kind.replaceAll("_", " ")}
           </span>
           <span>{card.dateLabel || "Recent"}</span>
         </div>
-        <p className="mt-1.5 text-sm leading-6 text-gray-400">{card.body}</p>
+        <p className="mt-2 text-sm leading-6 text-white/66">{card.body}</p>
       </div>
 
-      <div className="max-w-[76px] shrink-0 text-right text-[11px] font-semibold uppercase leading-4 tracking-[0.14em] text-gray-500 md:text-xs md:tracking-[0.16em]">
+      <div className="shrink-0 text-right text-[11px] font-semibold uppercase tracking-[0.18em] text-white/46">
         {isBusy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : card.cta}
       </div>
     </button>
@@ -117,7 +129,6 @@ function NotificationCard({ card, workingId, onOpen }) {
 
 function NotificationsContent() {
   const router = useRouter();
-  const { palette } = useFigmaSite();
   const { isAdultMode } = useAdultGateStore();
   const { notifications, unreadCount, loadNotifications, markRead } =
     useNotificationsStore();
@@ -129,6 +140,15 @@ function NotificationsContent() {
     () => buildNotificationCards(notifications),
     [notifications],
   );
+
+  const accent = isAdultMode ? "rose" : "blue";
+  const totalCount = notifications.length;
+  const releaseCount = notifications.filter(
+    (item) => item?.type === "EPISODE" || item?.type === "TTF_READY",
+  ).length;
+  const promoCount = notifications.filter(
+    (item) => item?.type === "PROMO" || item?.type === "SUB_VOUCHER",
+  ).length;
 
   const refreshInbox = useCallback(async () => {
     setLoading(true);
@@ -175,234 +195,182 @@ function NotificationsContent() {
   };
 
   return (
-    <div className={cn("min-h-screen pb-20", palette.rootBg)}>
+    <StorefrontPage accentClass="from-[rgba(82,188,255,0.12)] via-[rgba(167,139,250,0.08)] to-[rgba(255,87,166,0.1)]">
       <FigmaChrome>
-        <div className="mx-auto max-w-5xl px-4 md:px-8">
-          <section
-            className={cn(
-              "mb-6 overflow-hidden rounded-[28px] border p-5 shadow-2xl md:rounded-[32px] md:p-8",
-              palette.surface,
-              palette.border,
-            )}
-          >
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500">
-                  Inbox
-                </p>
-                <h1 className="mt-2 font-display text-[2.15rem] font-semibold leading-[0.92] tracking-[-0.06em] text-white md:text-[2.8rem]">
-                  Everything worth opening lives here.
-                </h1>
-                <p className="mt-3 max-w-xl text-sm leading-6 text-gray-400 md:mt-4 md:max-w-2xl md:leading-7">
-                  Episode drops, promo pushes, and time-to-free unlocks are all
-                  wired to the same notification feed.
-                </p>
-              </div>
+        <div className="flex flex-col gap-8">
+          <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+            <EditorialHero
+              accent={accent}
+              appearance="dark"
+              eyebrow="Inbox"
+              title="Everything worth opening lands here first."
+              description="Episode drops, time-to-free unlocks, and store prompts all stay in one reading lane so the jump back into the catalog remains fast."
+              secondary={isAdultMode ? "18+ mode active" : "Core mode active"}
+              stats={[
+                {
+                  label: "Unread",
+                  value: String(unreadCount),
+                  hint: unreadCount > 0 ? "Waiting for a tap." : "All clear.",
+                },
+                {
+                  label: "Total feed",
+                  value: String(totalCount),
+                  hint: "Current inbox volume.",
+                },
+                {
+                  label: "Reading alerts",
+                  value: String(releaseCount),
+                  hint: "Episode and unlock notices.",
+                },
+              ]}
+              actions={
+                <>
+                  <button
+                    type="button"
+                    onClick={() => void refreshInbox()}
+                    className={storefrontSecondaryButtonClass}
+                  >
+                    Refresh
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleMarkAll()}
+                    disabled={workingId === "__all__" || unreadCount === 0}
+                    className={`${storefrontPrimaryButtonClass} disabled:cursor-not-allowed disabled:opacity-60`}
+                  >
+                    {workingId === "__all__" ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCheck className="h-4 w-4" />
+                    )}
+                    Mark all read
+                  </button>
+                </>
+              }
+            />
 
-              <div className="flex flex-wrap gap-2.5 md:gap-3">
-                <button
-                  type="button"
-                  onClick={() => void refreshInbox()}
-                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-white/10 md:rounded-2xl md:px-5 md:py-3"
-                >
-                  Refresh
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void handleMarkAll()}
-                  disabled={workingId === "__all__" || unreadCount === 0}
-                  className={cn(
-                    "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-white transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 md:rounded-2xl md:px-5 md:py-3 md:text-sm",
-                    palette.primaryBg,
-                  )}
-                >
-                  {workingId === "__all__" ? (
-                    <LoaderCircle className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <CheckCheck className="h-4 w-4" />
-                  )}
-                  Mark all read
-                </button>
-              </div>
-            </div>
-          </section>
-
-          <div className="mb-8 grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
-            <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_34px_rgba(8,6,20,0.22)] md:p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                Unread
-              </p>
-              <div className="mt-2 font-display text-2xl font-semibold tracking-[-0.04em] text-white md:mt-3 md:text-3xl">
-                {unreadCount}
-              </div>
-            </div>
-            <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_34px_rgba(8,6,20,0.22)] md:p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                Total
-              </p>
-              <div className="mt-2 font-display text-2xl font-semibold tracking-[-0.04em] text-white md:mt-3 md:text-3xl">
-                {notifications.length}
-              </div>
-            </div>
-            <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_34px_rgba(8,6,20,0.22)] md:p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                State
-              </p>
-              <div className="mt-2 text-base font-semibold tracking-[-0.02em] text-white md:mt-3 md:text-lg">
-                {isAdultMode ? "Mature mode on" : "Core mode"}
-              </div>
-            </div>
-          </div>
-
-          <section className="mb-8 grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-            <div
-              className={cn(
-                "rounded-[28px] border p-4 shadow-xl md:p-5",
-                palette.surface,
-                palette.border,
-              )}
+            <SurfacePanel
+              tone="muted"
+              accent={accent}
+              appearance="dark"
+              className="space-y-4"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-gray-500 md:text-xs">
-                    Feed Status
-                  </p>
-                  <h2 className="mt-2 font-display text-[1.45rem] font-semibold tracking-[-0.04em] text-white md:text-[1.6rem]">
-                    Notifications are grouped into one reading lane.
-                  </h2>
-                </div>
-                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-300">
-                  Live
-                </div>
-              </div>
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                    Episode drops
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-white">
-                    Chapter and route alerts
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                    Store prompts
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-white">
-                    Promo and voucher notices
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                    Return path
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-white">
-                    One tap back into reading
-                  </p>
-                </div>
-              </div>
-            </div>
+              <StorefrontSectionHeading
+                eyebrow="Queue Health"
+                title="One feed for reading, promo, and entitlement updates"
+                description="The notification system still uses the current data source and routing. Only the storefront shell changed."
+              />
 
-            <div
-              className={cn(
-                "rounded-[28px] border p-4 shadow-xl md:p-5",
-                palette.surface,
-                palette.border,
-              )}
-            >
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-gray-500 md:text-xs">
-                Queue Health
-              </p>
-              <div className="mt-3 font-display text-3xl font-semibold tracking-[-0.04em] text-white">
-                {notifications.length}
-              </div>
-              <p className="mt-2 text-sm leading-6 text-gray-400">
-                Alerts are balanced between release drops, promotional nudges,
-                and entitlement updates.
-              </p>
-              <div className="mt-4 space-y-3">
-                <div className="rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                    Priority
+              <div className="grid gap-3">
+                <div className={storefrontInfoCardClass}>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+                    Current lane
                   </p>
-                  <p className="mt-2 text-sm font-semibold text-white">
-                    {unreadCount > 0
-                      ? "Unread items waiting"
-                      : "Inbox under control"}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                    Current tab
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-white">
+                  <p className="mt-2 font-display text-[1.45rem] font-semibold tracking-[-0.04em] text-white">
                     {isAdultMode ? "Mature feed context" : "Core feed context"}
                   </p>
+                  <p className="mt-2 text-sm leading-6 text-white/64">
+                    The inbox refreshes against the active mode, so content
+                    visibility stays consistent with the existing gate logic.
+                  </p>
+                </div>
+
+                <div className={storefrontInfoCardClass}>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+                    Promo signals
+                  </p>
+                  <p className="mt-2 font-display text-[1.45rem] font-semibold tracking-[-0.04em] text-white">
+                    {promoCount}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-white/64">
+                    Store nudges and voucher messages keep their original jump
+                    paths into the live store route.
+                  </p>
                 </div>
               </div>
-            </div>
+
+              {error ? <p className={storefrontNoticeClass}>{error}</p> : null}
+            </SurfacePanel>
           </section>
 
-          {loading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div
-                  key={`notification-skeleton-${index}`}
-                  className={cn(
-                    "h-28 animate-pulse rounded-[24px] border shadow-xl md:h-32 md:rounded-[26px]",
-                    palette.surface,
-                    palette.border,
-                  )}
-                />
-              ))}
-            </div>
-          ) : error ? (
-            <div
-              className={cn(
-                "rounded-[24px] border p-5 text-white shadow-xl md:rounded-[26px] md:p-6",
-                palette.surface,
-                palette.border,
-              )}
+          <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <SurfacePanel
+              tone="muted"
+              accent={accent}
+              appearance="dark"
+              className="space-y-5"
             >
-              <p className="text-lg font-black">{error}</p>
-              <p className="mt-2 text-sm text-gray-400">
-                Reload the inbox and try again.
-              </p>
-            </div>
-          ) : cards.length > 0 ? (
-            <div className="space-y-4">
-              {cards.map((card) => (
-                <NotificationCard
-                  key={card.id}
-                  card={card}
-                  workingId={workingId}
-                  onOpen={handleOpen}
-                />
-              ))}
-            </div>
-          ) : (
-            <div
-              className={cn(
-                "rounded-[24px] border p-8 text-center shadow-xl md:rounded-[26px] md:p-10",
-                palette.surface,
-                palette.border,
+              <StorefrontSectionHeading
+                eyebrow="Live Feed"
+                title="Notifications are grouped into a single reading lane"
+                description="Unread states, mark-all behavior, and destination routing still use the existing store and reader logic."
+              />
+
+              {loading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div
+                      key={`notification-skeleton-${index}`}
+                      className="h-28 animate-pulse rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.035)] shadow-[0_18px_36px_rgba(8,6,20,0.22)]"
+                    />
+                  ))}
+                </div>
+              ) : cards.length > 0 ? (
+                <div className="space-y-4">
+                  {cards.map((card) => (
+                    <NotificationCard
+                      key={card.id}
+                      card={card}
+                      workingId={workingId}
+                      onOpen={handleOpen}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.035)] px-6 py-10 text-center shadow-[0_18px_36px_rgba(8,6,20,0.22)]">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-[rgba(255,255,255,0.035)] shadow-[0_14px_28px_rgba(8,6,20,0.18)]">
+                    <Bell className="h-8 w-8 text-white/46" />
+                  </div>
+                  <h2 className="mt-5 font-display text-[2rem] font-semibold tracking-[-0.04em] text-white">
+                    Inbox cleared
+                  </h2>
+                  <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-white/62">
+                    No new alerts right now. When another release, unlock, or
+                    promo hits the backend, it will surface here.
+                  </p>
+                </div>
               )}
-            >
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
-                <Bell className="h-8 w-8 text-gray-500" />
-              </div>
-              <h2 className="mt-5 text-2xl font-black text-white">
-                Inbox cleared
-              </h2>
-              <p className="mt-3 text-sm leading-6 text-gray-400">
-                No new alerts right now. When the backend drops another update,
-                it will show here.
-              </p>
+            </SurfacePanel>
+
+            <div className="grid gap-4">
+              <StorefrontInfoCard
+                eyebrow="Signal Types"
+                title="What flows through this inbox"
+                description="This page stays wired to the same notification payloads. The visual system is now aligned with the rest of the storefront."
+              >
+                <div className="mt-4 grid gap-3">
+                  <div className={`${storefrontSoftCardClass} px-4 py-3 text-sm text-white/68`}>
+                    Episode drops and branch continuations
+                  </div>
+                  <div className={`${storefrontSoftCardClass} px-4 py-3 text-sm text-white/68`}>
+                    Promo pushes and subscription vouchers
+                  </div>
+                  <div className={`${storefrontSoftCardClass} px-4 py-3 text-sm text-white/68`}>
+                    Time-to-free unlock reminders
+                  </div>
+                </div>
+              </StorefrontInfoCard>
+
+              <StorefrontInfoCard
+                eyebrow="Return Path"
+                title="Every notification keeps the fast jump intact"
+                description="Reader alerts return to chapters, series notices reopen detail pages, and promo alerts still point at the existing store route."
+              />
             </div>
-          )}
+          </section>
         </div>
       </FigmaChrome>
-    </div>
+    </StorefrontPage>
   );
 }
 

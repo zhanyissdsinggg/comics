@@ -17,6 +17,7 @@ import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { trackEvent } from "../../lib/trackEvent";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
+import { StorefrontPage } from "../../components/storefront/StorefrontScaffold";
 
 export default function NotificationsPage() {
   const router = useRouter();
@@ -208,8 +209,8 @@ export default function NotificationsPage() {
       : "Inbox";
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#0f0d13_0%,#130f18_44%,#17131d_100%)] text-white">
-      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
+    <StorefrontPage accentClass="from-[rgba(103,232,249,0.12)] via-[rgba(167,139,250,0.08)] to-[rgba(255,79,154,0.1)]">
+      <div className="flex flex-col gap-8">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="dark"
@@ -288,7 +289,7 @@ export default function NotificationsPage() {
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={index}
-                  className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 shadow-[0_18px_44px_rgba(8,6,20,0.22)]"
+                  className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.035)] p-4 shadow-[0_18px_44px_rgba(8,6,20,0.22)]"
                   aria-hidden="true"
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -351,7 +352,7 @@ export default function NotificationsPage() {
             />
           </SurfacePanel>
         )}
-      </main>
-    </div>
+      </div>
+    </StorefrontPage>
   );
 }

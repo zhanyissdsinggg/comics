@@ -6,9 +6,12 @@ import SurfacePanel from "../common/SurfacePanel";
 import {
   StorefrontInfoCard,
   StorefrontSectionHeading,
+  storefrontNoticeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
 } from "../common/StorefrontPagePrimitives";
+import { StorefrontPage } from "../storefront/StorefrontScaffold";
 import AgeGateModal from "../layout/AgeGateModal";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -186,8 +189,7 @@ export default function MatureContentSettingsPage() {
   );
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#120f1c_0%,#0d0b14_100%)] text-white">
-      <main className="mx-auto flex max-w-[1180px] flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.16)] via-[rgba(167,139,250,0.08)] to-[rgba(244,201,93,0.08)]">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_340px]">
           <SurfacePanel appearance="dark" tone="highlight" accent="rose">
             <StorefrontSectionHeading
@@ -244,7 +246,7 @@ export default function MatureContentSettingsPage() {
         </section>
 
         {feedback ? (
-          <div className="rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white/74 shadow-[0_12px_26px_rgba(8,6,20,0.2)]">
+          <div className={storefrontNoticeClass}>
             {feedback}
           </div>
         ) : null}
@@ -257,7 +259,7 @@ export default function MatureContentSettingsPage() {
               description="Signed-out visitors and readers without age verification cannot open mature titles. Even verified readers still need Mature Mode turned on."
             />
 
-            <div className="mt-5 rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
+            <div className={`mt-5 ${storefrontSoftCardClass} p-4`}>
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/52">
                 Current status
               </p>
@@ -277,7 +279,7 @@ export default function MatureContentSettingsPage() {
               description="This keeps mature reading history separate from the standard library view on the current device."
             />
 
-            <label className="mt-5 flex items-start gap-3 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-white/78 shadow-[0_12px_26px_rgba(8,6,20,0.18)]">
+            <label className={`mt-5 flex items-start gap-3 ${storefrontSoftCardClass} px-4 py-4 text-sm text-white/78`}>
               <input
                 type="checkbox"
                 checked={hideAdultHistory}
@@ -318,7 +320,6 @@ export default function MatureContentSettingsPage() {
           ageRuleKey={ageRuleKey}
           legalAge={legalAge}
         />
-      </main>
-    </div>
+    </StorefrontPage>
   );
 }

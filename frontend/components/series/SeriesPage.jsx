@@ -11,9 +11,11 @@ import Skeleton from "../common/Skeleton";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import SurfacePanel from "../common/SurfacePanel";
 import {
+  storefrontInfoCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
+import { StorefrontPage } from "../storefront/StorefrontScaffold";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { apiGet } from "../../lib/apiClient";
 import { trackEvent } from "../../lib/trackEvent";
@@ -43,8 +45,13 @@ import { getSeriesPrimaryReadAction } from "../../lib/episodeAccessState";
 import { buildReaderPath } from "../../lib/readerRoutes";
 import { siteConfig } from "../../lib/siteConfig";
 
-const seriesPageShellClass =
-  "min-h-screen overflow-hidden bg-[linear-gradient(180deg,#0a0c13_0%,#0f1118_34%,#13131d_100%)] text-white";
+function SeriesPageFrame({ children, className = "" }) {
+  return (
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.12)]">
+      <div className={className || "flex flex-col gap-8"}>{children}</div>
+    </StorefrontPage>
+  );
+}
 
 function EpisodeListSkeleton() {
   return (
@@ -57,7 +64,7 @@ function EpisodeListSkeleton() {
       <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
         <div className="flex items-center gap-2">
           <Skeleton className="h-6 w-28 rounded-full bg-white/16" />
-          <Skeleton className="h-4 w-10 rounded-full bg-white/[0.06]" />
+          <Skeleton className="h-4 w-10 rounded-full bg-[rgba(255,255,255,0.035)]" />
         </div>
         <div className="flex items-center gap-3">
           <Skeleton className="h-9 w-24 rounded-full bg-white/16" />
@@ -68,7 +75,7 @@ function EpisodeListSkeleton() {
         {Array.from({ length: 6 }).map((_, index) => (
           <Skeleton
             key={`episode-list-skeleton-${index}`}
-            className="h-24 w-full rounded-[24px] bg-white/[0.05]"
+            className="h-24 w-full rounded-[24px] bg-[rgba(255,255,255,0.035)]"
           />
         ))}
       </div>
@@ -834,8 +841,8 @@ export default function SeriesPage({
 
   if (loading) {
     return (
-      <main className={seriesPageShellClass}>
-        <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
+      <SeriesPageFrame>
+        <div>
           <SurfacePanel
             appearance="dark"
             tone="highlight"
@@ -843,18 +850,18 @@ export default function SeriesPage({
             className="p-5 sm:p-7"
           >
             <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
-              <Skeleton className="aspect-[3/4] w-full rounded-[28px] bg-white/[0.06]" />
+              <Skeleton className="aspect-[3/4] w-full rounded-[28px] bg-[rgba(255,255,255,0.035)]" />
               <div className="space-y-4">
                 <div className="flex flex-wrap gap-2">
                   <Skeleton className="h-7 w-24 rounded-full bg-white/16" />
                   <Skeleton className="h-7 w-24 rounded-full bg-white/16" />
                 </div>
                 <Skeleton className="h-12 w-4/5 rounded-[20px] bg-white/16" />
-                <Skeleton className="h-5 w-3/5 rounded-full bg-white/[0.06]" />
+                <Skeleton className="h-5 w-3/5 rounded-full bg-[rgba(255,255,255,0.035)]" />
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-full rounded-full bg-white/[0.06]" />
-                  <Skeleton className="h-4 w-[92%] rounded-full bg-white/[0.06]" />
-                  <Skeleton className="h-4 w-[76%] rounded-full bg-white/[0.06]" />
+                  <Skeleton className="h-4 w-full rounded-full bg-[rgba(255,255,255,0.035)]" />
+                  <Skeleton className="h-4 w-[92%] rounded-full bg-[rgba(255,255,255,0.035)]" />
+                  <Skeleton className="h-4 w-[76%] rounded-full bg-[rgba(255,255,255,0.035)]" />
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Skeleton className="h-9 w-36 rounded-full bg-white/16" />
@@ -864,7 +871,7 @@ export default function SeriesPage({
                   {Array.from({ length: 3 }).map((_, index) => (
                     <Skeleton
                       key={`series-header-skeleton-${index}`}
-                      className="h-28 rounded-[22px] bg-white/[0.05]"
+                      className="h-28 rounded-[22px] bg-[rgba(255,255,255,0.035)]"
                     />
                   ))}
                 </div>
@@ -873,14 +880,14 @@ export default function SeriesPage({
           </SurfacePanel>
           <EpisodeListSkeleton />
         </div>
-      </main>
+      </SeriesPageFrame>
     );
   }
 
   if (error === "NOT_FOUND") {
     return (
-      <main className={seriesPageShellClass}>
-        <div className="mx-auto max-w-[960px] px-4 py-8 md:px-8 md:py-10">
+      <SeriesPageFrame>
+        <div className="max-w-[960px]">
           <SurfacePanel
             appearance="dark"
             tone="highlight"
@@ -922,7 +929,7 @@ export default function SeriesPage({
             </div>
           </SurfacePanel>
         </div>
-      </main>
+      </SeriesPageFrame>
     );
   }
 
@@ -930,8 +937,8 @@ export default function SeriesPage({
     const isUnavailable = error === "UNAVAILABLE";
 
     return (
-      <main className={seriesPageShellClass}>
-        <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
+      <SeriesPageFrame>
+        <div>
           <NetworkFallback
             compact
             title={
@@ -964,13 +971,13 @@ export default function SeriesPage({
             </button>
           </NetworkFallback>
         </div>
-      </main>
+      </SeriesPageFrame>
     );
   }
 
   if ((series?.adult || error === "ADULT_GATED") && gateStatus !== "OK") {
     return (
-      <main className={seriesPageShellClass}>
+      <SeriesPageFrame>
         <AdultGateBlockingPanel
           status={gateStatus}
           onOpenModal={openGateModal}
@@ -995,14 +1002,13 @@ export default function SeriesPage({
             legalAge={legalAge}
           />
         ) : null}
-      </main>
+      </SeriesPageFrame>
     );
   }
 
   return (
-    <main className={seriesPageShellClass}>
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[760px] bg-[radial-gradient(circle_at_14%_12%,rgba(255,79,154,0.12),transparent_22%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.1),transparent_18%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
+    <SeriesPageFrame>
+      <div className="flex flex-col gap-8">
         {commerceNotice ? (
           <div className="pt-6">
             <CommerceSuccessBanner
@@ -1034,12 +1040,59 @@ export default function SeriesPage({
           creatorHref={creatorHref}
         />
 
+        <SurfacePanel
+          appearance="dark"
+          tone="muted"
+          accent="cyan"
+          className="border-white/10 bg-[linear-gradient(180deg,rgba(17,18,28,0.96)_0%,rgba(10,12,19,0.94)_100%)] p-4 sm:p-5"
+        >
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className={`${storefrontInfoCardClass} px-4 py-4 text-white`}>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+                Reading flow
+              </p>
+              <p className="mt-3 text-base font-semibold tracking-[-0.03em] text-white">
+                {progress?.episodeId ? "Continue where you left off" : "Start from chapter one"}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-white/64">
+                {progress?.episodeId
+                  ? "Your saved progress is ready from the latest synced chapter."
+                  : "Open the title from the beginning or jump into the freshest release."}
+              </p>
+            </div>
+            <div className={`${storefrontInfoCardClass} px-4 py-4 text-white`}>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+                Catalog mode
+              </p>
+              <p className="mt-3 text-base font-semibold tracking-[-0.03em] text-white">
+                {series?.adult ? "18+ title" : "Standard title"}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-white/64">
+                {series?.adult
+                  ? "This page only opens while adult mode and age gate requirements are satisfied."
+                  : "This page stays in the standard catalog and respects normal mode filters."}
+              </p>
+            </div>
+            <div className={`${storefrontInfoCardClass} px-4 py-4 text-white`}>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+                Episode access
+              </p>
+              <p className="mt-3 text-base font-semibold tracking-[-0.03em] text-white">
+                {episodes.length > 0 ? `${episodes.length} episodes ready` : "No live episodes yet"}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-white/64">
+                Free, claimable, unlockable, and subscriber states stay surfaced inside the episode shelf below.
+              </p>
+            </div>
+          </div>
+        </SurfacePanel>
+
         {interactiveStory ? (
           <SurfacePanel
             appearance="dark"
             tone="muted"
             accent="rose"
-            className="p-4 sm:p-5"
+            className="border-white/10 bg-[linear-gradient(135deg,rgba(28,16,34,0.98)_0%,rgba(14,12,20,0.96)_52%,rgba(13,19,28,0.96)_100%)] p-4 shadow-[0_24px_60px_rgba(8,6,20,0.3)] sm:p-5"
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
@@ -1088,7 +1141,7 @@ export default function SeriesPage({
         {showSecondarySections ? (
           <>
             <SimilarSeriesSection seriesId={seriesId} series={series} />
-            <div className="mt-8 border-t border-white/10 pt-6" />
+            <div className="mt-8 h-px w-full bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)]" />
             <CommentsSection
               seriesId={seriesId}
               seriesTitle={series.title}
@@ -1112,8 +1165,8 @@ export default function SeriesPage({
             accent="cyan"
             className="mt-8 space-y-4"
           >
-            <Skeleton className="h-8 w-48 rounded-lg bg-white/[0.08]" />
-            <Skeleton className="h-36 w-full rounded-2xl bg-white/[0.05]" />
+            <Skeleton className="h-8 w-48 rounded-lg bg-[rgba(255,255,255,0.075)]" />
+            <Skeleton className="h-36 w-full rounded-2xl bg-[rgba(255,255,255,0.035)]" />
           </SurfacePanel>
         )}
       </div>
@@ -1138,6 +1191,6 @@ export default function SeriesPage({
           legalAge={legalAge}
         />
       ) : null}
-    </main>
+    </SeriesPageFrame>
   );
 }

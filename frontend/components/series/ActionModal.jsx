@@ -1,6 +1,9 @@
 "use client";
 
 import {
+  storefrontBadgeClass,
+  storefrontInfoCardClass,
+  storefrontNoticeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
@@ -64,7 +67,7 @@ export default function ActionModal({
       >
         <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.01))] p-5">
           <div>
-            <p className="inline-flex rounded-full border border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.12)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#ffd6e5]">
+            <p className={`${storefrontBadgeClass} border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.12)] text-[#ffd6e5]`}>
               {toneLabel}
             </p>
             <h3 className="mt-3 font-display text-[2rem] font-semibold leading-[0.92] tracking-[-0.05em] text-white">
@@ -94,7 +97,7 @@ export default function ActionModal({
           ) : null}
 
           {offer ? (
-            <div className="mt-4 rounded-[24px] border border-white/10 bg-white/[0.03] p-4 text-sm text-white/76 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+            <div className={`mt-4 ${storefrontInfoCardClass} p-4 text-sm text-white/76`}>
               <div className="flex items-center justify-between gap-2">
                 <span className="font-semibold tracking-[-0.02em] text-white">
                   {offer.title || offer.name}
@@ -119,7 +122,7 @@ export default function ActionModal({
           ) : null}
 
           {Array.isArray(compareItems) && compareItems.length > 0 ? (
-            <div className="mt-4 rounded-[24px] border border-white/10 bg-white/[0.03] p-4 text-sm text-white/76 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+            <div className={`mt-4 ${storefrontInfoCardClass} p-4 text-sm text-white/76`}>
               <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/58">
                 {compareTitle}
               </p>
@@ -138,7 +141,7 @@ export default function ActionModal({
           ) : null}
 
           {Array.isArray(tips) && tips.length > 0 ? (
-            <div className="mt-4 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-white/76 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+            <div className={`mt-4 ${storefrontNoticeClass} px-4 py-4 text-sm text-white/76`}>
               <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/58">
                 {tipsTitle}
               </p>

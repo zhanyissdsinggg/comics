@@ -4,13 +4,16 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Bookmark, Clock3, Library as LibraryIcon, Sparkles } from "lucide-react";
 import Rail from "../home/Rail";
 import Skeleton from "../common/Skeleton";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import {
+  storefrontBadgeClass,
+  storefrontChipClass,
+  storefrontInfoCardClass,
   storefrontInsetCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
@@ -36,6 +39,7 @@ import {
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
 import { normalizeReadingPercent } from "../../lib/readingPercent";
+import { StorefrontPage } from "../storefront/StorefrontScaffold";
 
 function PanelLoadingSkeleton({ rows = 3 }) {
   return (
@@ -175,6 +179,42 @@ function getReadingState({
   }
 
   return { label: "Unread", badge: "" };
+}
+
+function LibraryOverviewCard({
+  label,
+  title,
+  body,
+  icon: Icon,
+  tone = "cyan",
+}) {
+  const toneClass =
+    tone === "rose"
+      ? "border-rose-200/20 bg-rose-300/12 text-rose-100"
+      : tone === "amber"
+        ? "border-amber-200/20 bg-amber-300/12 text-amber-100"
+        : "border-cyan-200/20 bg-cyan-300/12 text-cyan-100";
+
+  return (
+    <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+            {label}
+          </p>
+          <p className="mt-2 font-display text-[1.2rem] font-semibold tracking-[-0.04em] text-white">
+            {title}
+          </p>
+        </div>
+        <span
+          className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl border ${toneClass}`}
+        >
+          <Icon className="size-4.5" />
+        </span>
+      </div>
+      <p className="mt-3 text-sm leading-6 text-white/64">{body}</p>
+    </div>
+  );
 }
 
 export default function LibraryPage({
@@ -866,9 +906,69 @@ export default function LibraryPage({
         ? "Your shelf."
         : "Your shelf starts here."
     : "Your library";
+  const heroEyebrow = viewerSignedIn ? "Library Hub" : "Saved Stories";
   const resumeSpotlightPanelTitle = resumeSpotlight?.seriesId
     ? resumeSpotlight?.title || "Continue reading"
     : "Continue reading";
+  const overviewCards = viewerSignedIn
+    ? [
+        {
+          label: "Continue",
+          title: resumeSpotlight?.title || "Pick up a story",
+          body:
+            resumeSpotlightMeta ||
+            "When you open more stories, your active read will show up here.",
+          icon: Clock3,
+          tone: "cyan",
+        },
+        {
+          label: "Shelf Mood",
+          title:
+            visibleLibraryItems.length > 0 ? "Saved and stacked" : "Still empty",
+          body:
+            visibleLibraryItems.length > 0
+              ? `${visibleLibraryItems.length} saved titles are ready for tonight.`
+              : "Save a few titles and this shelf turns into your personal queue.",
+          icon: LibraryIcon,
+          tone: "rose",
+        },
+        {
+          label: "Bookmarks",
+          title:
+            bookmarkCountTotal > 0
+              ? `${bookmarkCountTotal} markers ready`
+              : "No bookmarks yet",
+          body:
+            bookmarkCountTotal > 0
+              ? "Jump back to exact scenes and panels from your saved markers."
+              : "Bookmarks appear here once you start pinning moments to return to.",
+          icon: Bookmark,
+          tone: "amber",
+        },
+      ]
+    : [
+        {
+          label: "Why sign in",
+          title: "Keep your shelf in sync",
+          body: "Save progress, bookmarks, and reading history across devices.",
+          icon: Sparkles,
+          tone: "cyan",
+        },
+        {
+          label: "Start here",
+          title: "Build your queue",
+          body: "Save titles, keep your place, and come back without hunting for chapters.",
+          icon: LibraryIcon,
+          tone: "rose",
+        },
+        {
+          label: "Reading flow",
+          title: "Jump back faster",
+          body: "Continue rails and recent activity fill in automatically once you sign in.",
+          icon: ArrowRight,
+          tone: "amber",
+        },
+      ];
   const readingSnapshotCardsPanel =
     viewerSignedIn && readingSnapshotCards.length > 0 ? (
       <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
@@ -877,7 +977,7 @@ export default function LibraryPage({
             key={card.id}
             type="button"
             onClick={card.onClick}
-            className="group rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.045)] p-4 text-left text-white shadow-[0_18px_40px_rgba(8,6,20,0.24)] backdrop-blur-xl transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16"
+            className={`${storefrontInfoCardClass} group p-4 text-left text-white transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16`}
           >
             <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/65">
               {card.label}
@@ -899,11 +999,11 @@ export default function LibraryPage({
     ) : null;
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(82,188,255,0.13),transparent_24%),radial-gradient(circle_at_15%_18%,rgba(255,87,166,0.16),transparent_28%),linear-gradient(180deg,#090912_0%,#0d1020_52%,#090912_100%)] text-white">
-      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <StorefrontPage accentClass="from-[rgba(103,232,249,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(255,79,154,0.12)]">
+      <div className="flex flex-col gap-8">
+        <section className="space-y-5">
           <EditorialHero
-            eyebrow="Saved Series"
+            eyebrow={heroEyebrow}
             title={libraryDeskTitle}
             description={signedInHeroDescription}
             secondary={signedOutHeroSecondary}
@@ -963,6 +1063,72 @@ export default function LibraryPage({
               </>
             }
           />
+
+          <SurfacePanel
+            appearance="dark"
+            accent="cyan"
+            tone="muted"
+            className="space-y-5"
+          >
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-[40rem]">
+                <p className={`${storefrontBadgeClass} gap-2 text-white/64`}>
+                  <Sparkles className="size-3.5" />
+                  Shelf Overview
+                </p>
+                <h2 className="mt-3 font-display text-[1.85rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.35rem]">
+                  Your saved reads, progress, and next-open signals live here
+                </h2>
+                <p className="mt-2 text-sm leading-7 text-white/66">
+                  Continue rails, saved titles, bookmarks, and recent reading all
+                  respect the current content mode and stay attached to your live shelf.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {viewerSignedIn ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        hasLibrarySignals
+                          ? scrollToSection("continue-reading")
+                          : router.push("/search")
+                      }
+                      className={primaryButtonClass}
+                    >
+                      {hasLibrarySignals ? "Open Continue Rail" : "Find a Story"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        visibleLibraryItems.length > 0
+                          ? scrollToSection("saved-series")
+                          : setShowCollectionManager((value) => !value)
+                      }
+                      className={secondaryButtonClass}
+                    >
+                      {visibleLibraryItems.length > 0 ? "Open Saved Shelf" : "Collections"}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" className={primaryButtonClass}>
+                      Sign in
+                    </Link>
+                    <Link href="/comics" className={secondaryButtonClass}>
+                      Browse free chapters
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-3">
+              {overviewCards.map((card) => (
+                <LibraryOverviewCard key={card.label} {...card} />
+              ))}
+            </div>
+          </SurfacePanel>
         </section>
 
         {commerceNotice ? (
@@ -1140,7 +1306,7 @@ export default function LibraryPage({
                           ),
                         )
                       }
-                      className="rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.045)] p-4 text-left text-white shadow-[0_18px_40px_rgba(8,6,20,0.24)] backdrop-blur-xl transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16"
+                      className={`${storefrontInfoCardClass} p-4 text-left text-white transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16`}
                     >
                       <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">
                         {item.eyebrow || "Free start"}
@@ -1152,7 +1318,7 @@ export default function LibraryPage({
                         {item.subtitle ||
                           "Open the series page and start reading."}
                       </p>
-                      <span className="mt-4 inline-flex rounded-full border border-white/14 bg-white/6 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">
+                      <span className={`${storefrontChipClass} mt-4 min-h-[36px] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-white/75`}>
                         Start reading
                       </span>
                     </button>
@@ -1314,7 +1480,7 @@ export default function LibraryPage({
             </div>
           </>
         )}
-      </main>
+      </div>
       <RewardToast message={toastMessage} onClose={() => setToastMessage("")} />
       <ActionModal
         open={Boolean(makeupModal)}
@@ -1376,6 +1542,6 @@ export default function LibraryPage({
         }
         onClose={() => setMakeupModal(null)}
       />
-    </div>
+    </StorefrontPage>
   );
 }

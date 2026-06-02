@@ -23,7 +23,7 @@ export default function NewEpisodesToday({ items = [] }) {
           {items.map((series, index) => (
             <div
               key={series.id}
-              className="w-[82vw] max-w-[360px] lg:w-auto lg:max-w-none"
+              className="w-[calc(100vw-2.5rem)] max-w-[360px] lg:w-auto lg:max-w-none"
             >
               <StoryCard
                 series={series}

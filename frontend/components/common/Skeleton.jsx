@@ -27,9 +27,9 @@ export const Skeleton = memo(function Skeleton({
   };
 
   const variantClasses = {
-    default: "bg-neutral-800/50",
-    light: "bg-neutral-700/30",
-    dark: "bg-neutral-900/50",
+    default: "bg-[rgba(255,255,255,0.08)]",
+    light: "bg-[rgba(255,255,255,0.12)]",
+    dark: "bg-[rgba(255,255,255,0.05)]",
   };
 
   return (
@@ -65,7 +65,7 @@ export const SkeletonText = memo(function SkeletonText({
 export const SkeletonCard = memo(function SkeletonCard({ className = "" }) {
   return (
     <div
-      className={`rounded-2xl border border-neutral-800 bg-neutral-900/40 p-4 ${className}`}
+      className={`rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045)_0%,rgba(255,255,255,0.025)_100%)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.22)] backdrop-blur-xl ${className}`}
     >
       <Skeleton height="12rem" className="mb-4" rounded="lg" />
       <Skeleton height="1.5rem" width="80%" className="mb-2" rounded="sm" />
@@ -80,7 +80,7 @@ export const SkeletonEpisode = memo(function SkeletonEpisode({
 }) {
   return (
     <div
-      className={`flex items-center gap-4 rounded-2xl border border-neutral-800 bg-neutral-900/40 p-4 ${className}`}
+      className={`flex items-center gap-4 rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045)_0%,rgba(255,255,255,0.025)_100%)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.22)] backdrop-blur-xl ${className}`}
     >
       {/* 缩略图 */}
       <Skeleton width="6rem" height="8rem" rounded="lg" />

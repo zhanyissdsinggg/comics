@@ -3,6 +3,7 @@
 import { memo, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import {
+  storefrontChipClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "./StorefrontPagePrimitives";
@@ -147,7 +148,7 @@ export const Modal = memo(function Modal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/12 bg-[rgba(255,255,255,0.06)] p-2 text-white shadow-[0_14px_32px_rgba(8,6,20,0.26)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-cyan-300/28 hover:bg-[rgba(255,255,255,0.11)] active:scale-95"
+                className={`ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center p-2 text-white ${storefrontChipClass}`}
                 aria-label="Close dialog"
               >
                 <X size={20} />

@@ -26,6 +26,7 @@ import {
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
+import { StorefrontPage } from "../storefront/StorefrontScaffold";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -265,9 +266,7 @@ export default function AdultHubPage() {
   );
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#09070c_0%,#120b13_42%,#0b0910_100%)] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.16),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(244,201,93,0.1),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
-      <div className="mx-auto flex max-w-[1180px] flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.16)] via-[rgba(244,201,93,0.08)] to-[rgba(167,139,250,0.08)]">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_340px]">
           <SurfacePanel
             appearance="dark"
@@ -423,8 +422,6 @@ export default function AdultHubPage() {
             ) : null}
           </div>
         )}
-      </div>
-
       <LoginGateModal
         open={activeModal === "login"}
         onClose={() => {
@@ -443,6 +440,6 @@ export default function AdultHubPage() {
         ageRuleKey={ageRuleKey}
         legalAge={legalAge}
       />
-    </main>
+    </StorefrontPage>
   );
 }

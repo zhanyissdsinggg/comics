@@ -1,12 +1,5 @@
-import Link from "next/link";
-import EditorialHero from "../../components/common/EditorialHero";
-import {
-  StorefrontDesk,
-  StorefrontInfoCard,
-  storefrontPrimaryButtonClass,
-  storefrontSecondaryButtonClass,
-} from "../../components/common/StorefrontPagePrimitives";
-import SurfacePanel from "../../components/common/SurfacePanel";
+import LegalEditorialLayout from "../../components/common/LegalEditorialLayout";
+import { StorefrontInfoCard } from "../../components/common/StorefrontPagePrimitives";
 import { createPageMetadata } from "../../lib/seo";
 import { siteConfig } from "../../lib/siteConfig";
 
@@ -112,143 +105,112 @@ if (hasResolvedLegalJurisdiction) {
       `${siteConfig.siteName} is operated by ${siteConfig.companyName}.`,
     ],
   });
-} else {
-  // TODO: Populate NEXT_PUBLIC_GOVERNING_LAW and NEXT_PUBLIC_LEGAL_VENUE before public launch.
 }
 
-function LegalSection({
-  title,
-  paragraphs = [],
-  bullets = [],
-  className = "",
-  children = null,
-}) {
-  return (
-    <SurfacePanel className={className} appearance="dark" accent="cyan">
-      <h2 className="font-display text-[1.8rem] font-semibold leading-[0.96] tracking-[-0.06em] text-white">
-        {title}
-      </h2>
-      <div className="mt-4 space-y-4 text-sm leading-[1.72] text-white/72">
-        {paragraphs.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
-        ))}
-        {bullets.length > 0 ? (
-          <ul className="list-disc space-y-2 pl-5 text-white/72 marker:text-[#FF007A]">
-            {bullets.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        ) : null}
-        {children}
-      </div>
-    </SurfacePanel>
-  );
-}
+const overviewCards = [
+  {
+    label: "Effective",
+    value: effectiveDate,
+    hint: "This is the version currently published on the site.",
+  },
+  {
+    label: "Scope",
+    value: monetizationLive
+      ? "Browsing + purchases"
+      : "Browsing + future purchases",
+    hint: "Covers the public product and any commerce features that are live.",
+  },
+  {
+    label: "Contact",
+    value: "Legal inbox",
+    hint: "Use the direct legal route for formal questions or notices.",
+  },
+];
 
 function ContactCard() {
   return (
-    <StorefrontInfoCard title="Legal contact">
-      <p className="mt-3 text-sm text-white/68">
-        <span className="font-semibold uppercase tracking-[0.08em] text-white">
-          Email:
-        </span>{" "}
-        <a
-          href={`mailto:${siteConfig.legalEmail}`}
-          className="font-semibold text-[#ff77b0] transition hover:text-[#ff9cc0]"
-        >
-          {siteConfig.legalEmail}
-        </a>
-      </p>
+    <div className="grid gap-3 lg:grid-cols-2">
+      <StorefrontInfoCard
+        eyebrow="Legal"
+        title={siteConfig.legalEmail}
+        description="Use this inbox for legal notices, formal questions, or policy-level issues."
+      />
+      <StorefrontInfoCard
+        eyebrow="Privacy"
+        title={siteConfig.privacyEmail}
+        description="Use the privacy inbox instead when the request is specifically about data handling."
+      />
       {siteConfig.companyAddress ? (
-        <p className="mt-3 text-sm text-white/68">
-          <span className="font-semibold uppercase tracking-[0.08em] text-white">
-            Address:
-          </span>{" "}
-          {siteConfig.companyAddress}
-        </p>
+        <StorefrontInfoCard
+          eyebrow="Address"
+          title={siteConfig.companyAddress}
+          description="Business contact location."
+          className="lg:col-span-2"
+        />
       ) : null}
-    </StorefrontInfoCard>
+    </div>
   );
 }
 
 export default function TermsOfServicePage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.12),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
-      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <EditorialHero
-            appearance="dark"
-            accent="cyan"
-            eyebrow="Terms"
-            title="Terms."
-            description={
-              <>
-                Using {siteConfig.siteName} means you agree to these Terms and
-                our{" "}
-                <Link
-                  href="/privacy-policy"
-                  className="font-semibold text-[#ff77b0] transition hover:text-[#ff9cc0]"
-                >
-                  Privacy Policy
-                </Link>
-                .
-              </>
-            }
-            stats={[
-              {
-                label: "Effective",
-                value: effectiveDate,
-              },
-              {
-                label: "Covers",
-                value: monetizationLive
-                  ? "Browsing + purchases"
-                  : "Browsing + future purchases",
-              },
-            ]}
-          />
-
-          <StorefrontDesk
-            eyebrow="Legal"
-            title="Contact."
-            actions={
-              <ul className="grid gap-2.5">
-                <li>
-                  <a
-                    href={`mailto:${siteConfig.legalEmail}`}
-                    className={storefrontPrimaryButtonClass}
-                  >
-                    Email legal team
-                  </a>
-                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/45">
-                    For legal questions.
-                  </p>
-                </li>
-                <li>
-                  <Link
-                    href="/privacy-policy"
-                    className={storefrontSecondaryButtonClass}
-                  >
-                    View privacy policy
-                  </Link>
-                </li>
-              </ul>
-            }
-            description="Choose the legal contact link you need below."
-          />
-        </section>
-
-        <div className="grid gap-4 xl:grid-cols-2">
-          {TERMS_SECTIONS.map((section) => (
-            <LegalSection key={section.title} {...section} />
-          ))}
-
-          <LegalSection title="Legal contact" className="xl:col-span-2">
-            <ContactCard />
-          </LegalSection>
-        </div>
-      </main>
-    </div>
+    <LegalEditorialLayout
+      eyebrow="Terms"
+      title="Terms that explain the rules without burying the reader."
+      description={`Using ${siteConfig.siteName} means you agree to the product rules below, including account conduct, reading access, and any commerce behavior that is currently live.`}
+      heroStats={[
+        {
+          label: "Effective",
+          value: effectiveDate,
+        },
+        {
+          label: "Scope",
+          value: monetizationLive
+            ? "Reading + purchases"
+            : "Reading + future purchases",
+        },
+        {
+          label: "Contact",
+          value: "Legal inbox",
+        },
+      ]}
+      sideDesk={{
+        eyebrow: "Legal",
+        title: "Use the right legal route.",
+        description:
+          "Formal policy or legal questions go to the legal inbox. Privacy-specific issues still belong in the privacy lane.",
+        actions: [
+          {
+            label: "Email legal team",
+            href: `mailto:${siteConfig.legalEmail}`,
+            external: true,
+            primary: true,
+            note: "For legal questions or notices.",
+          },
+          {
+            label: "View privacy policy",
+            href: "/privacy-policy",
+          },
+        ],
+      }}
+      overviewTitle="The short version first"
+      overviewDescription="Most readers come here to confirm what is allowed, how purchases behave, and what happens if the service changes or access gets restricted."
+      overviewCards={overviewCards}
+      quickLinks={TERMS_SECTIONS.map((section) => ({
+        title: section.title,
+        description:
+          section.title === "What you cannot do"
+            ? "The fastest way to check prohibited behavior."
+            : section.title === "Purchases and digital access"
+              ? "How paid access and unlocks are framed."
+              : section.title === "Mature content"
+                ? "Rules tied to 18+ access and visibility controls."
+                : "",
+      }))}
+      sections={TERMS_SECTIONS}
+      contactTitle="Legal contact"
+      contactDescription="If the question is formal, contractual, or notice-related, use the direct legal contact details below."
+      contactCard={<ContactCard />}
+    />
   );
 }

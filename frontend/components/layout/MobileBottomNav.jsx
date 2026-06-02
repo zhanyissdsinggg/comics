@@ -13,6 +13,7 @@ import {
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { storefrontSecondaryButtonClass } from "../common/StorefrontPagePrimitives";
 import {
   navigateWithDocument,
   shouldUseDocumentNavigation,
@@ -158,7 +159,7 @@ export default function MobileBottomNav({
                 "relative flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-[20px] px-1.5 py-2 text-center transition-all duration-150",
                 isActive
                   ? "border border-white/12 bg-[linear-gradient(180deg,rgba(255,79,154,0.18)_0%,rgba(167,139,250,0.16)_100%)] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12),0_14px_26px_rgba(0,0,0,0.24)]"
-                  : "border border-transparent text-white/58 hover:border-white/10 hover:bg-white/[0.04] hover:text-white",
+                  : `${storefrontSecondaryButtonClass} h-auto border-transparent bg-[rgba(255,255,255,0.025)] px-1.5 py-2 text-white/58 shadow-none hover:border-white/10 hover:bg-[rgba(255,255,255,0.075)] hover:text-white`,
               )}
             >
               <span
@@ -197,7 +198,7 @@ export default function MobileBottomNav({
               "relative flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-[20px] px-1.5 py-2 text-center transition-all duration-150",
               isAdultMode
                 ? "border border-[rgba(255,79,154,0.28)] bg-[linear-gradient(180deg,rgba(255,79,154,0.18)_0%,rgba(120,54,84,0.16)_100%)] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1),0_14px_26px_rgba(0,0,0,0.24)]"
-                : "border border-transparent text-white/58 hover:border-white/10 hover:bg-white/[0.04] hover:text-white",
+                : `${storefrontSecondaryButtonClass} h-auto border-transparent bg-[rgba(255,255,255,0.025)] px-1.5 py-2 text-white/58 shadow-none hover:border-white/10 hover:bg-[rgba(255,255,255,0.075)] hover:text-white`,
             )}
           >
             <span

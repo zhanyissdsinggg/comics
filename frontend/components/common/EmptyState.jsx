@@ -15,7 +15,10 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { storefrontPrimaryButtonClass } from "./StorefrontPagePrimitives";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "./StorefrontPagePrimitives";
 
 const iconMap = {
   inbox: Inbox,
@@ -155,10 +158,10 @@ export const EmptyState = memo(function EmptyState({
               resolvedSecondaryAction.href ? (
                 <Link
                   href={resolvedSecondaryAction.href}
-                  className={`inline-flex items-center justify-center rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)] active:translate-y-px ${
+                  className={`inline-flex items-center justify-center px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)] active:translate-y-px ${
                     isLight
                       ? "border-black/15 bg-white text-black hover:border-black/25 hover:bg-black/[0.03]"
-                      : "border-white/18 bg-[rgba(255,255,255,0.04)] text-white/88 hover:border-white/35 hover:bg-white/5"
+                      : `${storefrontSecondaryButtonClass} text-white/88 hover:border-white/35 hover:bg-white/5`
                   }`}
                 >
                   <span>{resolvedSecondaryAction.label}</span>
@@ -167,10 +170,10 @@ export const EmptyState = memo(function EmptyState({
                 <button
                   type="button"
                   onClick={resolvedSecondaryAction.onClick}
-                  className={`inline-flex items-center justify-center rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)] active:translate-y-px ${
+                  className={`inline-flex items-center justify-center px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)] active:translate-y-px ${
                     isLight
                       ? "border-black/15 bg-white text-black hover:border-black/25 hover:bg-black/[0.03]"
-                      : "border-white/18 bg-[rgba(255,255,255,0.04)] text-white/88 hover:border-white/35 hover:bg-white/5"
+                      : `${storefrontSecondaryButtonClass} text-white/88 hover:border-white/35 hover:bg-white/5`
                   }`}
                 >
                   <span>{resolvedSecondaryAction.label}</span>

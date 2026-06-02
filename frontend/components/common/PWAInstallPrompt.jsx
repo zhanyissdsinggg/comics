@@ -4,6 +4,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Download, Smartphone, X } from "lucide-react";
 import { isFigmaRoute } from "../../lib/figmaRoutes";
+import {
+  storefrontBadgeClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "./StorefrontPagePrimitives";
 
 const PWAInstallPrompt = React.memo(() => {
   const pathname = usePathname();
@@ -161,7 +166,7 @@ const PWAInstallPrompt = React.memo(() => {
               <button
                 type="button"
                 onClick={handleInstall}
-                className="min-h-[44px] rounded-full border border-[rgba(255,79,154,0.35)] bg-[linear-gradient(135deg,#ff4f9a_0%,#ff76ad_100%)] px-4 py-2 text-sm font-semibold tracking-[0.01em] text-[#1a0e16] shadow-[0_16px_34px_rgba(255,79,154,0.24)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_20px_38px_rgba(255,79,154,0.3)]"
+                className={`min-h-[44px] px-4 py-2 text-sm text-[#1a0e16] ${storefrontPrimaryButtonClass}`}
               >
                 Install
               </button>
@@ -169,14 +174,14 @@ const PWAInstallPrompt = React.memo(() => {
             <button
               type="button"
               onClick={handleDismiss}
-              className="min-h-[44px] rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-4 py-2 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_12px_28px_rgba(8,6,20,0.2)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
+              className={`min-h-[44px] px-4 py-2 text-sm ${storefrontSecondaryButtonClass}`}
             >
               Not now
             </button>
             <button
               type="button"
               onClick={handleDismiss}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] text-white/66 shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)] hover:text-white"
+              className={`flex min-h-[44px] min-w-[44px] items-center justify-center text-white/66 hover:text-white ${storefrontSecondaryButtonClass}`}
               aria-label="Close"
             >
               <X size={16} />

@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { Star } from "lucide-react";
+import {
+  storefrontBadgeClass,
+  storefrontSoftCardClass,
+} from "../../common/StorefrontPagePrimitives";
 import { resolveDisplayImageUrl } from "../../../lib/fallbackImage";
 import { trackEvent } from "../../../lib/trackEvent";
 import {
@@ -47,7 +51,7 @@ export default function CoverCard({
   return (
     <Link
       href={href}
-      className="group block w-[44vw] max-w-[214px] min-w-[156px] shrink-0 scroll-snap-item"
+      className="group block w-[calc(50vw-1rem)] min-w-[148px] max-w-[214px] shrink-0 scroll-snap-item sm:w-[190px] md:w-[214px]"
       onClick={() => {
         if (sourceSection) {
           trackEvent("story_click", {
@@ -59,7 +63,7 @@ export default function CoverCard({
       }}
     >
       <article className="space-y-3">
-        <div className="relative aspect-[0.72] overflow-hidden rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-[0_18px_44px_rgba(0,0,0,0.34)] transition-all duration-200 group-hover:-translate-y-1.5 group-hover:border-white/18 group-hover:shadow-[0_26px_60px_rgba(0,0,0,0.4)]">
+        <div className={`relative aspect-[0.72] overflow-hidden rounded-[26px] shadow-[0_18px_44px_rgba(0,0,0,0.34)] transition-all duration-200 group-hover:-translate-y-1.5 group-hover:border-white/18 group-hover:shadow-[0_26px_60px_rgba(0,0,0,0.4)] ${storefrontSoftCardClass} p-0`}>
           <img
             src={coverUrl}
             alt={buildCoverAlt(series)}
@@ -70,7 +74,7 @@ export default function CoverCard({
           <div className="absolute left-3 right-3 top-3 flex items-start justify-between gap-2">
             {badge ? <GenreChip label={badge} tone="accent" /> : <span />}
             {rating ? (
-              <span className="inline-flex items-center gap-1 rounded-full border border-white/12 bg-[rgba(8,10,18,0.78)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/86 backdrop-blur-xl">
+              <span className={`${storefrontBadgeClass} gap-1 bg-[rgba(8,10,18,0.78)] text-white/86`}>
                 <Star className="size-3 fill-current text-[var(--gush-gold)]" />
                 {rating}
               </span>

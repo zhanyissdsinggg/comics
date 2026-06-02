@@ -13,6 +13,14 @@ import {
   Sparkles,
   Star,
 } from "lucide-react";
+import {
+  storefrontAccentChipClass,
+  storefrontBadgeClass,
+  storefrontInfoCardClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+} from "../common/StorefrontPagePrimitives";
 import { apiGet } from "../../lib/apiClient";
 import { getContentModeQueryParam } from "../../lib/contentFilters";
 import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
@@ -180,15 +188,15 @@ export function SectionHeading({
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="max-w-[44rem]">
         {eyebrow ? (
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/44">
+          <p className={`${storefrontBadgeClass} text-white/62`}>
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="mt-2 font-display text-[1.82rem] font-semibold leading-[0.96] tracking-[-0.06em] text-white sm:text-[2.35rem]">
+        <h2 className="mt-3 font-display text-[1.92rem] font-semibold leading-[0.94] tracking-[-0.06em] text-white sm:text-[2.5rem]">
           {title}
         </h2>
         {description ? (
-          <p className="mt-2.5 max-w-[40rem] text-sm leading-[1.72] text-white/62">
+          <p className="mt-2.5 max-w-[40rem] text-sm leading-[1.72] text-white/68">
             {description}
           </p>
         ) : null}
@@ -242,7 +250,7 @@ export function StoryHero({
         <div className="order-2 space-y-5 lg:order-1">
           <div className="space-y-3">
             {eyebrow ? (
-              <p className="inline-flex rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/72 backdrop-blur-xl">
+              <p className={`${storefrontBadgeClass} px-3 py-1.5 text-white/78`}>
                 {eyebrow}
               </p>
             ) : null}
@@ -266,7 +274,7 @@ export function StoryHero({
               {chips.map((chip) => (
                 <span
                   key={chip}
-                  className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/76 backdrop-blur-xl"
+                  className={`${storefrontBadgeClass} px-3 py-1.5 text-white/76`}
                 >
                   {chip}
                 </span>
@@ -278,7 +286,7 @@ export function StoryHero({
             <Link
               href={readHref}
               data-testid={primaryTestId}
-              className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-[rgba(255,122,176,0.28)] bg-[linear-gradient(135deg,#ff5fa4_0%,#ff8fbd_100%)] px-6 text-sm font-semibold text-[#1b0e17] shadow-[var(--gush-shadow-button)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_24px_52px_rgba(255,79,154,0.28)]"
+              className={`${storefrontPrimaryButtonClass} min-h-[48px] px-6 text-[#1b0e17]`}
             >
               {primaryLabel}
               <ArrowRight className="size-4" />
@@ -286,7 +294,7 @@ export function StoryHero({
             <Link
               href={detailHref}
               data-testid={secondaryTestId}
-              className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-white/12 bg-white/[0.06] px-5 text-sm font-medium text-white/82 transition-all duration-150 hover:-translate-y-0.5 hover:bg-white/[0.1]"
+              className={`${storefrontSecondaryButtonClass} min-h-[48px] px-5 text-white/82`}
             >
               {secondaryLabel}
             </Link>
@@ -297,9 +305,9 @@ export function StoryHero({
               {stats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] px-4 py-3.5 shadow-[0_18px_38px_rgba(8,6,20,0.22)] backdrop-blur-xl"
+                  className={`${storefrontInfoCardClass} px-4 py-3.5`}
                 >
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/44">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/48">
                     {stat.label}
                   </p>
                   <p className="mt-2 text-[0.98rem] font-semibold tracking-[-0.02em] text-white">
@@ -315,7 +323,7 @@ export function StoryHero({
           {trailingCard || (
             <div className="relative mx-auto w-full max-w-[300px]">
               <div className="absolute inset-4 rounded-[28px] bg-[rgba(255,79,154,0.2)] blur-3xl" />
-              <div className="absolute inset-3 -rotate-[5deg] rounded-[28px] border border-white/8 bg-white/[0.04]" />
+              <div className="absolute inset-3 -rotate-[5deg] rounded-[28px] border border-white/8 bg-[rgba(255,255,255,0.025)]" />
               <div className="absolute inset-2 rotate-[4deg] rounded-[28px] border border-white/8 bg-[rgba(103,232,249,0.08)]" />
               <div className="relative aspect-[3/4] overflow-hidden rounded-[28px] border border-white/12 shadow-[0_28px_72px_rgba(0,0,0,0.42)]">
                 <img
@@ -364,7 +372,10 @@ export function CoverCard({
     adult: series?.adult || series?.isAdult,
   });
   const rating = ratingLabel(series);
-  const widthClass = variant === "novel" ? "w-[58vw] max-w-[240px]" : "w-[52vw] max-w-[220px]";
+  const widthClass =
+    variant === "novel"
+      ? "w-[calc(58vw-1rem)] min-w-[174px] max-w-[244px] sm:w-[220px] md:w-[244px]"
+      : "w-[calc(52vw-1rem)] min-w-[160px] max-w-[224px] sm:w-[196px] md:w-[224px]";
   const metaLine =
     variant === "novel"
       ? meta.tertiary || [buildLatestInstallmentLabel(series), status].filter(Boolean).join(" / ")
@@ -378,7 +389,7 @@ export function CoverCard({
       className={`group scroll-snap-item ${widthClass} shrink-0`}
     >
       <article className="space-y-3">
-        <div className="relative aspect-[3/4] overflow-hidden rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-[var(--gush-shadow-card)] transition-all duration-200 group-hover:-translate-y-1 group-hover:border-white/16">
+        <div className="relative aspect-[3/4] overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.035)] shadow-[var(--gush-shadow-card)] transition-all duration-200 group-hover:-translate-y-1.5 group-hover:border-white/18 group-hover:shadow-[0_30px_96px_rgba(0,0,0,0.42)]">
           <img
             src={coverUrl}
             alt={coverAlt(series)}
@@ -397,10 +408,10 @@ export function CoverCard({
             ) : null}
           </div>
           <div className="absolute bottom-0 left-0 right-0 space-y-1.5 p-3.5">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/58">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/62">
               {meta.eyebrow}
             </p>
-            <h3 className="line-clamp-2 text-[1.15rem] font-semibold leading-[1.02] tracking-[-0.03em] text-white">
+            <h3 className="line-clamp-2 text-[1.18rem] font-semibold leading-[1.02] tracking-[-0.03em] text-white">
               {series.title}
             </h3>
             <p className="line-clamp-2 text-sm leading-5 text-white/70">
@@ -459,7 +470,7 @@ export function UpdateList({ items = [], variant = "comic", sectionName = "" }) 
                 });
               }
             }}
-            className="group grid grid-cols-[76px_minmax(0,1fr)_auto] items-center gap-3 rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-3 shadow-[var(--gush-shadow-soft)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.06)] sm:grid-cols-[88px_minmax(0,1fr)_auto]"
+            className={`group grid grid-cols-[76px_minmax(0,1fr)_auto] items-center gap-3 p-3 transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.075)] sm:grid-cols-[88px_minmax(0,1fr)_auto] ${storefrontSoftCardClass}`}
           >
             <div className="relative aspect-[3/4] overflow-hidden rounded-[18px] border border-white/10">
               <img
@@ -529,7 +540,7 @@ export function RankList({
           <Link
             key={`${series.id}-${index}`}
             href={buildSeriesHref(series)}
-            className={`group grid items-center gap-3 border border-white/8 bg-black/15 transition-colors hover:bg-white/[0.05] ${
+            className={`group grid items-center gap-3 border border-white/8 bg-[rgba(255,255,255,0.025)] transition-colors hover:bg-[rgba(255,255,255,0.075)] ${
               minimal
                 ? "grid-cols-[30px_48px_minmax(0,1fr)] rounded-[20px] px-3 py-2.5"
                 : "grid-cols-[34px_56px_minmax(0,1fr)] rounded-[22px] px-3 py-3"
@@ -602,7 +613,7 @@ export function GenreShelfSection({
 
 export function InteractivePromo() {
   return (
-    <section className="rounded-[34px] border border-[rgba(103,232,249,0.18)] bg-[linear-gradient(135deg,rgba(7,10,18,0.98)_0%,rgba(13,11,25,0.98)_50%,rgba(16,12,24,0.98)_100%)] p-5 shadow-[var(--gush-shadow-panel)] sm:p-6">
+    <section className="rounded-[36px] border border-[rgba(103,232,249,0.18)] bg-[linear-gradient(135deg,rgba(7,10,18,0.98)_0%,rgba(13,11,25,0.98)_50%,rgba(16,12,24,0.98)_100%)] p-5 shadow-[var(--gush-shadow-panel)] sm:p-6">
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div className="space-y-3">
           <p className="inline-flex items-center gap-2 rounded-full border border-cyan-200/16 bg-cyan-200/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-100">
@@ -626,7 +637,7 @@ export function InteractivePromo() {
           </Link>
           <Link
             href="/search?format=interactive"
-            className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-white/12 bg-white/[0.05] px-5 text-sm font-medium text-white/82"
+            className={`${storefrontSecondaryButtonClass} min-h-[48px] px-5 text-white/82`}
           >
             More Stories
           </Link>
@@ -647,8 +658,8 @@ export function DiscoveryFilterPill({
       href={href}
       className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
         active
-          ? "border-white/16 bg-[rgba(255,79,154,0.16)] text-white shadow-[var(--gush-shadow-soft)]"
-          : "border-white/10 bg-white/[0.05] text-white/72 hover:-translate-y-0.5 hover:bg-white/[0.08]"
+          ? `${storefrontAccentChipClass} border-white/16 bg-[rgba(255,79,154,0.16)] text-white shadow-[var(--gush-shadow-soft)]`
+          : `${storefrontSecondaryButtonClass} text-white/78`
       }`}
     >
       {Icon ? <Icon className="size-4" /> : null}
@@ -675,7 +686,7 @@ export function EmptyShelf({
       </p>
       <Link
         href={actionHref}
-        className="mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/12 bg-white/[0.05] px-4 text-sm font-medium text-white/82"
+        className={`mt-5 ${storefrontSecondaryButtonClass} min-h-[44px] px-4 text-white/82`}
       >
         Find a Story
         <Library className="size-4" />

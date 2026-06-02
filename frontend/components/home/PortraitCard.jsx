@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import Cover from "../common/Cover";
 import { cn } from "@/lib/utils";
 import { getCoverCardMeta } from "../../lib/coverPresentation";
+import { storefrontBadgeClass } from "../common/StorefrontPagePrimitives";
 import {
   formatTitleCardFormatStatus,
   formatTitleCardGenres,
@@ -270,7 +271,7 @@ function PortraitCard({
           ) : null}
           <span
             className={cn(
-              "inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-white/12 bg-[rgba(255,255,255,0.06)] text-white shadow-[0_8px_20px_rgba(8,6,20,0.18)]",
+              `${storefrontBadgeClass} h-8 w-8 flex-shrink-0 justify-center px-0 py-0 text-white`,
               "transition-transform duration-150 group-hover:translate-x-0.5 group-hover:bg-[rgba(255,79,154,0.14)]",
             )}
           >

@@ -23,7 +23,7 @@ function ReaderLoadingShell({ fallbackData }) {
       }
       mutedClassName={isNovel ? "text-[#667085]" : "text-white/55"}
       borderClassName={
-        isNovel ? "border-[#e5e7eb]" : "border-white/10 bg-white/[0.04]"
+        isNovel ? "border-[#e5e7eb]" : "border-white/10 bg-[rgba(255,255,255,0.035)]"
       }
       heroClassName={
         isNovel

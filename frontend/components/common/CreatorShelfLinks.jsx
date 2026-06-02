@@ -3,10 +3,16 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { getCreatorDisplayName } from "../../lib/creators";
 import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 import { trackEvent } from "../../lib/trackEvent";
+import {
+  storefrontBadgeClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+} from "./StorefrontPagePrimitives";
 
 function getSeriesId(item) {
   if (typeof item?.seriesId === "string" && item.seriesId.trim()) {
@@ -94,8 +100,8 @@ export default function CreatorShelfLinks({
   }
 
   const baseClassName = compact
-    ? "rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,20,33,0.96)_0%,rgba(14,12,20,0.96)_100%)] px-3 py-3 shadow-[0_18px_40px_rgba(8,6,20,0.22)]"
-    : "rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,20,33,0.96)_0%,rgba(14,12,20,0.96)_100%)] px-4 py-4 shadow-[0_20px_46px_rgba(8,6,20,0.24)] sm:px-5";
+    ? "rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(20,18,30,0.96)_0%,rgba(13,12,20,0.96)_100%)] px-3.5 py-3.5 shadow-[0_20px_46px_rgba(8,6,20,0.24)] backdrop-blur-xl"
+    : "rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(20,18,30,0.96)_0%,rgba(13,12,20,0.96)_100%)] px-4 py-4 shadow-[0_24px_52px_rgba(8,6,20,0.26)] backdrop-blur-xl sm:px-5";
 
   const handleClick = (creator) => {
     const targetPath = creator.href || "/creators";
@@ -128,7 +134,7 @@ export default function CreatorShelfLinks({
           }
         >
           <p
-            className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-600" : "text-white/56"}`}
+            className={`${storefrontBadgeClass} ${isLight ? "border-slate-300 bg-slate-100 text-slate-600" : "text-white/60"}`}
           >
             {label}
           </p>
@@ -155,11 +161,7 @@ export default function CreatorShelfLinks({
                 event.preventDefault();
                 handleClick(creator);
               }}
-              className={`
-                group min-w-[12rem] max-w-full flex-1 rounded-[20px] border border-white/10
-                bg-[rgba(255,255,255,0.03)] px-4 py-3 text-left shadow-[0_14px_32px_rgba(8,6,20,0.18)]
-                transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.06)]
-              `}
+              className={`${storefrontSoftCardClass} group min-w-[12rem] max-w-full flex-1 px-4 py-3 text-left transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.075)]`}
             >
               <span className="flex items-center justify-between gap-3">
                 <span className="min-w-0">
@@ -174,9 +176,9 @@ export default function CreatorShelfLinks({
                 </span>
                 <span
                   aria-hidden="true"
-                  className="text-sm text-white/38 transition group-hover:translate-x-0.5 group-hover:text-white/72"
+                  className={`inline-flex h-9 w-9 items-center justify-center px-0 text-white/44 transition group-hover:translate-x-0.5 group-hover:text-white/80 ${storefrontSecondaryButtonClass}`}
                 >
-                  &rarr;
+                  <ArrowRight className="size-4" />
                 </span>
               </span>
             </Link>

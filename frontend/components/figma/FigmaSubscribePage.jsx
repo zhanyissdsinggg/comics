@@ -13,6 +13,10 @@ import {
 import FigmaChrome from "./FigmaChrome";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import { cn } from "./figma-utils";
+import {
+  storefrontBadgeClass,
+  storefrontSoftCardClass,
+} from "../common/StorefrontPagePrimitives";
 
 const PLAN_PREVIEWS = [
   {
@@ -108,7 +112,7 @@ function SubscribeContent() {
                 </div>
 
                 <div className="mt-4 grid gap-2.5 sm:grid-cols-3 md:mt-5 md:gap-3">
-                  <div className="rounded-[22px] border border-white/10 bg-black/20 p-3">
+                  <div className={`${storefrontSoftCardClass} p-3`}>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
                       Status
                     </p>
@@ -116,7 +120,7 @@ function SubscribeContent() {
                       Preview only
                     </p>
                   </div>
-                  <div className="rounded-[22px] border border-white/10 bg-black/20 p-3">
+                  <div className={`${storefrontSoftCardClass} p-3`}>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
                       Billing
                     </p>
@@ -124,7 +128,7 @@ function SubscribeContent() {
                       Not live yet
                     </p>
                   </div>
-                  <div className="rounded-[22px] border border-white/10 bg-black/20 p-3">
+                  <div className={`${storefrontSoftCardClass} p-3`}>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
                       Access
                     </p>
@@ -160,7 +164,7 @@ function SubscribeContent() {
                 </div>
               </div>
 
-              <div className="mt-5 space-y-2.5 rounded-[26px] border border-white/10 bg-black/20 p-3 md:mt-6 md:space-y-3 md:p-4">
+              <div className={`mt-5 space-y-2.5 ${storefrontSoftCardClass} p-3 md:mt-6 md:space-y-3 md:p-4`}>
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
                     <CheckCircle2 className="h-4 w-4" />
@@ -242,7 +246,7 @@ function SubscribeContent() {
                         {plan.summary}
                       </p>
                     </div>
-                    <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-gray-200">
+                    <div className={`${storefrontBadgeClass} text-gray-200`}>
                       {plan.badge}
                     </div>
                   </div>
@@ -259,7 +263,7 @@ function SubscribeContent() {
                     ))}
                   </div>
 
-                  <div className="mt-4 rounded-[22px] border border-white/10 bg-black/20 p-3">
+                  <div className={`mt-4 ${storefrontSoftCardClass} p-3`}>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
                       Launch Note
                     </p>

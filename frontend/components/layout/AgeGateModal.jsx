@@ -3,6 +3,12 @@
 import { useEffect } from "react";
 import { ChevronRight, ShieldAlert } from "lucide-react";
 import { AGE_RULES } from "../../lib/ageRules";
+import {
+  storefrontBadgeClass,
+  storefrontInfoCardClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 import { Button } from "@/components/ui/button";
 
 export default function AgeGateModal({
@@ -61,7 +67,7 @@ export default function AgeGateModal({
             <ShieldAlert className="size-5" strokeWidth={2} />
           </div>
 
-          <p className="mt-5 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/62">
+          <p className={`mt-5 ${storefrontBadgeClass} text-white/70`}>
             Mature access
           </p>
           <h2
@@ -80,7 +86,7 @@ export default function AgeGateModal({
         </div>
 
         <div className="relative p-6 sm:p-7">
-          <div className="rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 shadow-[0_14px_34px_rgba(8,6,20,0.2)]">
+          <div className={`${storefrontInfoCardClass} px-4 text-white`}>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/52">
               Region check
             </p>
@@ -98,14 +104,14 @@ export default function AgeGateModal({
               type="button"
               variant="ghost"
               onClick={onClose}
-              className="h-11 rounded-full border border-white/12 bg-white/[0.03] px-5 text-sm font-medium text-white shadow-none transition-colors hover:border-white/18 hover:bg-white/[0.06]"
+              className={`${storefrontSecondaryButtonClass} px-5 text-white`}
             >
               Not now
             </Button>
             <Button
               type="button"
               onClick={() => onConfirm?.(normalizedRule)}
-              className="h-11 rounded-full border border-[rgba(245,137,177,0.3)] bg-[linear-gradient(135deg,#f589b1_0%,#ffabc8_100%)] px-5 text-sm font-semibold text-[#25111f] shadow-[0_14px_30px_rgba(245,137,177,0.22)] transition-all hover:-translate-y-0.5"
+              className={`${storefrontPrimaryButtonClass} px-5 text-[#25111f]`}
             >
               I am {currentAge} or older
               <ChevronRight className="size-4" />

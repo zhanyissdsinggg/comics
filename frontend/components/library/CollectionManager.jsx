@@ -3,6 +3,7 @@
 import React, { useCallback, useState } from "react";
 import { useFollowStore } from "../../store/useFollowStore";
 import {
+  storefrontBadgeClass,
   storefrontInputClass,
   storefrontInsetCardClass,
   storefrontPrimaryButtonClass,
@@ -162,7 +163,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
           return (
             <div
               key={collection.id}
-              className="flex items-center gap-3 rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.045)] p-3 shadow-[0_18px_38px_rgba(8,6,20,0.22)] backdrop-blur-xl transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/16"
+              className={`flex items-center gap-3 p-3 transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/16 ${storefrontSoftCardClass}`}
             >
               {seriesId ? (
                 <input
@@ -228,7 +229,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                       <button
                         type="button"
                         onClick={() => handleDelete(collection.id)}
-                        className="h-9 rounded-full border border-[rgba(255,79,154,0.28)] bg-[linear-gradient(135deg,rgba(255,79,154,0.22)_0%,rgba(255,124,177,0.16)_100%)] px-3 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_rgba(255,79,154,0.18)] transition-transform duration-150 ease-out hover:-translate-y-0.5"
+                        className={`${storefrontBadgeClass} h-9 border-[rgba(255,79,154,0.28)] bg-[linear-gradient(135deg,rgba(255,79,154,0.22)_0%,rgba(255,124,177,0.16)_100%)] px-3 text-[11px] text-white shadow-[0_14px_28px_rgba(255,79,154,0.18)] transition-transform duration-150 ease-out hover:-translate-y-0.5`}
                       >
                         Delete
                       </button>

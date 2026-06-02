@@ -6,6 +6,10 @@ import {
   shouldUseDocumentNavigation,
 } from "../../lib/adultRouteNavigation";
 import { siteConfig } from "../../lib/siteConfig";
+import {
+  storefrontInfoCardClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 const primaryFooterLinks = [
   { label: "Comics", href: "/comics" },
@@ -161,7 +165,10 @@ export default function SiteFooter({
   showTagline = true,
   showInteractiveNav = true,
 }) {
-  const currentYear = new Date().getFullYear();
+  const currentYear = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    timeZone: "America/New_York",
+  }).format(new Date());
   const isHome = tone === "home" || tone === "light";
   const isCompact = variant === "compact";
   const currentRouteKey = buildFooterRouteKey(pathname);
@@ -233,37 +240,45 @@ export default function SiteFooter({
     return (
       <footer
         data-site-footer="1"
-        className={`${isHome ? "mt-0" : "mt-16"} border-t border-white/10 bg-[linear-gradient(180deg,#0a0c13_0%,#0f1118_100%)] text-white`}
+        className={`${isHome ? "mt-0" : "mt-16"} border-t border-white/10 bg-[linear-gradient(180deg,rgba(11,12,19,0.96)_0%,rgba(8,10,16,0.98)_100%)] text-white backdrop-blur-xl`}
       >
         <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-md space-y-2">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/44">
+                Read Tonight
+              </p>
               <FooterHomeLink
                 {...footerHomeLinkProps}
-                className="font-display text-[1.9rem] font-semibold tracking-[-0.05em] text-white"
+                className="font-display text-[2rem] font-semibold tracking-[-0.06em] text-white"
               >
                 {siteConfig.siteName}
               </FooterHomeLink>
+              {showTagline && footerTagline ? (
+                <p className="max-w-sm text-sm leading-6 text-white/56">
+                  {footerTagline}
+                </p>
+              ) : null}
             </div>
 
-            <nav className="flex max-w-3xl flex-wrap gap-x-4 gap-y-2 text-sm font-medium">
+            <nav className="grid max-w-3xl grid-cols-2 gap-2 text-sm font-medium sm:flex sm:flex-wrap sm:gap-x-2 sm:gap-y-2">
               {footerPrimaryLinks.map((link) =>
                 renderInternalLink(
                   link,
-                  "text-white/60 transition-colors hover:text-white",
+                  `flex min-h-[42px] items-center justify-center px-3.5 py-2 text-center text-white/64 hover:text-white sm:min-h-0 ${storefrontSecondaryButtonClass}`,
                 ),
               )}
             </nav>
           </div>
 
-          <div className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-3 text-sm text-white/50 lg:flex-row lg:items-center lg:justify-end">
+          <div className="mt-5 flex flex-col gap-3 border-t border-white/10 pt-4 text-sm text-white/50 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col gap-3">
               {footerMetaLinks.length > 0 ? (
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                   {footerMetaLinks.map((link) =>
                     renderInternalLink(
                       link,
-                      "font-medium text-white/60 transition-colors hover:text-white",
+                      "font-medium text-white/56 transition-colors hover:text-white",
                     ),
                   )}
                 </div>
@@ -284,14 +299,14 @@ export default function SiteFooter({
   return (
     <footer
       data-site-footer="1"
-      className="mt-16 border-t border-white/10 bg-[linear-gradient(180deg,#0a0c13_0%,#0f1118_100%)] text-white"
+      className="mt-16 border-t border-white/10 bg-[linear-gradient(180deg,rgba(11,12,19,0.96)_0%,rgba(8,10,16,0.99)_100%)] text-white backdrop-blur-xl"
     >
       <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
-          <div className="max-w-xl space-y-4">
-            <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-white/46">
-                Read
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+          <div className="max-w-xl space-y-5">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-white/42">
+                Read Tonight
               </p>
               <FooterHomeLink
                 {...footerHomeLinkProps}
@@ -299,31 +314,48 @@ export default function SiteFooter({
               >
                 {siteConfig.siteName}
               </FooterHomeLink>
+              {showTagline && footerTagline ? (
+                <p className="max-w-lg text-sm leading-7 text-white/58">
+                  {footerTagline}
+                </p>
+              ) : null}
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-              <a
-                href={`mailto:${siteConfig.supportEmail}`}
-                className="font-medium text-white/60 transition-colors hover:text-white"
-              >
-                {siteConfig.supportEmail}
-              </a>
-              {contactActions.map((item) =>
-                item.href.startsWith("mailto:") ? (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    className="font-medium text-white/60 transition-colors hover:text-white"
-                  >
-                    {item.label}
-                  </a>
-                ) : (
-                  renderInternalLink(
-                    item,
-                    "font-medium text-white/60 transition-colors hover:text-white",
-                  )
-                ),
-              )}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className={`${storefrontInfoCardClass} rounded-[26px] p-4`}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46">
+                  Support
+                </p>
+                <a
+                  href={`mailto:${siteConfig.supportEmail}`}
+                  className="mt-3 block text-sm font-medium text-white/72 transition-colors hover:text-white"
+                >
+                  {siteConfig.supportEmail}
+                </a>
+              </div>
+              <div className={`${storefrontInfoCardClass} rounded-[26px] p-4`}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46">
+                  More
+                </p>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  {contactActions.map((item) =>
+                    item.href.startsWith("mailto:") ? (
+                      <a
+                        key={item.label}
+                        href={item.href}
+                        className="text-sm font-medium text-white/68 transition-colors hover:text-white"
+                      >
+                        {item.label}
+                      </a>
+                    ) : (
+                      renderInternalLink(
+                        item,
+                        "text-sm font-medium text-white/68 transition-colors hover:text-white",
+                      )
+                    ),
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -354,7 +386,7 @@ export default function SiteFooter({
               {footerMetaLinks.map((link) =>
                 renderInternalLink(
                   link,
-                  "font-medium text-white/60 transition-colors hover:text-white",
+                  "font-medium text-white/56 transition-colors hover:text-white",
                 ),
               )}
             </div>

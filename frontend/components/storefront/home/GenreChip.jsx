@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  storefrontAccentChipClass,
+  storefrontBadgeClass,
+} from "../../common/StorefrontPagePrimitives";
+
 export default function GenreChip({
   label,
   tone = "default",
@@ -11,9 +16,9 @@ export default function GenreChip({
 
   const toneClass =
     tone === "accent"
-      ? "border-[rgba(255,122,176,0.28)] bg-[rgba(255,92,164,0.14)] text-white"
+      ? `${storefrontAccentChipClass} min-h-[30px] px-3 py-1.5 text-white`
       : tone === "ghost"
-        ? "border-white/10 bg-white/[0.05] text-white/76"
+        ? `${storefrontBadgeClass} min-h-[30px] px-3 py-1.5 text-white/76`
         : "border-white/12 bg-[rgba(11,14,23,0.52)] text-white/82";
 
   return (

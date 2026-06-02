@@ -68,7 +68,7 @@ export default function CookieConsent() {
           <div className="pointer-events-none absolute inset-0 opacity-80 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.16),transparent_36%),radial-gradient(circle_at_top_right,rgba(103,232,249,0.12),transparent_42%)]" />
           <button
             onClick={handleDecline}
-            className="absolute right-2 top-2 z-10 rounded-full border border-white/12 bg-white/[0.05] p-1.5 text-white/70 shadow-[0_10px_24px_rgba(8,6,20,0.18)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.08] hover:text-white sm:right-3 sm:top-3 sm:p-2"
+            className={`absolute right-2 top-2 z-10 p-1.5 text-white/70 sm:right-3 sm:top-3 sm:p-2 ${storefrontSecondaryButtonClass}`}
             aria-label="Close"
           >
             <X size={16} />

@@ -8,6 +8,11 @@ import {
   saveSearchHistoryItem,
   subscribeSearchHistory,
 } from "../../lib/searchHistory";
+import {
+  storefrontBadgeClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+} from "../common/StorefrontPagePrimitives";
 
 const MAX_HISTORY_ITEMS = 10;
 
@@ -135,7 +140,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
               <button
                 type="button"
                 onClick={clearHistory}
-                className="rounded-full border border-white/10 bg-[rgba(255,255,255,0.045)] px-3 py-1.5 text-[11px] font-semibold tracking-[0.04em] text-white/75 shadow-[0_14px_30px_rgba(8,6,20,0.22)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-[#ffd77a]/24 hover:bg-[rgba(255,255,255,0.08)]"
+                className={`${storefrontSecondaryButtonClass} px-3 py-1.5 text-[11px]`}
               >
                 Clear
               </button>
@@ -144,7 +149,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
               {history.map((keyword, index) => (
                 <div
                   key={`${keyword}-${index}`}
-                  className="inline-flex min-w-0 items-center gap-1 rounded-full border border-white/10 bg-[rgba(255,255,255,0.045)] px-2 py-1.5 shadow-[0_12px_28px_rgba(8,6,20,0.2)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-cyan-300/22"
+                  className={`inline-flex min-w-0 items-center gap-1 ${storefrontSoftCardClass} rounded-full px-2 py-1.5`}
                 >
                   <button
                     type="button"
@@ -156,7 +161,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
                   <button
                     type="button"
                     onClick={() => removeFromHistory(keyword)}
-                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-transparent text-white/60 transition-colors hover:border-white/12 hover:bg-[rgba(255,255,255,0.08)] hover:text-white"
+                    className={`${storefrontBadgeClass} h-7 w-7 flex-shrink-0 justify-center border-transparent px-0 py-0 text-white/60 hover:border-white/12 hover:bg-[rgba(255,255,255,0.075)] hover:text-white`}
                   >
                     <svg
                       className="h-4 w-4"
@@ -189,13 +194,13 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
                   key={keyword.id}
                   type="button"
                   onClick={() => handleSearch(keyword.value)}
-                  className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-[rgba(255,255,255,0.045)] px-3 py-2 text-left shadow-[0_14px_30px_rgba(8,6,20,0.22)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-cyan-300/24 hover:bg-[rgba(255,255,255,0.08)]"
+                  className={`inline-flex max-w-full items-center gap-2 rounded-full ${storefrontSoftCardClass} px-3 py-2 text-left hover:border-cyan-300/24 hover:bg-[rgba(255,255,255,0.075)]`}
                 >
                   <span
                     className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
                       index < 3
                         ? "border border-[rgba(255,214,130,0.22)] bg-[rgba(247,195,91,0.22)] text-white"
-                        : "border border-white/12 bg-[rgba(255,255,255,0.05)] text-white/75"
+                        : `${storefrontBadgeClass} h-5 w-5 border-white/12 px-0 py-0 text-white/75`
                     }`}
                   >
                     {index + 1}

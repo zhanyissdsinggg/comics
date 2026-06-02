@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { ArrowUpRight, Search, Trophy } from "lucide-react";
+import {
+  storefrontInfoCardClass,
+  storefrontSoftCardClass,
+} from "../../common/StorefrontPagePrimitives";
 import { buildReadHref } from "../landingUtils";
 import GenreChip from "./GenreChip";
 import SectionHeader from "./SectionHeader";
@@ -9,7 +13,7 @@ import StoryCard from "./StoryCard";
 
 function SearchSuggestionPanel({ suggestions = [] }) {
   return (
-    <div className="rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 shadow-[0_18px_46px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+    <div className={`${storefrontSoftCardClass} p-4`}>
       <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/44">
         <Search className="size-4" />
         Search suggestions
@@ -36,7 +40,7 @@ function SearchSuggestionPanel({ suggestions = [] }) {
 
 function RankingsPreview({ items = [] }) {
   return (
-    <div className="rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 shadow-[0_18px_46px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+    <div className={`${storefrontInfoCardClass} p-4`}>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/44">
           <Trophy className="size-4" />
@@ -98,7 +102,7 @@ export default function ReadTonightSection({
             {items.slice(0, 4).map((series, index) => (
               <div
                 key={series.id}
-                className="w-[82vw] max-w-[360px] md:w-auto md:max-w-none"
+                className="w-[calc(100vw-2.5rem)] max-w-[360px] md:w-auto md:max-w-none"
               >
                 <StoryCard
                   series={series}

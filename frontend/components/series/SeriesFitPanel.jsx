@@ -10,6 +10,7 @@ import {
   getStartReadingLabel,
 } from "../../lib/seriesFormatLabels";
 import {
+  storefrontInfoCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
@@ -221,7 +222,7 @@ export default function SeriesFitPanel({
             Why read this?
           </h2>
         </div>
-        <div className="rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-left shadow-[0_18px_44px_rgba(8,6,20,0.22)]">
+        <div className={`${storefrontInfoCardClass} px-4 py-4 text-left`}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/58">
             Jump in
           </p>
@@ -235,7 +236,7 @@ export default function SeriesFitPanel({
         {fitCards.map((card) => (
           <div
             key={card.label}
-            className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-white shadow-[0_18px_44px_rgba(8,6,20,0.22)]"
+            className={`${storefrontInfoCardClass} px-4 py-4 text-white`}
           >
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/58">
               {card.label}
@@ -251,7 +252,7 @@ export default function SeriesFitPanel({
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.08fr_0.92fr]">
-        <div className="rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-white shadow-[0_18px_44px_rgba(8,6,20,0.22)]">
+        <div className={`${storefrontInfoCardClass} px-4 py-4 text-white`}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/58">
             Good fit
           </p>
@@ -266,7 +267,7 @@ export default function SeriesFitPanel({
             .
           </p>
         </div>
-        <div className="rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-white shadow-[0_18px_44px_rgba(8,6,20,0.22)]">
+        <div className={`${storefrontInfoCardClass} px-4 py-4 text-white`}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/58">
             Also try
           </p>
@@ -279,7 +280,7 @@ export default function SeriesFitPanel({
       </div>
 
       {fitModel.primaryAction ? (
-        <div className="rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-white shadow-[0_18px_44px_rgba(8,6,20,0.22)]">
+        <div className={`${storefrontInfoCardClass} px-4 py-4 text-white`}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/58">
             Up next
           </p>

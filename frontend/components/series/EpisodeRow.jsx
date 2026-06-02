@@ -25,6 +25,8 @@ import {
   isDefaultInstallmentTitle,
 } from "../../lib/seriesFormatLabels";
 import {
+  storefrontBadgeClass,
+  storefrontHighlightBadgeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
@@ -45,19 +47,19 @@ function openAuthModal() {
 
 function getSignalClass(tone) {
   if (tone === "free" || tone === "ready" || tone === "membership") {
-    return "border border-cyan-200/18 bg-cyan-300/10 text-cyan-100";
+    return `${storefrontBadgeClass} border border-cyan-200/18 bg-cyan-300/10 text-cyan-100`;
   }
   if (tone === "preview") {
-    return "border border-amber-200/18 bg-amber-300/10 text-amber-100";
+    return `${storefrontBadgeClass} border border-amber-200/18 bg-amber-300/10 text-amber-100`;
   }
   if (tone === "points") {
-    return "border border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] text-[#ffd6e5]";
+    return `${storefrontBadgeClass} border border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] text-[#ffd6e5]`;
   }
   if (tone === "locked") {
-    return "border border-white/10 bg-white/[0.04] text-white/62";
+    return `${storefrontBadgeClass} text-white/62`;
   }
 
-  return "border border-white/10 bg-white/[0.04] text-white/62";
+  return `${storefrontBadgeClass} text-white/62`;
 }
 
 function EpisodeRow({
@@ -445,14 +447,14 @@ function EpisodeRow({
                   {episodeNumberLabel}
                 </span>
                 {showStateBadge ? (
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${getSignalClass(accessState.stateTone)}`}
-                  >
+                  <span className={getSignalClass(accessState.stateTone)}>
                     {accessState.stateLabel}
                   </span>
                 ) : null}
                 {isLastReadEpisode ? (
-                  <span className="rounded-full border border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#ffd6e5]">
+                  <span
+                    className={`${storefrontHighlightBadgeClass} text-[#ffd6e5]`}
+                  >
                     Last read
                   </span>
                 ) : null}
@@ -467,14 +469,14 @@ function EpisodeRow({
                 {episodeHeading}
               </strong>
               {showStateBadge ? (
-                <span
-                  className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${getSignalClass(accessState.stateTone)}`}
-                >
+                <span className={getSignalClass(accessState.stateTone)}>
                   {accessState.stateLabel}
                 </span>
               ) : null}
               {isLastReadEpisode ? (
-                <span className="rounded-full border border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#ffd6e5]">
+                <span
+                  className={`${storefrontHighlightBadgeClass} text-[#ffd6e5]`}
+                >
                   Last read
                 </span>
               ) : null}
@@ -488,7 +490,7 @@ function EpisodeRow({
           ) : null}
 
           {isLastReadEpisode ? (
-            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[rgba(255,255,255,0.035)]">
               <div
                 className="h-full rounded-full bg-[linear-gradient(90deg,rgba(255,79,154,0.92)_0%,rgba(255,173,200,0.92)_100%)]"
                 style={{
@@ -501,7 +503,7 @@ function EpisodeRow({
 
         <div className="flex w-full flex-col gap-2 sm:max-w-[240px] sm:items-end">
           {sideLabel ? (
-            <p className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/62">
+            <p className={`${storefrontBadgeClass} text-white/62`}>
               {sideLabel}
             </p>
           ) : null}

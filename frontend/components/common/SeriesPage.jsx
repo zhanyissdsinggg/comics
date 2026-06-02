@@ -8,6 +8,11 @@ import SkeletonCard from "../common/SkeletonCard";
 import FilterBar from "../common/FilterBar";
 import EmptyState from "../common/EmptyState";
 import SurfacePanel from "../common/SurfacePanel";
+import {
+  storefrontSecondaryButtonClass,
+  StorefrontSectionHeading,
+} from "./StorefrontPagePrimitives";
+import { StorefrontPage } from "../storefront/StorefrontScaffold";
 import { apiGet } from "../../lib/apiClient";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { getPublicGenres } from "../../lib/matureContent";
@@ -128,11 +133,7 @@ function CatalogSection({ title, items, href, ctaLabel }) {
   return (
     <section className="space-y-4">
       <div className="flex items-end justify-between gap-4">
-        <div>
-          <h2 className="text-[1.3rem] font-semibold tracking-[-0.03em] text-white">
-            {title}
-          </h2>
-        </div>
+        <StorefrontSectionHeading title={title} className="space-y-0" />
         {href ? (
           <Link href={href} className="text-sm text-white/65 hover:text-white">
             {ctaLabel}
@@ -345,8 +346,8 @@ export default function SeriesPage({
   );
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#0f0d13_0%,#130f18_44%,#17131d_100%)] text-white">
-      <div className="mx-auto flex max-w-[1180px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.08)]">
+      <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-8">
         <section className="rounded-[32px] border border-[rgba(255,255,255,0.09)] bg-[rgba(17,13,24,0.78)] p-5 shadow-[0_28px_80px_rgba(8,6,20,0.28)] backdrop-blur-xl sm:p-6">
           <div className="space-y-4">
             <div className="space-y-2">
@@ -364,7 +365,7 @@ export default function SeriesPage({
             <div>
               <Link
                 href={`/search?format=${type}`}
-                className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-white/12 bg-white/[0.04] px-5 text-sm font-medium text-white/78 transition-colors hover:bg-white/[0.08] hover:text-white"
+                className={`${storefrontSecondaryButtonClass} min-h-[44px] px-5 text-white/78`}
               >
                 View title
               </Link>
@@ -382,7 +383,7 @@ export default function SeriesPage({
                 />
               ))}
             </div>
-            <div className="rounded-[24px] border border-white/10 bg-[#111111] p-5">
+            <div className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.035)] p-5">
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
                 {Array.from({ length: 10 }).map((_, index) => (
                   <SkeletonCard
@@ -421,7 +422,12 @@ export default function SeriesPage({
               </div>
             </div>
 
-            <section className="space-y-5 rounded-[28px] border border-[rgba(255,255,255,0.09)] bg-[rgba(255,255,255,0.03)] p-5 shadow-[0_18px_46px_rgba(8,6,20,0.22)] sm:p-6">
+            <SurfacePanel
+              tone="muted"
+              accent="rose"
+              appearance="dark"
+              className="space-y-5 rounded-[28px] p-5 sm:p-6"
+            >
               <div className="space-y-2">
                 <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/45">
                   {config.collectionEyebrow}
@@ -472,10 +478,10 @@ export default function SeriesPage({
                   ))}
                 </div>
               )}
-            </section>
+            </SurfacePanel>
           </>
         )}
       </div>
-    </main>
+    </StorefrontPage>
   );
 }

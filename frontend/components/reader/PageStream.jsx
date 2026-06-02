@@ -408,9 +408,9 @@ export default function PageStream({
       style={isVerticalComicFlow ? { lineHeight: 0 } : undefined}
     >
       {visiblePages.length === 0 && visibleParagraphs.length === 0 ? (
-        <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-6 text-sm text-neutral-300">
-          <p className="text-base font-semibold text-neutral-100">No content</p>
-          <p className="mt-2 text-xs text-neutral-400">
+        <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045)_0%,rgba(255,255,255,0.025)_100%)] p-6 text-sm text-white/66 shadow-[0_18px_38px_rgba(8,6,20,0.22)] backdrop-blur-xl">
+          <p className="text-base font-semibold text-white">No content</p>
+          <p className="mt-2 text-xs text-white/46">
             Pages are not live yet.
           </p>
         </div>
@@ -431,7 +431,7 @@ export default function PageStream({
                 key={page.url}
                 className={`${
                   isHorizontal
-                    ? "flex-none w-full scroll-snap-item rounded-2xl border border-neutral-900 bg-neutral-900/50 p-2"
+                    ? "flex-none w-full scroll-snap-item rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045)_0%,rgba(255,255,255,0.025)_100%)] p-2 shadow-[0_18px_38px_rgba(8,6,20,0.22)] backdrop-blur-xl"
                     : "block m-0 rounded-none border-0 bg-transparent p-0 leading-none"
                 }`}
                 style={
@@ -455,8 +455,8 @@ export default function PageStream({
                     episodeTitle={episodeTitle}
                   />
                 ) : errorPages[index] ? (
-                  <div className="flex flex-col items-center gap-3 py-10 text-sm text-neutral-300">
-                    <p className="text-base font-semibold text-neutral-100">
+                  <div className="flex flex-col items-center gap-3 py-10 text-sm text-white/66">
+                    <p className="text-base font-semibold text-white">
                       Page unavailable
                     </p>
                     <button
@@ -471,8 +471,8 @@ export default function PageStream({
                   <div
                     className={`animate-pulse ${
                       isHorizontal
-                        ? "rounded-xl bg-neutral-800/60"
-                        : "m-0 block rounded-none bg-neutral-800/60 p-0 leading-none"
+                        ? "rounded-xl bg-[rgba(255,255,255,0.08)]"
+                        : "m-0 block rounded-none bg-[rgba(255,255,255,0.08)] p-0 leading-none"
                     }`}
                     style={{
                       height: 0,
@@ -504,8 +504,8 @@ export default function PageStream({
                       <div
                         className={`pointer-events-none absolute inset-0 z-[1] animate-pulse ${
                           isHorizontal
-                            ? "rounded-xl bg-neutral-800/60"
-                            : "m-0 rounded-none bg-neutral-800/60"
+                            ? "rounded-xl bg-[rgba(255,255,255,0.08)]"
+                            : "m-0 rounded-none bg-[rgba(255,255,255,0.08)]"
                         }`}
                         style={{
                           margin: 0,

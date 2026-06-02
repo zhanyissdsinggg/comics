@@ -2,7 +2,10 @@
 
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { storefrontPrimaryButtonClass } from "./StorefrontPagePrimitives";
+import {
+  storefrontBadgeClass,
+  storefrontPrimaryButtonClass,
+} from "./StorefrontPagePrimitives";
 
 function MascotPlaceholder() {
   return (
@@ -15,7 +18,7 @@ function MascotPlaceholder() {
       <div className="absolute left-5 top-5 h-4 w-4 rounded-full bg-[rgba(103,232,249,0.72)] blur-[2px]" />
       <div className="absolute right-5 top-7 h-3 w-3 rounded-full bg-[rgba(255,79,154,0.78)] blur-[1px]" />
       <div className="absolute bottom-5 left-6 h-5 w-5 rounded-full bg-[rgba(244,201,93,0.72)] blur-[2px]" />
-      <div className="absolute bottom-6 right-6 h-6 w-6 rounded-full border border-white/10 bg-[rgba(255,255,255,0.04)]" />
+      <div className="absolute bottom-6 right-6 h-6 w-6 rounded-full border border-white/10 bg-[rgba(255,255,255,0.035)]" />
       <div className="relative flex h-16 w-16 items-center justify-center rounded-[22px] border border-white/12 bg-[rgba(8,7,14,0.86)] shadow-[0_16px_38px_rgba(0,0,0,0.34)] backdrop-blur-xl">
         <div className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-white/30" />
@@ -63,7 +66,7 @@ export default function NetworkFallback({
         <div className="relative flex flex-col items-center justify-center">
           {showIllustration ? illustration || <MascotPlaceholder /> : null}
 
-          <p className="mt-5 rounded-full border border-white/10 bg-[rgba(255,255,255,0.05)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/56">
+          <p className={`mt-5 ${storefrontBadgeClass} text-white/56`}>
             Network
           </p>
 

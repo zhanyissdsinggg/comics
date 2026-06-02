@@ -44,8 +44,7 @@ export default function LoginGateModal({
   const { config } = useRegionStore();
   const googleAuthEnabled = isGoogleAuthEnabled();
   const inputClass = storefrontInputClass.replace("mt-2 ", "");
-  const secondaryPillClass =
-    "rounded-full border border-white/12 bg-[rgba(255,255,255,0.045)] text-white shadow-[0_14px_28px_rgba(8,6,20,0.18)] backdrop-blur-xl transition-all duration-150 hover:-translate-y-0.5 hover:border-cyan-300/28 hover:bg-[rgba(255,255,255,0.08)]";
+  const secondaryPillClass = storefrontSecondaryButtonClass;
   const activePillClass =
     "rounded-full border border-[rgba(255,214,130,0.24)] bg-[linear-gradient(135deg,#f6c25f_0%,#ffd77a_100%)] text-[#241608] shadow-[0_16px_30px_rgba(246,194,95,0.24)]";
   const dividerClass = "h-px flex-1 bg-white/10";

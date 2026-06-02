@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Pill from "../common/Pill";
+import {
+  storefrontChipClass,
+  storefrontHighlightBadgeClass,
+  storefrontSoftCardClass,
+} from "../common/StorefrontPagePrimitives";
 import { trackEvent } from "../../lib/trackEvent";
 import {
   formatInstallmentLabel,
@@ -75,10 +80,10 @@ export default function ReaderDrawer({
               type="button"
               onClick={() => setTab("toc")}
               aria-pressed={tab === "toc"}
-              className={`rounded-full px-3 py-1 transition-[background-color,border-color,box-shadow,transform] duration-200 ${
+              className={`px-3 py-1 transition-[background-color,border-color,box-shadow,transform] duration-200 ${
                 tab === "toc"
-                  ? "border border-cyan-300/28 bg-[linear-gradient(135deg,rgba(86,215,255,0.24)_0%,rgba(124,92,255,0.18)_100%)] text-white shadow-[0_14px_28px_rgba(86,215,255,0.16)]"
-                  : "border border-white/12 bg-white/[0.04] text-neutral-300 shadow-[0_12px_24px_rgba(0,0,0,0.22)] hover:bg-white/[0.08]"
+                  ? `${storefrontHighlightBadgeClass} border border-cyan-300/28 bg-[linear-gradient(135deg,rgba(86,215,255,0.24)_0%,rgba(124,92,255,0.18)_100%)] text-white shadow-[0_14px_28px_rgba(86,215,255,0.16)]`
+                  : `${storefrontChipClass} text-white/72 hover:bg-[rgba(255,255,255,0.075)]`
               }`}
             >
               {installmentPlural}
@@ -87,10 +92,10 @@ export default function ReaderDrawer({
               type="button"
               onClick={() => setTab("bookmarks")}
               aria-pressed={tab === "bookmarks"}
-              className={`rounded-full px-3 py-1 transition-[background-color,border-color,box-shadow,transform] duration-200 ${
+              className={`px-3 py-1 transition-[background-color,border-color,box-shadow,transform] duration-200 ${
                 tab === "bookmarks"
-                  ? "border border-cyan-300/28 bg-[linear-gradient(135deg,rgba(86,215,255,0.24)_0%,rgba(124,92,255,0.18)_100%)] text-white shadow-[0_14px_28px_rgba(86,215,255,0.16)]"
-                  : "border border-white/12 bg-white/[0.04] text-neutral-300 shadow-[0_12px_24px_rgba(0,0,0,0.22)] hover:bg-white/[0.08]"
+                  ? `${storefrontHighlightBadgeClass} border border-cyan-300/28 bg-[linear-gradient(135deg,rgba(86,215,255,0.24)_0%,rgba(124,92,255,0.18)_100%)] text-white shadow-[0_14px_28px_rgba(86,215,255,0.16)]`
+                  : `${storefrontChipClass} text-white/72 hover:bg-[rgba(255,255,255,0.075)]`
               }`}
             >
               Bookmarks
@@ -99,13 +104,13 @@ export default function ReaderDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-white/12 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-neutral-200 shadow-[0_12px_24px_rgba(0,0,0,0.22)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-white/[0.08] active:translate-y-px"
+            className={`${storefrontChipClass} min-h-[32px] px-3 py-1 text-xs uppercase tracking-[0.1em] text-white/76 active:translate-y-px`}
           >
             Close
           </button>
         </div>
         {onSubscribe ? (
-          <div className="mt-4 rounded-[22px] border border-white/10 bg-white/[0.04] p-3 text-xs text-neutral-300 shadow-[0_14px_28px_rgba(0,0,0,0.22)]">
+          <div className={`mt-4 ${storefrontSoftCardClass} p-3 text-xs text-white/68`}>
             <div className="flex items-center justify-between gap-3">
               <span>Plans can unlock free reads.</span>
               <button
@@ -116,7 +121,7 @@ export default function ReaderDrawer({
                   });
                   onSubscribe();
                 }}
-                className="rounded-full border border-white/14 bg-white/[0.05] px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-white shadow-[0_12px_24px_rgba(0,0,0,0.22)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-white/24 hover:bg-white/[0.08] active:translate-y-px"
+                className={`${storefrontChipClass} min-h-[30px] px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] hover:-translate-y-0.5 active:translate-y-px`}
               >
                 Plans
               </button>
@@ -144,7 +149,7 @@ export default function ReaderDrawer({
                         onSelectEpisode(episode.id);
                       }
                     }}
-                    className="w-full rounded-[22px] border border-white/10 bg-white/[0.04] px-3 py-2 text-left text-sm text-neutral-200 shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-white/[0.08]"
+                    className={`w-full ${storefrontSoftCardClass} px-3 py-2 text-left text-sm text-white/78 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[rgba(255,255,255,0.075)]`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -152,7 +157,7 @@ export default function ReaderDrawer({
                           {formatInstallmentLabel(seriesType, episode.number)}{" "}
                           {episode.title}
                         </div>
-                        <div className="text-xs text-neutral-400">
+                        <div className="text-xs text-white/46">
                           {helperLabel}
                         </div>
                       </div>
@@ -171,8 +176,8 @@ export default function ReaderDrawer({
           ) : (
             <div className="space-y-2 pb-6">
               {bookmarks.length === 0 ? (
-                <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 shadow-[0_12px_24px_rgba(0,0,0,0.2)]">
-                  <div className="text-sm font-black uppercase tracking-[0.04em] text-neutral-100">
+                <div className={`${storefrontSoftCardClass} p-4`}>
+                  <div className="text-sm font-black uppercase tracking-[0.04em] text-white">
                     No bookmarks yet.
                   </div>
                 </div>
@@ -180,12 +185,12 @@ export default function ReaderDrawer({
                 bookmarks.map((bookmark) => (
                   <div
                     key={bookmark.id}
-                    className="rounded-[22px] border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-neutral-200 shadow-[0_12px_24px_rgba(0,0,0,0.2)]"
+                    className={`${storefrontSoftCardClass} px-3 py-2 text-sm text-white/78`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="font-semibold">{bookmark.label}</div>
-                        <div className="text-xs text-neutral-400">
+                        <div className="text-xs text-white/46">
                           {formatInstallmentLabel(
                             seriesType,
                             bookmark.episodeId,
@@ -196,7 +201,7 @@ export default function ReaderDrawer({
                       <button
                         type="button"
                         onClick={() => onRemoveBookmark(bookmark.id)}
-                        className="text-xs font-black uppercase tracking-[0.08em] text-neutral-400 hover:text-neutral-200"
+                        className="text-xs font-black uppercase tracking-[0.08em] text-white/44 hover:text-white/76"
                       >
                         Remove
                       </button>
@@ -204,7 +209,7 @@ export default function ReaderDrawer({
                     <button
                       type="button"
                       onClick={() => onGoBookmark(bookmark)}
-                      className="mt-2 w-full rounded-full border border-white/14 bg-white/[0.05] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[0_12px_24px_rgba(0,0,0,0.22)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-white/24 hover:bg-white/[0.08] active:translate-y-px"
+                      className={`${storefrontChipClass} mt-2 w-full justify-center px-3 py-1 text-xs font-black uppercase tracking-[0.08em] hover:-translate-y-0.5 active:translate-y-px`}
                     >
                       Go there
                     </button>

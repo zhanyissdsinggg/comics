@@ -2,6 +2,13 @@
 
 import { memo, useEffect, useState } from "react";
 import { Bookmark, ChevronRight, Keyboard, RotateCcw, X } from "lucide-react";
+import {
+  storefrontChipClass,
+  storefrontHighlightBadgeClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+} from "../common/StorefrontPagePrimitives";
 
 function clamp(value, min, max, fallback) {
   const parsed = Number(value);
@@ -25,12 +32,12 @@ function SegmentedButton({ active, disabled = false, onClick, children }) {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`min-h-[42px] rounded-full border px-4 text-sm font-semibold transition ${
+      className={`min-h-[42px] px-4 text-sm font-semibold transition ${
         active
-          ? "border-white/40 bg-white text-black"
-          : disabled
-            ? "border-white/8 bg-white/[0.03] text-white/30"
-            : "border-white/12 bg-white/[0.04] text-white/78 hover:bg-white/[0.08]"
+          ? `${storefrontHighlightBadgeClass} border-white/40 bg-white text-black shadow-[0_12px_24px_rgba(8,6,20,0.16)]`
+            : disabled
+            ? `${storefrontChipClass} border-white/8 bg-[rgba(255,255,255,0.035)] text-white/30 shadow-none`
+            : `${storefrontSecondaryButtonClass} text-white/78 hover:bg-[rgba(255,255,255,0.075)]`
       }`}
     >
       {children}
@@ -43,7 +50,7 @@ function ToggleRow({ label, description, enabled, onToggle }) {
     <button
       type="button"
       onClick={onToggle}
-      className="flex w-full items-center justify-between gap-4 rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:bg-white/[0.06]"
+      className={`flex w-full items-center justify-between gap-4 ${storefrontSoftCardClass} px-4 py-3 text-left transition hover:bg-[rgba(255,255,255,0.075)]`}
       aria-pressed={enabled}
     >
       <span className="min-w-0">
@@ -74,7 +81,7 @@ function RangeField({ label, valueLabel, min, max, step, value, onChange }) {
     ((Number(value) - Number(min)) / (Number(max) - Number(min))) * 100;
 
   return (
-    <div className="rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-4">
+    <div className={`${storefrontSoftCardClass} px-4 py-4`}>
       <div className="flex items-center justify-between gap-3">
         <span className="text-sm font-semibold text-white">{label}</span>
         <span className="text-sm text-white/65">{valueLabel}</span>
@@ -108,15 +115,15 @@ function ActionRow({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`flex w-full items-center justify-between gap-4 rounded-[22px] border px-4 py-3 text-left transition ${
+      className={`flex w-full items-center justify-between gap-4 rounded-[22px] border px-4 py-3 text-left shadow-[0_14px_28px_rgba(8,6,20,0.16)] transition ${
         disabled
-          ? "border-white/8 bg-white/[0.02] text-white/28"
-          : "border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06]"
+          ? `${storefrontSoftCardClass} border-white/8 bg-[rgba(255,255,255,0.035)] text-white/28 shadow-none`
+          : `${storefrontSoftCardClass} text-white hover:bg-[rgba(255,255,255,0.075)]`
       }`}
     >
       <span className="flex min-w-0 items-center gap-3">
         {Icon ? (
-          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]">
+          <span className={`${storefrontChipClass} flex h-9 w-9 items-center justify-center px-0 shadow-[0_12px_24px_rgba(8,6,20,0.16)]`}>
             <Icon className="h-4 w-4" />
           </span>
         ) : null}
@@ -233,7 +240,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
             type="button"
             onClick={onClose}
             aria-label="Close settings"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/72 transition hover:bg-white/[0.08] hover:text-white"
+            className={`${storefrontChipClass} h-10 w-10 min-h-0 justify-center px-0 text-white/72`}
           >
             <X className="h-4 w-4" />
           </button>
@@ -243,7 +250,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
           {showLayoutControls ? (
             <div className="space-y-3">
               <SectionLabel>Comic settings</SectionLabel>
-              <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
+              <div className={`${storefrontSoftCardClass} p-4`}>
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold text-white">
@@ -284,7 +291,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
                 title="Fit width"
                 description="Pages stay edge-to-edge on mobile and centered on larger screens."
                 trailing={
-                  <span className="rounded-full border border-white/12 bg-white/[0.05] px-3 py-1 text-xs font-medium text-white/62">
+                  <span className={`${storefrontChipClass} min-h-[28px] px-3 py-1 text-xs font-medium text-white/62`}>
                     Always on
                   </span>
                 }
@@ -333,7 +340,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
                 onChange={onLineHeightChange}
               />
 
-              <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
+              <div className={`${storefrontSoftCardClass} p-4`}>
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold text-white">Theme</p>
@@ -403,7 +410,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
                   : "Use arrow keys for chapter movement and Page Down to keep the story flowing."
               }
               trailing={
-                <span className="rounded-full border border-white/12 bg-white/[0.05] px-3 py-1 text-xs font-medium text-white/62">
+                <span className={`${storefrontChipClass} min-h-[28px] px-3 py-1 text-xs font-medium text-white/62`}>
                   Tips
                 </span>
               }
@@ -416,14 +423,14 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
           <button
             type="button"
             onClick={resetDefaults}
-            className="min-h-[46px] rounded-full border border-white/12 bg-white/[0.04] px-4 text-sm font-semibold text-white/82 transition hover:bg-white/[0.08]"
+            className={`${storefrontSecondaryButtonClass} min-h-[46px] px-4 text-sm text-white/82`}
           >
             {showTextControls ? "Reset defaults" : "Reset"}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="min-h-[46px] rounded-full bg-white px-4 text-sm font-semibold text-black transition hover:bg-white/90"
+            className={`min-h-[46px] px-4 text-sm font-semibold text-[#160d13] ${storefrontPrimaryButtonClass}`}
           >
             Close
           </button>

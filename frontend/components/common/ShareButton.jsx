@@ -3,6 +3,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Link2, Share2, X } from "lucide-react";
 import {
+  storefrontChipClass,
   storefrontBadgeClass,
   storefrontInputClass,
   storefrontPrimaryButtonClass,
@@ -216,7 +217,7 @@ const ShareButton = React.memo(function ShareButton({
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/12 bg-white/6 p-2 text-white/74 shadow-[0_14px_30px_rgba(8,6,20,0.24)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/10 hover:text-white"
+                  className={`flex min-h-[44px] min-w-[44px] items-center justify-center p-2 text-white/74 ${storefrontChipClass}`}
                   aria-label="Close"
                 >
                   <X size={16} />

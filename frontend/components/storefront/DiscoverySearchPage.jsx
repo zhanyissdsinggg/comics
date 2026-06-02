@@ -12,6 +12,13 @@ import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import {
+  storefrontAccentChipClass,
+  storefrontBadgeClass,
+  storefrontChipClass,
+  storefrontInfoCardClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
+import {
   CoverCard,
   DiscoveryFilterPill,
   EmptyShelf,
@@ -241,7 +248,7 @@ function DiscoveryUpdateCard({ series, index = 0, sectionName = "search_recently
           position: index + 1,
         })
       }
-      className="group rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-3 shadow-[var(--gush-shadow-soft)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.06)]"
+      className={`group rounded-[28px] p-3 shadow-[var(--gush-shadow-soft)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.075)] ${storefrontInfoCardClass}`}
     >
       <article className="grid grid-cols-[88px_minmax(0,1fr)] gap-3">
         <div className="relative aspect-[3/4] overflow-hidden rounded-[18px] border border-white/10">
@@ -272,7 +279,7 @@ function DiscoveryUpdateCard({ series, index = 0, sectionName = "search_recently
           <p className="mt-1 text-sm leading-6 text-white/58">
             {genreLabel}
           </p>
-          <div className="mt-4 inline-flex min-h-[44px] items-center rounded-full border border-white/12 bg-white/[0.05] px-4 text-sm font-medium text-white/82">
+          <div className={`mt-4 ${storefrontSecondaryButtonClass} min-h-[44px] px-4 text-white/82`}>
             Start Reading
           </div>
         </div>
@@ -583,13 +590,39 @@ export default function DiscoverySearchPage({
   const hasSearchIntent = Boolean(query || type || format || status || genre);
   const activeFilterCount = [type || format, status, genre].filter(Boolean).length;
   const heroTitle = query ? `"${query}"` : "Find your next read";
+  const totalIndexedTitles = formatCounts.comics + formatCounts.novels;
+  const heroInsights = [
+    {
+      label: "Catalog Mode",
+      value: includeAdult ? "Adult only" : "Standard only",
+      description: includeAdult
+        ? "Search stays locked to 18+ stories in the active mode."
+        : "Search stays locked to the normal catalog in the active mode.",
+    },
+    {
+      label: "Indexed Titles",
+      value: `${totalIndexedTitles}`,
+      description:
+        totalIndexedTitles > 0
+          ? "Comics and novels already sitting in the searchable catalog."
+          : "The searchable catalog is still warming up.",
+    },
+    {
+      label: "Fresh Picks",
+      value: `${discoveryModel.recent.length}`,
+      description:
+        discoveryModel.recent.length > 0
+          ? "Recent updates ready to open without digging through filters."
+          : "Fresh update cards appear here as releases land.",
+    },
+  ];
 
   return (
     <StorefrontPage accentClass="from-[rgba(103,232,249,0.12)] via-[rgba(255,79,154,0.08)] to-[rgba(255,255,255,0.04)]">
       <section className="rounded-[36px] border border-white/10 bg-[linear-gradient(140deg,rgba(10,12,20,0.98)_0%,rgba(12,12,20,0.96)_48%,rgba(18,14,24,0.98)_100%)] p-4 shadow-[var(--gush-shadow-floating)] sm:p-6 lg:p-8">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-end">
           <div>
-            <p className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
+            <p className={storefrontBadgeClass}>
               Search Stories
             </p>
             <h1 className="mt-4 max-w-[15ch] font-display text-[2.75rem] font-semibold leading-[1] tracking-[-0.018em] text-white sm:text-[3.9rem] sm:tracking-[-0.02em]">
@@ -621,10 +654,10 @@ export default function DiscoverySearchPage({
                   key={option.id}
                   type="button"
                   onClick={() => updateParams({ sort: option.id }, { resetPage: true })}
-                  className={`inline-flex min-h-[44px] items-center rounded-full border px-4 text-sm font-medium ${
+                  className={`${storefrontSecondaryButtonClass} min-h-[44px] px-4 ${
                     sort === option.id
-                      ? "border-white/16 bg-[rgba(255,79,154,0.16)] text-white"
-                      : "border-white/10 bg-white/[0.05] text-white/70"
+                      ? "border-white/16 bg-[rgba(255,79,154,0.16)] text-white shadow-[0_18px_36px_rgba(255,79,154,0.18)]"
+                      : "text-white/72"
                   }`}
                 >
                   {option.label}
@@ -670,11 +703,27 @@ export default function DiscoverySearchPage({
                   { resetPage: true },
                 )
               }
-              className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-white/72"
+              className={`${storefrontSecondaryButtonClass} min-h-[44px] px-4 text-white/72`}
             >
               Clear filters
             </button>
           ) : null}
+        </div>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
+          {heroInsights.map((item) => (
+            <div key={item.label} className={storefrontInfoCardClass}>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+                {item.label}
+              </p>
+              <p className="mt-2 font-display text-[1.3rem] font-semibold tracking-[-0.04em] text-white">
+                {item.value}
+              </p>
+              <p className="mt-3 text-sm leading-[1.72] text-white/66">
+                {item.description}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -703,7 +752,7 @@ export default function DiscoverySearchPage({
                   key={item.id}
                   type="button"
                   onClick={() => handleSearchSubmit(item.value)}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white/78 transition-all hover:-translate-y-0.5 hover:bg-white/[0.08]"
+                  className={storefrontChipClass}
                 >
                   <Flame className="size-4 text-[var(--gush-gold)]" />
                   {item.label}
@@ -724,7 +773,7 @@ export default function DiscoverySearchPage({
                   key={tag}
                   type="button"
                   onClick={() => handleSearchSubmit(tag)}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/10 bg-[rgba(255,79,154,0.08)] px-4 text-sm font-medium text-white/78 transition-all hover:-translate-y-0.5"
+                  className={storefrontAccentChipClass}
                 >
                   <Sparkles className="size-4 text-[var(--gush-rose)]" />
                   {tag}
@@ -744,7 +793,7 @@ export default function DiscoverySearchPage({
                 <Link
                   key={tag}
                   href={`/search?genre=${encodeURIComponent(tag)}`}
-                  className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white/72 transition-all hover:-translate-y-0.5 hover:bg-white/[0.08]"
+                  className={storefrontChipClass}
                 >
                   {tag}
                 </Link>
@@ -869,7 +918,7 @@ export default function DiscoverySearchPage({
                 <button
                   type="button"
                   onClick={() => updateParams({ page: String(page + 1) }, { resetPage: false })}
-                  className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white/72 transition-all hover:-translate-y-0.5 hover:bg-white/[0.08]"
+                  className={`${storefrontSecondaryButtonClass} px-4 text-white/72`}
                 >
                   More results
                 </button>

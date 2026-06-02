@@ -33,6 +33,7 @@ import {
   formatWalletTotal,
 } from "./figma-utils";
 import { filterContentByMode } from "../../lib/contentFilters";
+import { storefrontSoftCardClass } from "../common/StorefrontPagePrimitives";
 
 function AccountContent({ seriesList = [] }) {
   const router = useRouter();
@@ -228,7 +229,7 @@ function AccountContent({ seriesList = [] }) {
                 </p>
 
                 <div className="mb-5 grid gap-3 sm:grid-cols-3 md:mb-6">
-                  <div className="rounded-[20px] border border-white/10 bg-black/20 px-4 py-3">
+                  <div className={`${storefrontSoftCardClass} px-4 py-3`}>
                     <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
                       Status
                     </p>
@@ -236,7 +237,7 @@ function AccountContent({ seriesList = [] }) {
                       Verified reader
                     </p>
                   </div>
-                  <div className="rounded-[20px] border border-white/10 bg-black/20 px-4 py-3">
+                  <div className={`${storefrontSoftCardClass} px-4 py-3`}>
                     <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
                       Wallet
                     </p>
@@ -244,7 +245,7 @@ function AccountContent({ seriesList = [] }) {
                       {walletTotal.toLocaleString()} coins
                     </p>
                   </div>
-                  <div className="rounded-[20px] border border-white/10 bg-black/20 px-4 py-3">
+                  <div className={`${storefrontSoftCardClass} px-4 py-3`}>
                     <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
                       Sync
                     </p>
@@ -301,7 +302,7 @@ function AccountContent({ seriesList = [] }) {
                   Paid {paidPts.toLocaleString()} | Bonus{" "}
                   {bonusPts.toLocaleString()}
                 </p>
-                <div className="mt-4 rounded-[20px] border border-white/10 bg-black/20 px-4 py-3">
+                <div className={`mt-4 ${storefrontSoftCardClass} px-4 py-3`}>
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
                     Account lane
                   </p>

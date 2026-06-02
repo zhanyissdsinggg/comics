@@ -9,6 +9,7 @@ import {
 } from "../../components/common/StorefrontPagePrimitives";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import StructuredDataScript from "../../components/common/StructuredDataScript";
+import { StorefrontPage } from "../../components/storefront/StorefrontScaffold";
 import { createPageMetadata } from "../../lib/seo";
 import { siteConfig } from "../../lib/siteConfig";
 import {
@@ -31,21 +32,21 @@ const FAQ = getSiteFaqItems().map((item) => ({
 const QUICK_LINKS = [
   {
     title: "Support",
-    description: "",
+    description: "Need a person instead of an answer block? Use the support form.",
     href: "/support",
-    label: "Support",
+    label: "Open support",
   },
   {
-    title: "Access",
-    description: "",
+    title: "How Reading Works",
+    description: "Points, plans, free chapters, and the basic reading flow.",
     href: "/how-it-works",
-    label: "How It Works",
+    label: "Reading basics",
   },
   {
-    title: "Mature content",
-    description: "",
+    title: "18+ Access",
+    description: "How mature access works and why the two content modes stay separate.",
     href: "/mature-content",
-    label: "18+ Access",
+    label: "Mature access",
   },
 ];
 
@@ -64,17 +65,16 @@ export default function FAQPage() {
   ].filter(Boolean);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.12),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
+    <StorefrontPage accentClass="from-[rgba(255,79,154,0.12)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.12)]">
       <StructuredDataScript id="faq-jsonld" data={structuredData} />
-      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
+      <div className="flex flex-col gap-8">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="dark"
             accent="cyan"
             eyebrow="FAQ"
-            title="Answers."
-            description=""
+            title="Fast answers for the pages people actually get stuck on."
+            description="Reading, billing, access, and support basics in one place."
             actions={
               <>
                 <Link href="/support" className={storefrontPrimaryButtonClass}>
@@ -90,30 +90,34 @@ export default function FAQPage() {
             }
             stats={[
               {
-                label: "Items",
+                label: "FAQ items",
                 value: String(FAQ.length),
               },
               {
-                label: "Contact",
-                value: "Email + form",
+                label: "Fallback",
+                value: "Support + email",
+              },
+              {
+                label: "Focus",
+                value: "Reading + billing",
               },
             ]}
           />
 
           <StorefrontDesk
-            eyebrow="More"
-            title="More."
-            description="Need direct help, billing details, or 18+ access guidance? Jump to the right page."
+            eyebrow="Need more"
+            title="Jump to the right page."
+            description="If the answer is not here, move straight to the correct support lane."
             actions={
               <>
                 <Link href="/support" className={storefrontPrimaryButtonClass}>
-                  Support
+                  Open support
                 </Link>
                 <Link
                   href="/how-it-works"
                   className={storefrontSecondaryButtonClass}
                 >
-                  How It Works
+                  Reading basics
                 </Link>
               </>
             }
@@ -122,11 +126,16 @@ export default function FAQPage() {
 
         <section className="grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
           <SurfacePanel className="space-y-4" appearance="dark" accent="cyan">
-            <StorefrontSectionHeading eyebrow="FAQ" title="Answers." />
+            <StorefrontSectionHeading
+              eyebrow="Help center"
+              title="Most asked right now"
+              description="Short answers for the questions that come up most often when readers are browsing, paying, or trying to get back into a story."
+            />
             <div className="space-y-3">
-              {FAQ.map((item) => (
+              {FAQ.map((item, index) => (
                 <StorefrontInfoCard
                   key={item.q}
+                  eyebrow={`FAQ ${index + 1}`}
                   title={item.q}
                   description={item.a}
                 />
@@ -135,23 +144,17 @@ export default function FAQPage() {
           </SurfacePanel>
 
           <div className="grid gap-4">
-            {QUICK_LINKS.map((item) => (
+            {QUICK_LINKS.map((item, index) => (
               <SurfacePanel
                 key={item.title}
                 className="h-full"
                 appearance="dark"
-                accent="cyan"
+                accent={index === 0 ? "rose" : index === 1 ? "cyan" : "amber"}
               >
                 <StorefrontSectionHeading
-                  eyebrow="More"
+                  eyebrow="Next step"
                   title={item.title}
-                  description={
-                    item.title === "Support"
-                      ? "Send one message and get a reply by email."
-                      : item.title === "Access"
-                        ? "Points, plans, and reading basics."
-                        : "How mature content access and mode switching work."
-                  }
+                  description={item.description}
                 />
                 <Link
                   href={item.href}
@@ -163,7 +166,7 @@ export default function FAQPage() {
             ))}
           </div>
         </section>
-      </main>
-    </div>
+      </div>
+    </StorefrontPage>
   );
 }

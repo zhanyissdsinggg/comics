@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
@@ -13,11 +14,24 @@ import {
   Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import EditorialHero from "../common/EditorialHero";
+import SurfacePanel from "../common/SurfacePanel";
+import {
+  storefrontBadgeClass,
+  storefrontHighlightBadgeClass,
+  storefrontInfoCardClass,
+  storefrontNoticeClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+  StorefrontSectionHeading,
+} from "../common/StorefrontPagePrimitives";
+import { StorefrontPage } from "../storefront/StorefrontScaffold";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import FigmaChrome from "./FigmaChrome";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
-import { cn, formatUsd } from "./figma-utils";
+import { formatUsd } from "./figma-utils";
 
 function normalizePackages(packages = []) {
   return (Array.isArray(packages) ? packages : [])
@@ -53,6 +67,7 @@ function normalizePlans(planCatalog = {}) {
       const monthlyPoints = Number(
         plan?.monthlyPoints || plan?.includedPoints || 0,
       );
+
       return {
         id,
         name: String(plan?.name || id).trim(),
@@ -82,7 +97,7 @@ function StoreContent({
   prelaunchStore = false,
 }) {
   const router = useRouter();
-  const { palette, isAdultMode, openLogin } = useFigmaSite();
+  const { isAdultMode, openLogin } = useFigmaSite();
   const { isSignedIn, user } = useAuthStore();
   const {
     paidPts,
@@ -121,28 +136,14 @@ function StoreContent({
   const storePreview = prelaunchStore || !purchaseActionsEnabled;
   const commerceReady = !storePreview && normalizedPackages.length > 0;
   const membershipReady = !storePreview && subscriptionActionsEnabled;
-  const shellPanelClass = cn(
-    "relative overflow-hidden rounded-[34px] border bg-[linear-gradient(180deg,rgba(22,21,36,0.96)_0%,rgba(11,11,20,0.94)_100%)] shadow-[0_30px_80px_rgba(5,5,15,0.38)] backdrop-blur-2xl",
-    isAdultMode ? "border-red-500/18" : "border-cyan-300/14",
-  );
-  const insetPanelClass =
-    "relative overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] shadow-[0_20px_48px_rgba(8,6,20,0.24)] backdrop-blur-xl";
-  const eyebrowClass =
-    "text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56";
-  const primaryCtaClass = cn(
-    "inline-flex w-full items-center justify-center gap-2 rounded-full border px-6 py-3.5 text-sm font-semibold tracking-[0.02em] transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto",
-    isAdultMode
-      ? "border-red-400/28 bg-[linear-gradient(135deg,#ef4444_0%,#f43f5e_100%)] text-white shadow-[0_18px_38px_rgba(239,68,68,0.26)] hover:-translate-y-0.5"
-      : "border-[rgba(255,79,154,0.32)] bg-[linear-gradient(135deg,#ff4f9a_0%,#ff7ab1_52%,#ff9cc0_100%)] text-[#1a0e16] shadow-[0_18px_38px_rgba(255,79,154,0.26)] hover:-translate-y-0.5",
-  );
-  const secondaryCtaClass =
-    "inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(8,6,20,0.18)] transition-all hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.09)] sm:w-auto";
-  const accentChipClass = cn(
-    "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] shadow-[0_12px_28px_rgba(8,6,20,0.2)] md:px-4 md:py-2 md:text-xs",
-    isAdultMode
-      ? "border-red-400/24 bg-red-500/12 text-red-200"
-      : "border-cyan-300/18 bg-cyan-300/10 text-cyan-100",
-  );
+  const accent = isAdultMode ? "rose" : "blue";
+  const primaryCtaClass = `${storefrontPrimaryButtonClass} w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`;
+  const secondaryCtaClass = `${storefrontSecondaryButtonClass} w-full sm:w-auto`;
+  const quietCardClass = `${storefrontInfoCardClass} text-white`;
+  const planCardClass =
+    "flex h-full flex-col overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-5 shadow-[0_20px_48px_rgba(8,6,20,0.24)] md:p-6";
+  const inactivePackClass =
+    "relative flex h-full flex-col overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-5 text-left shadow-[0_20px_48px_rgba(8,6,20,0.24)] transition-all hover:-translate-y-1 active:scale-[0.99] md:p-6";
 
   useEffect(() => {
     if (normalizedPackages.length > 0 && !selectedPackId) {
@@ -196,6 +197,7 @@ function StoreContent({
       openLogin("login", "/store");
       return;
     }
+
     setBusyAction(`plan:${planId}`);
     setStatusMessage("");
     const response = await subscribe(planId, {
@@ -215,41 +217,98 @@ function StoreContent({
     setBusyAction("");
   };
 
+  const heroStats = [
+    {
+      label: "Wallet",
+      value: `${walletBalance.toLocaleString()} pts`,
+      hint: `Paid ${paidPts.toLocaleString()} / Bonus ${bonusPts.toLocaleString()}`,
+    },
+    {
+      label: "Point packs",
+      value: normalizedPackages.length > 0 ? `${normalizedPackages.length} live` : "Preview",
+      hint: commerceReady ? "Pick a pack and open checkout." : "Browsing only right now.",
+    },
+    {
+      label: "Membership",
+      value: subscription?.active
+        ? subscription?.planId || "Active"
+        : membershipReady
+          ? "Available"
+          : "Preview",
+      hint: subscription?.active
+        ? "Perks are already attached to this account."
+        : "Monthly plan layer for long-haul readers.",
+    },
+  ];
+
+  const deskCards = [
+    {
+      label: "Balance",
+      value: walletBalance.toLocaleString(),
+      hint: "Live wallet total.",
+      icon: Coins,
+    },
+    {
+      label: "Reader state",
+      value: subscription?.active ? "Member" : "Free",
+      hint: displayName,
+      icon: Crown,
+    },
+    {
+      label: "Commerce",
+      value: storePreview ? "Preview" : "Live",
+      hint: storePreview ? "Checkout disabled." : "Wallet checkout ready.",
+      icon: CreditCard,
+    },
+  ];
+
+  const helperCards = [
+    {
+      icon: ShieldCheck,
+      title: "Secure billing",
+      body: storePreview
+        ? "Checkout is staged but not open yet. Pricing stays visible so readers can still compare the structure."
+        : "Billing runs through the existing checkout flow already wired into the app.",
+    },
+    {
+      icon: Zap,
+      title: "Immediate unlocks",
+      body: storePreview
+        ? "Free chapters and catalog browsing stay live while paid unlocks wait for launch."
+        : "Purchased points land in the wallet and are ready for locked episodes right away.",
+    },
+    {
+      icon: Crown,
+      title: "Membership layer",
+      body: storePreview
+        ? "Membership pricing is visible early so readers can compare plans before billing opens."
+        : "If plans are live, you can stack recurring value on top of the same wallet flow.",
+    },
+  ];
+
   return (
-    <div className={cn("min-h-screen pb-20", palette.rootBg)}>
+    <StorefrontPage accentClass="from-[rgba(82,188,255,0.12)] via-[rgba(167,139,250,0.08)] to-[rgba(255,87,166,0.1)]">
       <FigmaChrome>
-        <div className="mx-auto max-w-6xl px-4 md:px-8">
-          <section className="mb-8 grid gap-4 lg:mb-10 lg:grid-cols-[minmax(0,1.6fr)_360px] lg:gap-6">
-            <div className={cn(shellPanelClass, "p-4 md:p-8")}>
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(103,232,249,0.14),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_34%)]" />
-              <div className="pointer-events-none absolute inset-[1px] rounded-[33px] border border-white/6" />
-              <div
-                className={cn(
-                  "pointer-events-none absolute -right-16 -top-12 h-56 w-56 rounded-full blur-[90px] opacity-30",
-                  isAdultMode ? "bg-red-500" : "bg-yellow-400",
-                )}
-              />
-              <div className="relative z-10 max-w-3xl">
-                <div className={cn("mb-3", accentChipClass)}>
-                  <Sparkles className="h-4 w-4" />
-                  {storePreview ? "Store Preview" : "Wallet / Membership"}
-                </div>
-                <h1 className="max-w-2xl font-display text-[2.3rem] font-semibold leading-[0.92] tracking-[-0.06em] text-white md:max-w-3xl md:text-[4.6rem]">
-                  {storePreview
-                    ? "Coming soon."
-                    : "Power up your next binge session."}
-                </h1>
-                {storePreview ? (
-                  <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#ffdca1] md:text-xs">
-                    Points are coming soon
-                  </p>
-                ) : null}
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 md:text-base">
-                  {storePreview
-                    ? "Preview only. Checkout is disabled."
-                    : "Buy points for locked episodes, or go member if you want the cleaner long-haul deal. Same storefront, sharper presentation."}
-                </p>
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row md:mt-8">
+        <div className="flex flex-col gap-8">
+          <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+            <EditorialHero
+              accent={accent}
+              appearance="dark"
+              eyebrow={storePreview ? "Store Preview" : "Wallet / Membership"}
+              title={
+                storePreview
+                  ? "Points are warming up for launch."
+                  : "Power up the next binge session."
+              }
+              description={
+                storePreview
+                  ? "Preview the pack structure, compare membership, and keep browsing free chapters until checkout opens."
+                  : "Buy points for locked episodes, or switch to membership if you want the cleaner long-haul reading deal."
+              }
+              secondary={isAdultMode ? "18+ mode active" : "Core mode active"}
+              stats={heroStats}
+              actions={
+                <>
                   <button
                     type="button"
                     onClick={() => {
@@ -289,8 +348,7 @@ function StoreContent({
                       View account
                       <ArrowRight className="h-4 w-4" />
                     </button>
-                  ) : null}
-                  {storePreview ? (
+                  ) : (
                     <button
                       type="button"
                       onClick={() => router.push("/support")}
@@ -298,132 +356,102 @@ function StoreContent({
                     >
                       Support
                     </button>
-                  ) : null}
-                </div>
-                {statusMessage ? (
-                  <div className="mt-4 inline-flex rounded-full border border-white/10 bg-[rgba(255,255,255,0.05)] px-4 py-2 text-sm font-medium text-white/78">
-                    {statusMessage}
-                  </div>
-                ) : null}
+                  )}
+                </>
+              }
+            />
 
-                <div className={cn("mt-6 p-3.5 lg:hidden", insetPanelClass)}>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.05)] text-[#ffd26f]">
-                      <Coins className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className={eyebrowClass}>
-                        Current Balance
-                      </p>
-                      <div className="font-display text-[2rem] font-semibold tracking-[-0.05em] text-white">
-                        {walletBalance.toLocaleString()}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between gap-3 rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.04)] px-3 py-2.5">
-                    <div>
-                      <div className="text-sm font-semibold text-white">
-                        {displayName}
-                      </div>
-                      <div className="text-xs text-white/58">
-                        {subscription?.active
-                          ? "Membership active"
-                          : "Free reader"}
-                      </div>
-                    </div>
-                    <div
-                      className={cn(
-                        "rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]",
-                        subscription?.active
-                          ? "border-emerald-300/22 bg-emerald-400/12 text-emerald-200"
-                          : "border-white/10 bg-[rgba(255,255,255,0.05)] text-white/68",
-                      )}
-                    >
-                      {subscription?.active
-                        ? subscription?.planId || "Member"
-                        : "Free"}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <SurfacePanel
+              tone="muted"
+              accent={accent}
+              appearance="dark"
+              className="space-y-4"
+            >
+              <StorefrontSectionHeading
+                eyebrow="Reader Desk"
+                title="Balance, account state, and plan access"
+                description="Live wallet state stays attached to the same checkout and subscription logic already wired into the app."
+              />
 
-            <div className={cn("relative hidden overflow-hidden p-5 lg:block lg:p-6", shellPanelClass)}>
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(103,232,249,0.1),transparent_26%)]" />
-              <div className="pointer-events-none absolute inset-[1px] rounded-[33px] border border-white/6" />
-              <div className="relative">
-              <p className={eyebrowClass}>
-                Current Balance
-              </p>
-              <div className="mt-4 flex items-center gap-3 md:mt-5">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.05)] text-[#ffd26f] md:h-12 md:w-12">
-                  <Coins className="h-6 w-6" />
-                </div>
-                <div>
-                  <div className="font-display text-[2.6rem] font-semibold tracking-[-0.06em] text-white md:text-[3rem]">
-                    {walletBalance.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-white/58">
-                    Paid {paidPts.toLocaleString()} / Bonus{" "}
-                    {bonusPts.toLocaleString()}
-                  </div>
-                </div>
+              <div className="grid gap-3">
+                {deskCards.map((card) => {
+                  const Icon = card.icon;
+                  return (
+                    <div key={card.label} className={quietCardClass}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+                            {card.label}
+                          </p>
+                          <p className="mt-2 font-display text-[1.4rem] font-semibold tracking-[-0.04em] text-white">
+                            {card.value}
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-white/66">
+                            {card.hint}
+                          </p>
+                        </div>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-[18px] border border-white/12 bg-[linear-gradient(135deg,rgba(255,79,154,0.16)_0%,rgba(86,215,255,0.14)_100%)] text-white shadow-[0_14px_30px_rgba(8,6,20,0.16)]">
+                          <Icon className="size-4" />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
-              <div className={cn("mt-6 p-3.5 md:mt-8 md:p-4", insetPanelClass)}>
-                <p className={eyebrowClass}>
+              <div className={storefrontSoftCardClass}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
                   Account
                 </p>
                 <div className="mt-3 flex items-center justify-between gap-3">
                   <div>
-                    <div className="text-lg font-semibold text-white">
+                    <p className="text-base font-semibold text-white">
                       {displayName}
-                    </div>
-                    <div className="text-sm text-white/58">
-                      {subscription?.active
-                        ? "Membership active"
-                        : "Free reader"}
-                    </div>
+                    </p>
+                    <p className="mt-1 text-sm text-white/60">
+                      {subscription?.active ? "Membership active" : "Free reader"}
+                    </p>
                   </div>
-                  <div
-                    className={cn(
-                      "rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]",
+                  <span
+                    className={
                       subscription?.active
-                        ? "border-emerald-300/22 bg-emerald-400/12 text-emerald-200"
-                        : "border-white/10 bg-[rgba(255,255,255,0.05)] text-white/68",
-                    )}
+                        ? storefrontHighlightBadgeClass
+                        : storefrontBadgeClass
+                    }
                   >
                     {subscription?.active
                       ? subscription?.planId || "Member"
                       : "Free"}
-                  </div>
+                  </span>
                 </div>
                 {subscriptionVoucher ? (
-                  <div className="mt-4 flex items-center gap-2 rounded-[22px] border border-emerald-300/18 bg-emerald-400/10 px-3 py-2 text-sm text-emerald-100">
-                    <Gift className="h-4 w-4" />
-                    Voucher ready:{" "}
-                    {String(subscriptionVoucher?.code || "Applied")}
+                  <div className="mt-4 rounded-[20px] border border-emerald-300/18 bg-emerald-400/10 px-3 py-3 text-sm text-emerald-100 shadow-[0_14px_30px_rgba(16,185,129,0.12)]">
+                    Voucher ready: {String(subscriptionVoucher?.code || "Applied")}
                   </div>
                 ) : null}
               </div>
-              </div>
-            </div>
+
+              {statusMessage ? (
+                <p className={storefrontNoticeClass}>{statusMessage}</p>
+              ) : null}
+            </SurfacePanel>
           </section>
 
-          <section className="mb-10 md:mb-12">
-            <div className="mb-5 flex flex-col gap-3 md:mb-6 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className={eyebrowClass}>
-                  Point Packs
-                </p>
-                <h2 className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.05em] text-white md:text-[2.5rem]">
-                  {storePreview
-                    ? "Point packs preview."
-                    : "Pick a reload pack"}
-                </h2>
-              </div>
+          <section className="space-y-5">
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <StorefrontSectionHeading
+                eyebrow="Point Packs"
+                title={storePreview ? "Point packs preview" : "Pick a reload pack"}
+                description="Small top-up for one more chapter run, or a bigger reload if you already know tonight is going long."
+              />
               {!commerceReady ? (
-                <span className="rounded-full border border-rose-300/18 bg-rose-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-rose-100">
+                <span
+                  className={
+                    isAdultMode
+                      ? "inline-flex items-center gap-2 rounded-full border border-rose-300/22 bg-rose-400/12 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-100 shadow-[0_14px_30px_rgba(244,63,94,0.14)]"
+                      : storefrontBadgeClass
+                  }
+                >
                   {storePreview ? "Launching soon" : "Checkout unavailable"}
                 </span>
               ) : null}
@@ -432,17 +460,17 @@ function StoreContent({
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {normalizedPackages.map((pack) => {
                 const active = selectedPack?.id === pack.id;
+
                 return (
                   <button
                     key={pack.id}
                     type="button"
                     onClick={() => setSelectedPackId(pack.id)}
-                    className={cn(
-                      "relative flex h-full flex-col overflow-hidden rounded-[30px] border p-5 text-left shadow-[0_20px_48px_rgba(8,6,20,0.24)] transition-all hover:-translate-y-1 active:scale-[0.99] md:p-6",
+                    className={
                       active
-                        ? "border-cyan-300/28 bg-[linear-gradient(180deg,rgba(92,228,255,0.16)_0%,rgba(255,79,154,0.12)_100%)] shadow-[0_24px_58px_rgba(8,6,20,0.28)]"
-                        : insetPanelClass,
-                    )}
+                        ? "relative flex h-full flex-col overflow-hidden rounded-[30px] border border-cyan-300/28 bg-[linear-gradient(180deg,rgba(92,228,255,0.16)_0%,rgba(255,79,154,0.12)_100%)] p-5 text-left shadow-[0_24px_58px_rgba(8,6,20,0.28)] transition-all hover:-translate-y-1 active:scale-[0.99] md:p-6"
+                        : inactivePackClass
+                    }
                   >
                     {pack.popular ? (
                       <div className="absolute right-4 top-4 rounded-full border border-[rgba(255,214,130,0.22)] bg-[linear-gradient(135deg,#f6c25f_0%,#ffd97f_100%)] px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.22em] text-[#241608] shadow-[0_12px_24px_rgba(246,194,95,0.22)] md:px-3 md:text-[10px]">
@@ -463,12 +491,11 @@ function StoreContent({
                         </p>
                       </div>
                       <div
-                        className={cn(
-                          "flex h-8 w-8 items-center justify-center rounded-full border",
+                        className={
                           active
-                            ? "border-cyan-300/28 bg-cyan-300/12 text-cyan-100"
-                            : "border-white/10 bg-[rgba(255,255,255,0.04)] text-white/36",
-                        )}
+                            ? "flex h-8 w-8 items-center justify-center rounded-full border border-cyan-300/28 bg-cyan-300/12 text-cyan-100"
+                            : "flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-[rgba(255,255,255,0.035)] text-white/36"
+                        }
                       >
                         {active ? <CheckCircle2 className="h-5 w-5" /> : null}
                       </div>
@@ -476,7 +503,7 @@ function StoreContent({
 
                     <div className="mt-auto flex items-end justify-between gap-3 border-t border-white/8 pt-3.5 md:pt-5">
                       <div>
-                        <div className={eyebrowClass}>
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
                           Price
                         </div>
                         <div className="mt-1.5 font-display text-[2rem] font-semibold tracking-[-0.05em] text-white">
@@ -490,6 +517,7 @@ function StoreContent({
                         </div>
                       ) : null}
                     </div>
+
                     {storePreview ? (
                       <p className="mt-4 text-xs font-medium uppercase tracking-[0.16em] text-white/42">
                         Preview only. Checkout is disabled.
@@ -502,25 +530,16 @@ function StoreContent({
           </section>
 
           {!storePreview && plans.length > 0 ? (
-            <section className="mb-10 md:mb-12">
-              <div className="mb-5 md:mb-6">
-                <p className={eyebrowClass}>
-                  Membership
-                </p>
-                <h2 className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.05em] text-white md:text-[2.5rem]">
-                  Plans for heavy readers
-                </h2>
-              </div>
+            <section className="space-y-5">
+              <StorefrontSectionHeading
+                eyebrow="Membership"
+                title="Plans for heavy readers"
+                description="Monthly readers get cleaner value when they want recurring perks instead of one-off reloads."
+              />
 
               <div className="grid gap-4 lg:grid-cols-3 lg:gap-5">
                 {plans.map((plan) => (
-                  <div
-                    key={plan.id}
-                    className={cn(
-                      "flex h-full flex-col overflow-hidden rounded-[30px] border p-5 shadow-[0_20px_48px_rgba(8,6,20,0.24)] md:p-6",
-                      insetPanelClass,
-                    )}
-                  >
+                  <div key={plan.id} className={planCardClass}>
                     <div className="mb-4 flex min-h-[4.5rem] items-center justify-between gap-3 md:min-h-[5rem]">
                       <div>
                         <h3 className="font-display text-[1.55rem] font-semibold tracking-[-0.04em] text-white md:text-[1.85rem]">
@@ -531,9 +550,7 @@ function StoreContent({
                         </p>
                       </div>
                       {plan.badge ? (
-                        <div className="rounded-full border border-white/10 bg-[rgba(255,255,255,0.05)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/72">
-                          {plan.badge}
-                        </div>
+                        <div className={storefrontBadgeClass}>{plan.badge}</div>
                       ) : null}
                     </div>
                     <div className="space-y-3">
@@ -553,7 +570,7 @@ function StoreContent({
                       disabled={
                         !membershipReady || busyAction === `plan:${plan.id}`
                       }
-                      className={cn("mt-5 md:mt-auto", primaryCtaClass)}
+                      className={`mt-5 md:mt-auto ${primaryCtaClass}`}
                     >
                       {busyAction === `plan:${plan.id}` ? (
                         <LoaderCircle className="h-5 w-5 animate-spin" />
@@ -572,60 +589,35 @@ function StoreContent({
             </section>
           ) : null}
 
-          <section
-            className={cn("grid gap-4 p-5 md:grid-cols-3 md:p-6", shellPanelClass)}
-          >
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-300/18 bg-emerald-400/10 text-emerald-200 md:h-12 md:w-12">
-                <ShieldCheck className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-white">
-                  Secure billing
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-white/62">
-                  {storePreview
-                    ? "Checkout is staged but not open yet. We are keeping the flow visible so the pricing structure stays clear."
-                    : "Billing runs through the existing checkout flow already wired into the app."}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-300/18 bg-cyan-300/10 text-cyan-100 md:h-12 md:w-12">
-                <Zap className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-white">
-                  Immediate unlocks
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-white/62">
-                  {storePreview
-                    ? "Free chapters and catalog browsing stay live while paid unlocks wait for launch."
-                    : "Purchased points land in the wallet and are ready for locked episodes right away."}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[rgba(255,120,164,0.2)] bg-[rgba(255,79,154,0.1)] text-[#ffd7e8] md:h-12 md:w-12">
-                <Crown className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-white">
-                  Membership layer
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-white/62">
-                  {storePreview
-                    ? "Membership pricing is visible early so readers can compare plans before billing opens."
-                    : "If plans are live, you can stack recurring value on top of the same wallet flow."}
-                </p>
-              </div>
-            </div>
+          <section className="grid gap-4 md:grid-cols-3">
+            {helperCards.map((item) => {
+              const Icon = item.icon;
+              return (
+                <SurfacePanel
+                  key={item.title}
+                  tone="muted"
+                  accent={accent}
+                  appearance="dark"
+                  className="space-y-4"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-[linear-gradient(135deg,rgba(255,79,154,0.16)_0%,rgba(86,215,255,0.14)_100%)] text-white shadow-[0_14px_30px_rgba(8,6,20,0.16)]">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-white">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-white/66">
+                      {item.body}
+                    </p>
+                  </div>
+                </SurfacePanel>
+              );
+            })}
           </section>
         </div>
       </FigmaChrome>
-    </div>
+    </StorefrontPage>
   );
 }
 

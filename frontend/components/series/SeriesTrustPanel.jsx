@@ -10,6 +10,8 @@ import {
   getInstallmentLabel,
 } from "../../lib/seriesFormatLabels";
 import {
+  storefrontInfoCardClass,
+  storefrontNoticeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
@@ -177,7 +179,7 @@ export default function SeriesTrustPanel({
             What to know
           </h2>
         </div>
-        <div className="rounded-[26px] border border-white/10 bg-white/[0.03] px-4 py-4 text-left shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+        <div className={`${storefrontNoticeClass} px-4 py-4 text-left`}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
             Right now
           </p>
@@ -194,7 +196,7 @@ export default function SeriesTrustPanel({
               key={card.label}
               type="button"
               onClick={card.onClick}
-              className="rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 text-left text-white shadow-[0_18px_40px_rgba(8,6,20,0.22)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.05]"
+              className={`${storefrontInfoCardClass} px-4 py-4 text-left text-white transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.075)]`}
             >
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
                 {card.label}
@@ -212,7 +214,7 @@ export default function SeriesTrustPanel({
           ) : (
             <div
               key={card.label}
-              className="rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 text-white shadow-[0_18px_40px_rgba(8,6,20,0.22)]"
+              className={`${storefrontInfoCardClass} px-4 py-4 text-white`}
             >
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
                 {card.label}
@@ -229,7 +231,7 @@ export default function SeriesTrustPanel({
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.12fr_0.88fr]">
-        <div className="rounded-[26px] border border-white/10 bg-white/[0.03] px-4 py-4 text-white shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+        <div className={`${storefrontInfoCardClass} rounded-[26px] px-4 py-4 text-white`}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
             Why read it
           </p>
@@ -240,7 +242,7 @@ export default function SeriesTrustPanel({
             {secondaryGenre ? ` and ${secondaryGenre}` : ""}.
           </p>
         </div>
-        <div className="rounded-[26px] border border-white/10 bg-white/[0.03] px-4 py-4 text-white shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+        <div className={`${storefrontInfoCardClass} rounded-[26px] px-4 py-4 text-white`}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
             Share
           </p>

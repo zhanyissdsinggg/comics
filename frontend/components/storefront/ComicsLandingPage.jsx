@@ -17,6 +17,10 @@ import {
   useCatalogFeed,
 } from "./StorefrontScaffold";
 import {
+  storefrontInfoCardClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
+import {
   buildCompletedRail,
   buildGenreLabel,
   buildGenreShelves,
@@ -179,7 +183,7 @@ export default function ComicsLandingPage({
             action={
               <Link
                 href="/search?type=comic&sort=latest"
-                className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-white/76"
+                className={`inline-flex min-h-[44px] items-center px-4 text-sm font-medium text-white/76 ${storefrontSecondaryButtonClass}`}
               >
                 Latest drops
               </Link>
@@ -242,7 +246,7 @@ export default function ComicsLandingPage({
       />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-[var(--gush-shadow-panel)]">
+        <section className={`${storefrontInfoCardClass} rounded-[30px] p-5`}>
           <SectionHeading
             eyebrow="Reader Favorites"
             title="Fast starts, new chapters, and complete runs"
@@ -270,7 +274,7 @@ export default function ComicsLandingPage({
               return (
                 <div
                   key={item.title}
-                  className="rounded-[22px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_14px_30px_rgba(8,6,20,0.18)]"
+                  className={`${storefrontInfoCardClass} rounded-[22px] p-4 text-white`}
                 >
                   <Icon className="size-5 text-[var(--gush-rose)]" />
                   <h3 className="mt-3 text-lg font-semibold text-white">

@@ -4,6 +4,11 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { cn } from "../../lib/utils";
+import {
+  storefrontBadgeClass,
+  storefrontHighlightBadgeClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 const ShareButton = dynamic(() => import("../common/ShareButton"), {
   ssr: false,
@@ -61,9 +66,9 @@ export default function ReaderTopBar({
               onClick={onBack}
               aria-label={contextActionLabel || "Back"}
               className={cn(
-                "flex h-11 w-11 items-center justify-center rounded-2xl border transition-all active:scale-[0.97]",
+                "flex h-11 w-11 items-center justify-center transition-all active:scale-[0.97]",
                 isComic
-                  ? "border-white/10 bg-white/5 text-white hover:border-white/20 hover:bg-white/10"
+                  ? `${storefrontSecondaryButtonClass} h-11 w-11 px-0 text-white`
                   : "border-[#d8dde6] bg-white/90 text-[#1f2933] hover:bg-white",
               )}
             >
@@ -101,9 +106,9 @@ export default function ReaderTopBar({
 
           <div
             className={cn(
-              "inline-flex min-h-[44px] items-center rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em]",
+              "inline-flex min-h-[44px] items-center px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em]",
               isComic
-                ? "border-white/10 bg-white/5 text-white/72"
+                ? `${storefrontBadgeClass} text-white/72`
                 : "border-[#d8dde6] bg-white/90 text-[#667085]",
             )}
           >
@@ -144,18 +149,18 @@ export default function ReaderTopBar({
   const canPrev = typeof onPrev === "function";
   const canNext = typeof onNext === "function";
   const topBarButtonClass =
-    "shrink-0 rounded-full border border-white/10 bg-[rgba(255,255,255,0.04)] px-3 py-1.5 text-xs text-white shadow-[0_12px_24px_rgba(0,0,0,0.24)] backdrop-blur-xl transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.08)]";
+    `shrink-0 px-3 py-1.5 text-xs text-white ${storefrontSecondaryButtonClass}`;
   const activeChipClass =
-    "border-[rgba(255,79,154,0.34)] bg-[rgba(255,79,154,0.16)] text-white shadow-[0_12px_24px_rgba(255,79,154,0.14)]";
+    `${storefrontHighlightBadgeClass} border-[rgba(255,79,154,0.34)] bg-[rgba(255,79,154,0.16)] text-white shadow-[0_12px_24px_rgba(255,79,154,0.14)]`;
   const lockedChipClass =
-    "border-[rgba(255,79,154,0.26)] bg-[rgba(255,79,154,0.18)] text-white";
+    `${storefrontHighlightBadgeClass} border-[rgba(255,79,154,0.26)] bg-[rgba(255,79,154,0.18)] text-white`;
   const mutedChipClass =
-    "border-white/6 bg-[rgba(255,255,255,0.02)] text-white/34 shadow-none";
+    `${storefrontBadgeClass} border-white/6 bg-[rgba(255,255,255,0.02)] text-white/34 shadow-none`;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/8 bg-[rgba(11,10,16,0.82)] text-neutral-100 backdrop-blur-2xl">
+    <header className="sticky top-0 z-40 border-b border-white/8 bg-[rgba(11,10,16,0.82)] text-white backdrop-blur-2xl">
       {typeof progress === "number" ? (
-        <div className="h-1 w-full bg-[rgba(255,255,255,0.04)]">
+        <div className="h-1 w-full bg-[rgba(255,255,255,0.035)]">
           <div
             className="h-full bg-[linear-gradient(90deg,#ff4f9a_0%,#ff76ad_55%,#67e8f9_100%)] transition-all duration-300"
             style={{ width: `${Math.round(progress * 100)}%` }}
@@ -172,7 +177,7 @@ export default function ReaderTopBar({
           <p className="truncate text-sm font-semibold">{title}</p>
           <p
             className={`text-xs ${
-              isNightMode ? "text-neutral-400" : "text-white/50"
+              isNightMode ? "text-white/46" : "text-white/54"
             }`}
           >
             {episodeLabel}
@@ -206,11 +211,7 @@ export default function ReaderTopBar({
             url={shareUrl}
             title={`${title} - ${episodeLabel}`}
             description={`${episodeLabel} from ${title} on Gush`}
-            className={`!w-auto !shrink-0 !rounded-full !px-2 !py-1 !text-xs md:!px-3 ${
-              isNightMode
-                ? "!border !border-white/10 !bg-[rgba(255,255,255,0.04)]"
-                : "!border !border-white/10 !bg-[rgba(255,255,255,0.04)] !text-white !shadow-[0_12px_24px_rgba(0,0,0,0.24)] hover:!translate-y-[-2px] hover:!border-white/16 hover:!bg-[rgba(255,255,255,0.08)]"
-            }`}
+            className={`!w-auto !shrink-0 !px-2 !py-1 !text-xs md:!px-3 !text-white ${storefrontSecondaryButtonClass}`}
           />
           {onOpenSettings ? (
             <button

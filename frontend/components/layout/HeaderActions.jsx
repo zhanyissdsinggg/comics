@@ -7,18 +7,22 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { siteConfig } from "../../lib/siteConfig";
 import { cn } from "@/lib/utils";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 function AuthSkeleton({ variant = "default" }) {
   return (
     <div
-      className="hidden h-11 w-24 animate-pulse rounded-full border border-white/10 bg-white/[0.04] sm:block"
+      className="hidden h-11 w-24 animate-pulse rounded-full border border-white/10 bg-[rgba(255,255,255,0.035)] sm:block"
       aria-hidden="true"
     />
   );
 }
 
 const ICON_BUTTON_CLASS =
-  "relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_12px_28px_rgba(0,0,0,0.24)] backdrop-blur-xl transition-all duration-150 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.07]";
+  `relative inline-flex h-11 w-11 items-center justify-center px-0 ${storefrontSecondaryButtonClass}`;
 
 export default function HeaderActions({
   onWalletClick,
@@ -48,7 +52,7 @@ export default function HeaderActions({
         <button
           type="button"
           onClick={onWalletClick}
-          className="hidden h-11 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_14px_30px_rgba(0,0,0,0.24)] backdrop-blur-xl transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-white/[0.07] lg:inline-flex"
+          className={`hidden h-11 items-center gap-2 px-4 text-white lg:inline-flex ${storefrontSecondaryButtonClass}`}
           aria-label={`View your wallet${walletTotal > 0 ? ` with ${walletTotal.toLocaleString()} points` : ""}`}
         >
           <Wallet className="size-4" strokeWidth={2} />
@@ -92,7 +96,7 @@ export default function HeaderActions({
             "inline-flex h-11 min-w-[5.3rem] items-center justify-center gap-2 rounded-full border px-3 text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-150 sm:min-w-[6.3rem] sm:px-3.5",
             isAdultMode
               ? "border-[rgba(255,79,154,0.34)] bg-[linear-gradient(135deg,rgba(255,79,154,0.22)_0%,rgba(120,54,84,0.3)_100%)] text-white shadow-[0_16px_32px_rgba(255,79,154,0.18)]"
-              : "border-white/10 bg-white/[0.04] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_12px_28px_rgba(0,0,0,0.24)] hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.07]",
+              : storefrontSecondaryButtonClass,
           )}
           aria-label={adultToggleAriaLabel}
           aria-pressed={isAdultMode}
@@ -137,7 +141,7 @@ export default function HeaderActions({
           <button
             type="button"
             onClick={() => router.push("/account")}
-            className="hidden h-11 items-center gap-2 rounded-full border border-[rgba(255,255,255,0.12)] bg-[linear-gradient(135deg,rgba(103,232,249,0.14)_0%,rgba(255,255,255,0.04)_100%)] px-4 text-sm font-medium tracking-[0.01em] text-white shadow-[0_14px_30px_rgba(0,0,0,0.24)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/18 sm:inline-flex"
+            className={`hidden h-11 items-center gap-2 border-[rgba(255,255,255,0.12)] bg-[linear-gradient(135deg,rgba(103,232,249,0.14)_0%,rgba(255,255,255,0.04)_100%)] px-4 text-sm font-medium tracking-[0.01em] text-white sm:inline-flex ${storefrontSecondaryButtonClass}`}
           >
             <User className="size-4" />
             Account
@@ -147,7 +151,7 @@ export default function HeaderActions({
         <button
           type="button"
           onClick={onLoginClick}
-          className="hidden h-11 items-center justify-center rounded-full border border-[rgba(255,79,154,0.35)] bg-[linear-gradient(135deg,#ff4f9a_0%,#ff76ad_100%)] px-5 text-sm font-semibold tracking-[0.01em] text-[#160d13] shadow-[0_16px_34px_rgba(255,79,154,0.24)] transition-all duration-150 hover:-translate-y-0.5 sm:inline-flex"
+          className={`hidden h-11 items-center justify-center px-5 text-sm font-semibold tracking-[0.01em] text-[#160d13] sm:inline-flex ${storefrontPrimaryButtonClass}`}
         >
           Sign In
         </button>

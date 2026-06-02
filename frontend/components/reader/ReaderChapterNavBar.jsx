@@ -3,6 +3,10 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 export default function ReaderChapterNavBar({
   visible = false,
@@ -36,7 +40,7 @@ export default function ReaderChapterNavBar({
           className={cn(
             "inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-black uppercase tracking-[0.04em] transition-all duration-150 ease-out",
             hasPrev
-              ? "border-white/16 bg-white/[0.05] text-white shadow-[0_16px_30px_rgba(8,6,20,0.22)] hover:-translate-y-0.5 hover:border-white/24 hover:bg-white/[0.08]"
+              ? `${storefrontSecondaryButtonClass} text-white`
               : "border-white/8 bg-white/[0.02] text-white/35 shadow-none",
           )}
         >
@@ -60,8 +64,8 @@ export default function ReaderChapterNavBar({
             !hasNext
               ? "border-white/8 bg-white/[0.02] text-white/35 shadow-none"
               : nextLocked
-                ? "border-[rgba(255,79,154,0.28)] bg-[linear-gradient(135deg,rgba(255,79,154,0.22)_0%,rgba(255,124,177,0.16)_100%)] text-white shadow-[0_16px_30px_rgba(255,79,154,0.18)] hover:-translate-y-0.5"
-                : "border-white/16 bg-white/[0.05] text-white shadow-[0_16px_30px_rgba(8,6,20,0.22)] hover:-translate-y-0.5 hover:border-cyan-300/20 hover:bg-white/[0.08]",
+                ? `${storefrontPrimaryButtonClass} text-[#160d13]`
+                : `${storefrontSecondaryButtonClass} text-white`,
           )}
         >
           <span>{nextLocked ? "Unlock Next" : `Next ${installmentLabel}`}</span>

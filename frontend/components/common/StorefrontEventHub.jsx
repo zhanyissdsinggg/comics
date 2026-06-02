@@ -2,8 +2,11 @@
 
 import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import {
+  storefrontBadgeClass,
+  storefrontInfoCardClass,
+  storefrontSecondaryButtonClass,
+} from "./StorefrontPagePrimitives";
 
 function EventCard({ event, priority = "secondary" }) {
   return (
@@ -16,12 +19,9 @@ function EventCard({ event, priority = "secondary" }) {
       <div className="flex h-full flex-col p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="max-w-3xl">
-            <Badge
-              variant="outline"
-              className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/70"
-            >
+            <span className={`${storefrontBadgeClass} text-white/70`}>
               {event.eyebrow}
-            </Badge>
+            </span>
             <h3
               className={cn(
                 "mt-4 font-display font-semibold tracking-[-0.05em] text-white",
@@ -40,7 +40,7 @@ function EventCard({ event, priority = "secondary" }) {
           </div>
 
           {event.signalValue ? (
-            <div className="min-w-[120px] rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.04)] px-3 py-2.5 text-left shadow-[0_14px_34px_rgba(8,6,20,0.18)]">
+            <div className={`${storefrontInfoCardClass} min-w-[120px] rounded-[20px] px-3 py-2.5 text-left`}>
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/48">
                 {event.signalLabel || "Signal"}
               </p>
@@ -56,15 +56,14 @@ function EventCard({ event, priority = "secondary" }) {
           ) : null}
         </div>
 
-        <Button
+        <button
           type="button"
-          variant="ghost"
           onClick={event.onClick}
-          className="mt-auto h-10 justify-start gap-2 px-0 text-sm font-semibold tracking-[0.02em] text-white/78 hover:bg-transparent hover:text-[var(--gush-accent)]"
+          className={`mt-auto h-10 justify-start gap-2 px-0 text-sm font-semibold tracking-[0.02em] text-white/78 hover:bg-transparent hover:text-[var(--gush-accent)] ${storefrontSecondaryButtonClass}`}
         >
           {event.ctaLabel}
           <ArrowUpRight className="size-4" />
-        </Button>
+        </button>
       </div>
     </div>
   );

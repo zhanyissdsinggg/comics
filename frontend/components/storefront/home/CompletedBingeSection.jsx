@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { ArrowRight, BookOpenCheck, Clock3 } from "lucide-react";
+import {
+  storefrontAccentChipClass,
+  storefrontSoftCardClass,
+} from "../../common/StorefrontPagePrimitives";
 import { resolveDisplayImageUrl } from "../../../lib/fallbackImage";
 import { trackEvent } from "../../../lib/trackEvent";
 import {
@@ -25,7 +29,7 @@ function CompletedMiniCard({ series, position }) {
   return (
     <Link
       href={`/series/${series.id}`}
-      className="group flex items-center gap-3 rounded-[24px] border border-white/10 bg-white/[0.04] p-3 transition-all duration-200 hover:-translate-y-1 hover:border-white/18 hover:bg-white/[0.07]"
+      className={`group flex items-center gap-3 p-3 transition-all duration-200 hover:-translate-y-1 hover:border-white/18 hover:bg-[rgba(255,255,255,0.075)] ${storefrontSoftCardClass}`}
       onClick={() =>
         trackEvent("story_click", {
           seriesId: series?.id,
@@ -115,15 +119,15 @@ export default function CompletedBingeSection({ lead = null, items = [] }) {
               </div>
 
               <div className="flex flex-wrap gap-3 text-sm text-white/72">
-                <span className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4">
+                <span className={`${storefrontAccentChipClass} px-4 text-white/82`}>
                   <BookOpenCheck className="size-4" />
                   Read Full Series
                 </span>
-                <span className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4">
+                <span className={`${storefrontSoftCardClass} inline-flex min-h-[44px] items-center gap-2 px-4 py-0 text-white/78`}>
                   <Clock3 className="size-4" />
                   {buildGenreLabel(leadSeries, 2) || "Completed"}
                 </span>
-                <span className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4">
+                <span className={`${storefrontSoftCardClass} inline-flex min-h-[44px] items-center gap-2 px-4 py-0 text-white/78`}>
                   <ArrowRight className="size-4" />
                   {buildStatusLabel(leadSeries)}
                 </span>

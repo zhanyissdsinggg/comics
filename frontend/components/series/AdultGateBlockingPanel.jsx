@@ -4,6 +4,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import SurfacePanel from "../common/SurfacePanel";
 import {
+  storefrontBadgeClass,
+  storefrontChipClass,
+  storefrontNoticeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
@@ -36,11 +39,11 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
         appearance="dark"
         tone="muted"
         accent="rose"
-        className="w-full max-w-2xl p-6 sm:p-7"
+        className="w-full max-w-3xl border-white/10 bg-[linear-gradient(145deg,rgba(20,16,28,0.98)_0%,rgba(11,12,18,0.96)_50%,rgba(16,11,22,0.98)_100%)] p-6 shadow-[0_30px_82px_rgba(0,0,0,0.34)] sm:p-7"
       >
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/58">
+            <p className={`${storefrontBadgeClass} border-[rgba(255,151,189,0.24)] bg-[rgba(255,79,154,0.12)] text-[#ffd6e5]`}>
               18+ access
             </p>
             <h2 className="mt-3 font-display text-[2.2rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
@@ -50,7 +53,7 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
               {description}
             </p>
           </div>
-          <div className="rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-4 text-left shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+          <div className={`${storefrontNoticeClass} px-4 py-4 text-left`}>
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
               Access
             </p>
@@ -64,7 +67,7 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
           {trustItems.map((item) => (
             <span
               key={item}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-white/62"
+              className={`${storefrontChipClass} min-h-0 px-3 py-1.5 text-xs uppercase tracking-[0.12em] text-white/62`}
             >
               {item}
             </span>

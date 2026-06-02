@@ -14,6 +14,17 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import EditorialHero from "../common/EditorialHero";
+import SurfacePanel from "../common/SurfacePanel";
+import {
+  storefrontInfoCardClass,
+  storefrontInputClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+  StorefrontInfoCard,
+  StorefrontSectionHeading,
+} from "../common/StorefrontPagePrimitives";
 import { siteConfig } from "../../lib/siteConfig";
 import { getFallbackImageUrl } from "../../lib/fallbackImage";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -100,6 +111,7 @@ function LoginContent() {
   const accentTone = isAdultMode
     ? "bg-red-500/10 text-red-300"
     : "bg-cyan-400/10 text-cyan-300";
+  const accent = isAdultMode ? "rose" : "blue";
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -141,76 +153,99 @@ function LoginContent() {
       </div>
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl items-center px-4 py-10 sm:py-12 md:px-8 md:py-16">
-        <div className="grid w-full gap-4 md:gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-          <section
-            className={cn(
-              "relative overflow-hidden rounded-[32px] border p-4 shadow-2xl md:p-8",
-              palette.surface,
-              palette.border,
-            )}
-          >
-            <div
-              className={cn(
-                "pointer-events-none absolute -left-12 top-0 h-56 w-56 rounded-full blur-[90px] opacity-20",
-                isAdultMode ? "bg-red-500" : "bg-cyan-400",
-              )}
-            />
-            <div className="relative z-10">
-              <div
-                className={cn(
-                  "mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] md:mb-4 md:px-4 md:py-2 md:text-xs",
-                  accentTone,
-                )}
-              >
-                <Sparkles className="h-4 w-4" />
-                {mode === "register" ? "Reader Access" : "Account Return"}
-              </div>
-
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 text-2xl font-black tracking-tight text-white transition-transform hover:scale-[1.02] md:text-3xl"
-              >
-                {siteConfig.siteName.toUpperCase()}
-              </Link>
-
-              <h1 className="mt-5 max-w-xl text-3xl font-black tracking-tight text-white md:mt-6 md:text-5xl">
-                {title}
-              </h1>
-              <p className="mt-2.5 max-w-2xl text-sm leading-6 text-gray-300 md:mt-4 md:text-base md:leading-7">
-                {subtitle}
-              </p>
-
-              <div className="mt-5 grid gap-2.5 md:mt-6 md:gap-3 sm:grid-cols-3">
-                {TRUST_POINTS.map((item) => (
-                  <div
-                    key={item.title}
-                    className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.045)] p-3 shadow-[0_16px_34px_rgba(8,6,20,0.22)] backdrop-blur-xl sm:p-4"
+        <div className="grid w-full gap-4 md:gap-5 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+          <div className="space-y-4">
+            <EditorialHero
+              accent={accent}
+              appearance="dark"
+              eyebrow={mode === "register" ? "Reader Access" : "Account Return"}
+              title={title}
+              description={subtitle}
+              secondary={isAdultMode ? "18+ mode active" : "Core mode active"}
+              stats={[
+                {
+                  label: "Shelf sync",
+                  value: "Active",
+                  hint: "Progress, bookmarks, and purchases stay tied to one identity.",
+                },
+                {
+                  label: "Return path",
+                  value: returnTo,
+                  hint: "After auth we send readers back where they came from.",
+                },
+                {
+                  label: "Gate safety",
+                  value: isAdultMode ? "Adult profile" : "Normal profile",
+                  hint: "Mode state stays attached to the same account flow.",
+                },
+              ]}
+              actions={
+                <>
+                  <Link href="/" className={storefrontSecondaryButtonClass}>
+                    {siteConfig.siteName.toUpperCase()}
+                  </Link>
+                  <span
+                    className={cn(
+                      "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-[10px] font-black uppercase tracking-[0.22em] md:text-xs",
+                      accentTone,
+                    )}
                   >
-                    <div className="flex items-start gap-3 sm:block">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-white sm:h-9 sm:w-9">
-                        <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                      </div>
-                      <div className="min-w-0 sm:mt-3">
-                        <h2 className="text-[11px] font-black uppercase tracking-[0.08em] text-white sm:text-sm">
-                          {item.title}
-                        </h2>
-                        <p className="mt-1.5 text-xs leading-5 text-gray-400 sm:mt-2 sm:text-sm">
-                          {item.body}
-                        </p>
-                      </div>
-                    </div>
+                    <Sparkles className="h-4 w-4" />
+                    {mode === "register" ? "Create account" : "Sign in"}
+                  </span>
+                </>
+              }
+            />
+
+            <SurfacePanel
+              tone="muted"
+              accent={accent}
+              appearance="dark"
+              className="space-y-5"
+            >
+              <StorefrontSectionHeading
+                eyebrow="Tonight's Reader Flow"
+                title="One sign-in brings the whole shelf back"
+                description="Auth still uses the current store methods. The page shell now matches the rest of the storefront."
+              />
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  "Sign in and reopen the exact chapter you left on.",
+                  "Keep your shelf, bookmarks, and purchases tied to one account.",
+                  "Adult mode stays attached to the same reader profile and gate checks.",
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className={`${storefrontSoftCardClass} px-4 py-4 text-sm leading-6 text-white/66`}
+                  >
+                    {item}
                   </div>
                 ))}
               </div>
-            </div>
-          </section>
+            </SurfacePanel>
 
-          <section
-            className={cn(
-              "rounded-[32px] border p-4 shadow-2xl backdrop-blur-xl md:p-8",
-              palette.surfaceGlass,
-              palette.border,
-            )}
+            <div className="grid gap-3 sm:grid-cols-3">
+              {TRUST_POINTS.map((item) => (
+                <StorefrontInfoCard
+                  key={item.title}
+                  title={item.title}
+                  description={item.body}
+                  className="h-full"
+                >
+                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-2xl bg-white/5 text-white">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                  </div>
+                </StorefrontInfoCard>
+              ))}
+            </div>
+          </div>
+
+          <SurfacePanel
+            tone="muted"
+            accent={accent}
+            appearance="dark"
+            className="rounded-[34px] p-4 md:p-8"
           >
             <div className="mb-5 flex items-start justify-between gap-4 md:mb-6">
               <div>
@@ -233,7 +268,7 @@ function LoginContent() {
                 <button
                   key={action.id}
                   type="button"
-                  className="flex w-full items-center justify-center gap-3 rounded-2xl border border-white/12 bg-[rgba(255,255,255,0.045)] px-4 py-3 font-bold text-white shadow-[0_14px_28px_rgba(8,6,20,0.18)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:bg-[rgba(255,255,255,0.08)] md:py-3.5"
+                  className={storefrontSecondaryButtonClass}
                 >
                   {action.icon}
                   {action.label}
@@ -264,7 +299,7 @@ function LoginContent() {
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder="you@example.com"
                     className={cn(
-                      "w-full rounded-2xl border bg-[rgba(7,10,21,0.72)] py-3 pl-12 pr-4 text-white placeholder:text-gray-500 outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_12px_28px_rgba(8,6,20,0.18)] transition-all md:py-3.5",
+                      `${storefrontInputClass} mt-0 pl-12 pr-4`,
                       isAdultMode
                         ? "border-gray-800 focus:border-red-500 focus:ring-1 focus:ring-red-500"
                         : "border-gray-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400",
@@ -298,7 +333,7 @@ function LoginContent() {
                     onChange={(event) => setPassword(event.target.value)}
                     placeholder="Enter your password"
                     className={cn(
-                      "w-full rounded-2xl border bg-[rgba(7,10,21,0.72)] py-3 pl-12 pr-12 text-white placeholder:text-gray-500 outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_12px_28px_rgba(8,6,20,0.18)] transition-all md:py-3.5",
+                      `${storefrontInputClass} mt-0 pl-12 pr-12`,
                       isAdultMode
                         ? "border-gray-800 focus:border-red-500 focus:ring-1 focus:ring-red-500"
                         : "border-gray-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400",
@@ -328,8 +363,8 @@ function LoginContent() {
                 type="submit"
                 disabled={loading}
                 className={cn(
-                  "mt-1 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-black uppercase tracking-[0.22em] text-white transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60 md:mt-2 md:py-4",
-                  palette.primaryBg,
+                  `mt-1 w-full md:mt-2 ${storefrontPrimaryButtonClass}`,
+                  "justify-center gap-2 rounded-2xl py-3.5 text-sm font-black uppercase tracking-[0.22em] text-white hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60 md:py-4",
                 )}
               >
                 {loading
@@ -343,7 +378,7 @@ function LoginContent() {
               </button>
             </form>
 
-            <div className="mt-5 rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.045)] p-3.5 shadow-[0_16px_34px_rgba(8,6,20,0.22)] backdrop-blur-xl md:mt-6 md:p-4">
+            <div className={`mt-5 md:mt-6 ${storefrontInfoCardClass}`}>
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
                 Reader flow
               </p>
@@ -352,6 +387,34 @@ function LoginContent() {
                   ? "After account creation we return you to your original page and keep the session warm."
                   : "After sign-in we send you back to the page that requested authentication."}
               </p>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              {[
+                {
+                  label: "Reader Shelf",
+                  text: "Progress, favorites, and saved titles stay together.",
+                },
+                {
+                  label: "Fast Return",
+                  text: "Jump back into the same chapter or branch on another device.",
+                },
+                {
+                  label: "Mode Safe",
+                  text: isAdultMode
+                    ? "Adult gate state stays attached to this signed-in profile."
+                    : "Normal mode stays clean with the current content filters.",
+                },
+              ].map((item) => (
+                <div key={item.label} className={`${storefrontSoftCardClass} px-3 py-3`}>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                    {item.label}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-gray-300">
+                    {item.text}
+                  </p>
+                </div>
+              ))}
             </div>
 
             <p className="mt-5 text-center text-sm font-medium text-gray-400 md:mt-6">
@@ -371,7 +434,7 @@ function LoginContent() {
                 {mode === "register" ? "Sign in" : "Sign up"}
               </button>
             </p>
-          </section>
+          </SurfacePanel>
         </div>
       </div>
     </div>

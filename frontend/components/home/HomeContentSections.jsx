@@ -236,7 +236,7 @@ export default function HomeContentSections({
                   {supporting.slice(0, 4).map((series, index) => (
                     <div
                       key={series.id}
-                      className="w-[82vw] max-w-[360px] md:w-auto md:max-w-none"
+                      className="w-[calc(100vw-2.5rem)] max-w-[360px] md:w-auto md:max-w-none"
                     >
                       <StoryCard
                         series={series}

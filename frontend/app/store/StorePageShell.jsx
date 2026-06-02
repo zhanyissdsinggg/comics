@@ -2,13 +2,18 @@
 
 import { Suspense, lazy } from "react";
 import Skeleton from "../../components/common/Skeleton";
+import {
+  storefrontBadgeClass,
+  storefrontSecondaryButtonClass,
+} from "../../components/common/StorefrontPagePrimitives";
+import { StorefrontPage } from "../../components/storefront/StorefrontScaffold";
 
 const StorePageRuntime = lazy(() => import("./StorePageRuntime"));
 
 function StoreLoadingFallback({ prelaunchStore = false }) {
   return (
-    <div className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#0f0d13_0%,#130f18_44%,#17131d_100%)] text-white">
-      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
+    <StorefrontPage accentClass="from-[rgba(103,232,249,0.12)] via-[rgba(167,139,250,0.08)] to-[rgba(255,79,154,0.1)]">
+      <div className="flex flex-col gap-8">
         <section className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(22,18,30,0.96)_0%,rgba(15,13,19,0.98)_100%)] p-6 shadow-[0_28px_72px_rgba(8,6,20,0.34)]">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
             Store
@@ -30,7 +35,7 @@ function StoreLoadingFallback({ prelaunchStore = false }) {
             </a>
             <a
               href="/support"
-              className="rounded-full border border-white/12 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.08]"
+              className={`${storefrontSecondaryButtonClass} h-auto px-3 py-1.5 text-[11px] tracking-[0.12em]`}
             >
               Support
             </a>
@@ -38,13 +43,13 @@ function StoreLoadingFallback({ prelaunchStore = false }) {
         </section>
         <div className="grid gap-6 xl:grid-cols-[0.84fr_1.16fr]">
           <div className="space-y-6">
-            <Skeleton className="h-56 rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-[0_20px_48px_rgba(8,6,20,0.24)]" />
-            <Skeleton className="h-56 rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-[0_20px_48px_rgba(8,6,20,0.24)]" />
+            <Skeleton className="h-56 rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.035)] shadow-[0_20px_48px_rgba(8,6,20,0.24)]" />
+            <Skeleton className="h-56 rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.035)] shadow-[0_20px_48px_rgba(8,6,20,0.24)]" />
           </div>
-          <Skeleton className="h-[42rem] rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-[0_20px_48px_rgba(8,6,20,0.24)]" />
+          <Skeleton className="h-[42rem] rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.035)] shadow-[0_20px_48px_rgba(8,6,20,0.24)]" />
         </div>
-      </main>
-    </div>
+      </div>
+    </StorefrontPage>
   );
 }
 

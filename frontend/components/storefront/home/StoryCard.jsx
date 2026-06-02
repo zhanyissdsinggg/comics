@@ -10,6 +10,7 @@ import {
   buildUpdatedLabel,
 } from "../landingUtils";
 import GenreChip from "./GenreChip";
+import { storefrontChipClass } from "../../common/StorefrontPagePrimitives";
 
 function buildCoverAlt(series) {
   const title = String(series?.title || "").trim() || "Untitled";
@@ -39,7 +40,7 @@ export default function StoryCard({
   return (
     <Link
       href={href}
-      className={`group block shrink-0 scroll-snap-item ${compact ? "w-[82vw] max-w-[360px]" : "w-full"}`}
+      className="group block w-full shrink-0 scroll-snap-item"
       onClick={() => {
         if (sourceSection) {
           trackEvent("story_click", {
@@ -95,7 +96,7 @@ export default function StoryCard({
             </span>
           </div>
 
-          <div className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/12 bg-white/[0.06] px-4 text-sm font-medium text-white/82 shadow-[0_14px_28px_rgba(8,6,20,0.16)] backdrop-blur-xl transition-all duration-200 group-hover:bg-[rgba(255,92,164,0.14)] group-hover:text-white">
+          <div className={`mt-4 inline-flex px-4 text-white/82 group-hover:bg-[rgba(255,92,164,0.14)] group-hover:text-white ${storefrontChipClass}`}>
             <Play className="size-4" />
             {ctaLabel}
           </div>

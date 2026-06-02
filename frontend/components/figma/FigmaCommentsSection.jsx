@@ -16,6 +16,12 @@ import {
   resolveDisplayImageUrl,
 } from "../../lib/fallbackImage";
 import { openAuthPrompt } from "../../lib/openAuthPrompt";
+import {
+  storefrontBadgeClass,
+  storefrontInfoCardClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+} from "../common/StorefrontPagePrimitives";
 import { cn } from "./figma-utils";
 import { useFigmaSite } from "./FigmaSiteContext";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -28,20 +34,19 @@ function CommentItem({ comment, onRequireAuth }) {
   return (
     <div
       className={cn(
-        "rounded-2xl border p-4 transition-all md:p-5",
-        palette.surface,
+        "rounded-[26px] border bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.035))] p-4 shadow-[0_18px_42px_rgba(8,6,20,0.22)] backdrop-blur-xl transition-all md:p-5",
         comment.isPinned
           ? isAdultMode
-            ? "border-red-500/30 bg-red-500/5"
-            : "border-indigo-500/30 bg-indigo-500/5"
-          : "border-white/5",
+            ? "border-red-500/28 bg-[linear-gradient(180deg,rgba(127,29,29,0.22),rgba(255,255,255,0.035))]"
+            : "border-cyan-300/18 bg-[linear-gradient(180deg,rgba(103,232,249,0.12),rgba(255,255,255,0.035))]"
+          : "border-white/10",
       )}
     >
       {comment.isPinned ? (
         <div
           className={cn(
-            "mb-3 flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.22em]",
-            palette.primaryText,
+            storefrontBadgeClass,
+            "mb-3 gap-1.5 border-white/12 bg-[rgba(255,255,255,0.035)] text-white/76",
           )}
         >
           <Pin className="h-3.5 w-3.5" />
@@ -108,7 +113,7 @@ function CommentItem({ comment, onRequireAuth }) {
                   <button
                     type="button"
                     onClick={() => setShowSpoiler(false)}
-                    className="absolute right-0 top-0 rounded-lg bg-black/50 p-1.5 text-gray-400 opacity-0 transition-opacity hover:text-white group-hover:opacity-100"
+                    className="absolute right-0 top-0 rounded-full border border-white/10 bg-black/40 p-2 text-gray-400 opacity-0 transition-opacity hover:text-white group-hover:opacity-100"
                     title="Hide spoiler"
                   >
                     <EyeOff className="h-4 w-4" />
@@ -176,7 +181,7 @@ export default function FigmaCommentsSection({
 
   return (
     <div className="mt-12 w-full pb-24">
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-white">
             <MessageSquare className={cn("h-6 w-6", palette.primaryText)} />
@@ -190,7 +195,7 @@ export default function FigmaCommentsSection({
             ].map((item) => (
               <span
                 key={item}
-                className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold tracking-[0.01em] text-white/72"
+                className={`${storefrontBadgeClass} py-1.5 text-[11px] normal-case tracking-[0.01em] text-white/72`}
               >
                 {item}
               </span>
@@ -199,7 +204,7 @@ export default function FigmaCommentsSection({
         </div>
         <button
           type="button"
-          className="flex items-center gap-1 text-sm font-bold text-gray-400 transition-colors hover:text-white"
+          className={`${storefrontSecondaryButtonClass} px-4 text-white/72`}
         >
           Sort by Top
           <ChevronDown className="h-4 w-4" />
@@ -208,8 +213,8 @@ export default function FigmaCommentsSection({
 
       <div
         className={cn(
-          "mb-10 rounded-2xl border border-white/10 p-4 shadow-lg transition-colors md:p-5",
-          palette.surface,
+          storefrontInfoCardClass,
+          "mb-10 p-4 transition-colors md:p-5",
         )}
       >
         <div className="flex gap-3 md:gap-4">
@@ -228,15 +233,15 @@ export default function FigmaCommentsSection({
               placeholder="What do you think about this chapter?"
               className="min-h-[80px] w-full resize-none border-none bg-transparent text-sm text-white outline-none placeholder:text-gray-600 md:text-base"
             />
-            <div className="mt-2 flex items-center justify-between border-t border-white/5 pt-3">
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-3 border-t border-white/5 pt-3">
               <button
                 type="button"
                 onClick={() => setIsSpoilerTag(!isSpoilerTag)}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors active:scale-95",
+                  "flex min-h-[40px] items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors active:scale-95",
                   isSpoilerTag
                     ? "border-red-500/30 bg-red-500/20 text-red-500"
-                    : "border-transparent bg-white/5 text-gray-400 hover:bg-white/10",
+                    : "border-white/10 bg-white/5 text-gray-300 hover:bg-white/10",
                 )}
               >
                 <AlertTriangle className="h-3.5 w-3.5" />
@@ -251,7 +256,7 @@ export default function FigmaCommentsSection({
                   }
                 }}
                 className={cn(
-                  "flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-black text-white shadow-lg transition-all active:scale-95",
+                  "flex min-h-[44px] items-center gap-2 rounded-full px-5 py-2 text-sm font-black text-white shadow-lg transition-all active:scale-95",
                   newComment.length > 0
                     ? palette.primaryBg
                     : "cursor-not-allowed bg-gray-800 text-gray-500",
@@ -278,9 +283,8 @@ export default function FigmaCommentsSection({
       ) : (
         <div
           className={cn(
-            "rounded-2xl border border-dashed p-6 text-center md:p-8",
-            palette.surface,
-            "border-white/10",
+            storefrontSoftCardClass,
+            "border-dashed p-6 text-center md:p-8",
           )}
         >
           <p className="text-base font-bold text-white">
@@ -296,7 +300,7 @@ export default function FigmaCommentsSection({
         <div className="mt-8 text-center">
           <button
             type="button"
-            className="rounded-full border border-gray-800 px-6 py-3 text-sm font-bold text-gray-400 transition-all hover:border-gray-600 hover:text-white active:scale-95"
+            className={`${storefrontSecondaryButtonClass} px-6 text-white/72 active:scale-95`}
           >
             Load More Comments
           </button>

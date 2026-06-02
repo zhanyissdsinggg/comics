@@ -13,8 +13,8 @@ export default function MissionsPanel({ missions, onClaim, workingId }) {
         <div className="space-y-3" aria-hidden="true">
           <div className="h-4 w-28 animate-pulse rounded-full bg-white/15" />
           <div className="h-7 w-44 animate-pulse rounded-2xl bg-white/15" />
-          <div className="h-16 w-full animate-pulse rounded-[22px] bg-[#111111]" />
-          <div className="h-16 w-full animate-pulse rounded-[22px] bg-[#111111]" />
+          <div className="h-16 w-full animate-pulse rounded-[22px] bg-[rgba(255,255,255,0.035)]" />
+          <div className="h-16 w-full animate-pulse rounded-[22px] bg-[rgba(255,255,255,0.035)]" />
         </div>
         <p className="mt-4 text-sm font-semibold text-white/75">
           Missions are loading.

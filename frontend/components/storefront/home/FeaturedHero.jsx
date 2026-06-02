@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { ArrowRight, BookOpenText, Library, Sparkles } from "lucide-react";
+import {
+  storefrontInfoCardClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../../common/StorefrontPagePrimitives";
 import { resolveDisplayImageUrl } from "../../../lib/fallbackImage";
 import { trackEvent } from "../../../lib/trackEvent";
 import GenreChip from "./GenreChip";
@@ -74,7 +79,7 @@ export default function FeaturedHero({
             <Link
               href={primaryHref}
               data-testid="home-hero-primary-cta"
-              className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-[rgba(255,143,184,0.28)] bg-[linear-gradient(135deg,#ff5aa3_0%,#ff8cb8_100%)] px-6 text-sm font-semibold text-[#180d15] shadow-[0_18px_42px_rgba(255,79,154,0.24)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_54px_rgba(255,79,154,0.3)]"
+              className={`${storefrontPrimaryButtonClass} min-h-[48px] px-6 text-[#180d15]`}
               onClick={() =>
                 trackEvent("story_click", {
                   seriesId: series?.id,
@@ -88,7 +93,7 @@ export default function FeaturedHero({
             </Link>
             <Link
               href={secondaryHref}
-              className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-white/12 bg-white/[0.06] px-5 text-sm font-medium text-white shadow-[0_14px_30px_rgba(8,6,20,0.18)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/[0.1]"
+              className={`${storefrontSecondaryButtonClass} min-h-[48px] px-5 text-white`}
               onClick={() =>
                 trackEvent("story_click", {
                   seriesId: series?.id,
@@ -107,7 +112,7 @@ export default function FeaturedHero({
               {stats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(10,13,22,0.58)_0%,rgba(10,13,22,0.46)_100%)] px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_18px_38px_rgba(8,6,20,0.18)] backdrop-blur-xl"
+                  className={`${storefrontInfoCardClass} px-4 py-3.5`}
                 >
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/42">
                     {stat.label}
@@ -124,7 +129,7 @@ export default function FeaturedHero({
         <div className="order-1 mx-auto w-full max-w-[340px] lg:order-2">
           <div className="relative mx-auto w-full max-w-[340px]">
             <div className="absolute inset-5 rounded-[32px] bg-[rgba(103,232,249,0.12)] blur-3xl" />
-            <div className="absolute inset-4 -rotate-[5deg] rounded-[30px] border border-white/8 bg-white/[0.04]" />
+            <div className="absolute inset-4 -rotate-[5deg] rounded-[30px] border border-white/8 bg-[rgba(255,255,255,0.025)]" />
             <div className="absolute inset-3 rotate-[4deg] rounded-[30px] border border-white/8 bg-[rgba(255,92,164,0.08)]" />
               <div className="relative aspect-[0.72] overflow-hidden rounded-[30px] border border-white/12 shadow-[0_26px_72px_rgba(0,0,0,0.44)]">
                 <img

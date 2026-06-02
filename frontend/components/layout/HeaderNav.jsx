@@ -8,6 +8,7 @@ import {
   shouldUseDocumentNavigation,
 } from "../../lib/adultRouteNavigation";
 import { siteConfig } from "../../lib/siteConfig";
+import { storefrontSecondaryButtonClass } from "../common/StorefrontPagePrimitives";
 
 const PUBLIC_NAV_ITEMS = [
   { id: "comics", label: "Comics", href: "/comics" },
@@ -70,7 +71,7 @@ export default function HeaderNav({ variant = "default", showInteractiveNav = tr
               key={item.id}
               {...navItemProps}
               aria-current={isActive ? "page" : undefined}
-              className={`rounded-full px-4 py-2.5 text-sm font-medium tracking-[0.01em] transition-all duration-150 ${isActive ? "bg-[linear-gradient(135deg,rgba(255,79,154,0.18)_0%,rgba(167,139,250,0.14)_100%)] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.14),0_10px_22px_rgba(0,0,0,0.24)]" : "text-white/68 hover:bg-white/[0.05] hover:text-white"}`}
+              className={`rounded-full px-4 py-2.5 text-sm font-medium tracking-[0.01em] transition-all duration-150 ${isActive ? "bg-[linear-gradient(135deg,rgba(255,79,154,0.18)_0%,rgba(167,139,250,0.14)_100%)] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.14),0_10px_22px_rgba(0,0,0,0.24)]" : `${storefrontSecondaryButtonClass} h-auto bg-transparent px-4 py-2.5 text-white/68 shadow-none hover:bg-[rgba(255,255,255,0.075)]`}`}
             >
               {item.label}
             </NavItem>

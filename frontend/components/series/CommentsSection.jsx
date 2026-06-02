@@ -8,8 +8,14 @@ import { emitAuthRequired } from "../../lib/authBus";
 import { useAuthStore } from "../../store/useAuthStore";
 import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
 import {
+  storefrontAccentChipClass,
+  storefrontBadgeClass,
+  storefrontChipClass,
+  storefrontInfoCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
+  storefrontInputClass,
+  storefrontSoftCardClass,
 } from "../common/StorefrontPagePrimitives";
 
 function formatDate(value) {
@@ -265,8 +271,15 @@ export default function CommentsSection({
 
   const secondaryButtonClass = storefrontSecondaryButtonClass;
   const primaryButtonClass = storefrontPrimaryButtonClass;
-  const inputClass =
-    "flex-1 rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-4 py-3 text-sm font-semibold text-white outline-none shadow-[0_12px_28px_rgba(8,6,20,0.2)] transition-all duration-150 ease-out placeholder:text-white/35 hover:border-white/18 hover:bg-[rgba(255,255,255,0.07)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffd5e5]";
+  const inputClass = `${storefrontInputClass} mt-0 flex-1 rounded-full px-4 py-3`;
+  const chipButtonClass = (active) =>
+    active
+      ? `${storefrontAccentChipClass} min-h-[34px] px-3 py-1 text-xs`
+      : `${storefrontChipClass} min-h-[34px] px-3 py-1 text-xs`;
+  const smallActionClass =
+    "min-h-[34px] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]";
+  const subtleActionClass = `${storefrontChipClass} ${smallActionClass}`;
+  const emphasizedActionClass = `${storefrontAccentChipClass} ${smallActionClass}`;
 
   return (
     <section
@@ -289,7 +302,7 @@ export default function CommentsSection({
             ].map((item) => (
               <span
                 key={item}
-                className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-3 py-1.5 text-[11px] font-semibold tracking-[0.01em] text-white/74 shadow-[0_12px_28px_rgba(8,6,20,0.18)]"
+                className={`${storefrontBadgeClass} px-3 py-1.5 text-[11px] normal-case tracking-[0.01em] text-white/74`}
               >
                 {item}
               </span>
@@ -301,11 +314,7 @@ export default function CommentsSection({
             <button
               type="button"
               onClick={onFollowToggle}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                isFollowing
-                  ? "border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] text-[#ffd6e5] shadow-[0_12px_28px_rgba(255,79,154,0.16)] hover:-translate-y-0.5"
-                  : "border-white/12 bg-[rgba(255,255,255,0.04)] text-white/80 shadow-[0_12px_28px_rgba(8,6,20,0.18)] hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
-              }`}
+              className={isFollowing ? emphasizedActionClass : subtleActionClass}
             >
               {isFollowing ? "Saved" : "Save Series"}
             </button>
@@ -331,22 +340,14 @@ export default function CommentsSection({
           <button
             type="button"
             onClick={() => setSortKey("latest")}
-            className={`rounded-full border px-3 py-1 transition ${
-              sortKey === "latest"
-                ? "border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] text-[#ffd6e5] shadow-[0_12px_28px_rgba(255,79,154,0.16)]"
-                : "border-white/12 bg-[rgba(255,255,255,0.04)] text-white/75 shadow-[0_12px_28px_rgba(8,6,20,0.18)] hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
-            }`}
+            className={chipButtonClass(sortKey === "latest")}
           >
             Latest
           </button>
           <button
             type="button"
             onClick={() => setSortKey("top")}
-            className={`rounded-full border px-3 py-1 transition ${
-              sortKey === "top"
-                ? "border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] text-[#ffd6e5] shadow-[0_12px_28px_rgba(255,79,154,0.16)]"
-                : "border-white/12 bg-[rgba(255,255,255,0.04)] text-white/75 shadow-[0_12px_28px_rgba(8,6,20,0.18)] hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
-            }`}
+            className={chipButtonClass(sortKey === "top")}
           >
             Top
           </button>
@@ -362,7 +363,7 @@ export default function CommentsSection({
         ) : null}
       </div>
 
-      <div className="mt-5 rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 shadow-[0_18px_44px_rgba(8,6,20,0.24)]">
+      <div className={`mt-5 ${storefrontInfoCardClass} p-4`}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
@@ -375,7 +376,7 @@ export default function CommentsSection({
                 key={prompt.id}
                 type="button"
                 onClick={() => focusComposer(prompt.text)}
-                className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-3 py-2 text-sm font-semibold tracking-[0.01em] text-white/80 shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
+                className={`${storefrontChipClass} px-3 py-2 text-sm tracking-[0.01em] text-white/80`}
               >
                 {prompt.label}
               </button>
@@ -404,7 +405,7 @@ export default function CommentsSection({
 
       <div className="mt-6 space-y-4">
         {sortedComments.length === 0 ? (
-          <div className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-5 text-white shadow-[0_18px_44px_rgba(8,6,20,0.24)]">
+          <div className={`${storefrontInfoCardClass} p-5 text-white`}>
             <p className="text-sm font-semibold tracking-[-0.02em] text-white">
               No comments yet.
             </p>
@@ -416,7 +417,7 @@ export default function CommentsSection({
           sortedComments.map((comment) => (
             <div
               key={comment.id}
-              className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 text-white shadow-[0_18px_44px_rgba(8,6,20,0.22)]"
+              className={`${storefrontInfoCardClass} p-4 text-white`}
             >
               <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
                 <span>{getCommentAuthor(comment)}</span>
@@ -429,11 +430,11 @@ export default function CommentsSection({
                 <button
                   type="button"
                   onClick={() => handleLike(comment.id)}
-                  className={`rounded-full border px-3 py-1 transition ${
+                  className={
                     getCommentLikedByUser(comment)
-                      ? "border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] text-[#ffd6e5] shadow-[0_12px_28px_rgba(255,79,154,0.16)]"
-                      : "border-white/12 bg-[rgba(255,255,255,0.04)] text-white/75 shadow-[0_12px_28px_rgba(8,6,20,0.18)] hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
-                  }`}
+                      ? emphasizedActionClass
+                      : subtleActionClass
+                  }
                 >
                   Like {getCommentLikeCount(comment)}
                 </button>
@@ -444,14 +445,14 @@ export default function CommentsSection({
                       prev === comment.id ? "" : comment.id,
                     )
                   }
-                  className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75 shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
+                  className={subtleActionClass}
                 >
                   Reply{" "}
                   {Array.isArray(comment.replies) ? comment.replies.length : 0}
                 </button>
               </div>
               {Array.isArray(comment.replies) && comment.replies.length > 0 ? (
-                <div className="mt-3 space-y-2 rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-3 text-xs text-white/75 shadow-[0_12px_30px_rgba(8,6,20,0.18)]">
+                <div className={`mt-3 space-y-2 ${storefrontSoftCardClass} p-3 text-xs text-white/75`}>
                   {comment.replies.map((reply) => (
                     <div key={reply.id}>
                       <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.08em] text-white/60">
@@ -476,7 +477,7 @@ export default function CommentsSection({
                       }))
                     }
                     placeholder="Add a reply..."
-                    className="flex-1 rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-3 py-2 text-xs font-semibold text-white outline-none shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all duration-150 ease-out placeholder:text-white/35 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffd5e5]"
+                    className={`${storefrontInputClass} mt-0 flex-1 rounded-full px-3 py-2 text-xs font-semibold`}
                   />
                   <button
                     type="button"

@@ -35,7 +35,7 @@ export default function ReaderEndPanel({
       <div className={cn("mx-auto", isComic ? "max-w-5xl" : "max-w-[760px]")}>
         <div className="grid gap-4">
           <div className={shellClassName}>
-            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/46">
               Chapter Complete
             </p>
             <h3
@@ -147,7 +147,7 @@ export default function ReaderEndPanel({
               </button>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2 text-xs uppercase tracking-[0.16em] text-gray-500">
+            <div className="mt-4 flex flex-wrap gap-2 text-xs uppercase tracking-[0.16em] text-white/42">
               {hasNextEpisode ? <span>Next chapter is ready</span> : null}
               {currentBookmark ? <span>Progress saved</span> : null}
               {liked ? <span>Liked</span> : null}

@@ -3,7 +3,6 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Gift, Sparkles, X, Zap } from "lucide-react";
 import {
-  formatUSDisplayCurrency,
   formatUSDisplayCurrencyFromCents,
   formatUSNumber,
 } from "../../lib/localization";
@@ -11,8 +10,12 @@ import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
 import NetworkFallback from "../common/NetworkFallback";
 import SurfacePanel from "../common/SurfacePanel";
 import {
+  storefrontBadgeClass,
+  storefrontInfoCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+  StorefrontSectionHeading,
 } from "../common/StorefrontPagePrimitives";
 
 function getPackageId(pkg) {
@@ -199,14 +202,14 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
           <button
             type="button"
             onClick={handleClose}
-            className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/12 bg-[rgba(255,255,255,0.06)] p-2 text-white shadow-[0_14px_32px_rgba(8,6,20,0.26)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-cyan-300/28 hover:bg-[rgba(255,255,255,0.11)] active:scale-95"
+            className={`absolute right-4 top-4 z-10 min-h-[44px] min-w-[44px] justify-center px-0 py-0 text-white active:scale-95 ${storefrontSecondaryButtonClass}`}
             aria-label="Close top-up dialog"
           >
             <X size={18} />
           </button>
 
           <div className="text-center">
-            <p className="mb-3 inline-flex rounded-full border border-white/10 bg-[rgba(255,255,255,0.05)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/62">
+            <p className={`mb-3 ${storefrontBadgeClass}`}>
               Wallet
             </p>
             <h2 className="font-display text-[2.7rem] font-semibold leading-none tracking-[-0.06em] text-white">
@@ -222,13 +225,49 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
         </div>
 
         <div className="relative p-6 sm:p-8">
+          <div className="mb-6 grid gap-3 sm:grid-cols-3">
+            <div className={`${storefrontInfoCardClass} px-4 py-3`}>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/46">
+                Balance
+              </p>
+              <p className="mt-2 text-sm font-semibold text-white/82">
+                {formatUSNumber(currentPoints)} points
+              </p>
+            </div>
+            <div className={`${storefrontInfoCardClass} px-4 py-3`}>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/46">
+                Pack state
+              </p>
+              <p className="mt-2 text-sm font-semibold text-white/82">
+                {loading
+                  ? "Loading offers"
+                  : displayPackages.length > 0
+                    ? `${displayPackages.length} packs ready`
+                    : "Open store route"}
+              </p>
+            </div>
+            <div className={`${storefrontInfoCardClass} px-4 py-3`}>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/46">
+                Checkout
+              </p>
+              <p className="mt-2 text-sm font-semibold text-white/82">
+                {purchaseActionsEnabled ? "Open offer in store" : "Browse pack list"}
+              </p>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <StorefrontSectionHeading
+              eyebrow="Top-up picks"
+              title="Choose the pack that keeps your reading pace steady"
+              description="Small pack for one more session, bigger pack if you already know tonight is going long."
+            />
+          </div>
+
           {loading ? (
             <div className="mb-6 space-y-3">
               {[0, 1, 2].map((index) => (
-                <div
-                  key={index}
-                  className="h-24 animate-pulse rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.04)]"
-                />
+                <div key={index} className={`h-24 animate-pulse ${storefrontSoftCardClass}`} />
               ))}
             </div>
           ) : displayPackages.length > 0 ? (
@@ -269,7 +308,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                           className={`flex h-12 w-12 items-center justify-center rounded-[18px] ${
                             isHighlighted
                               ? "border border-cyan-300/24 bg-[rgba(92,228,255,0.18)] text-cyan-100 shadow-[0_14px_30px_rgba(8,6,20,0.22)]"
-                              : "border border-white/10 bg-[rgba(255,255,255,0.05)] text-white/80 shadow-[0_14px_30px_rgba(8,6,20,0.18)]"
+                              : "border border-white/10 bg-[rgba(255,255,255,0.035)] text-white/80 shadow-[0_14px_30px_rgba(8,6,20,0.18)]"
                           }`}
                         >
                           <Zap size={22} />

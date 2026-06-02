@@ -16,7 +16,10 @@ import {
 } from "../../components/common/StorefrontPagePrimitives";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { getFriendlyMessage } from "../../lib/errorMessages";
-import { formatUSDisplayCurrencyFromCents } from "../../lib/localization";
+import {
+  formatUSDate,
+  formatUSDisplayCurrencyFromCents,
+} from "../../lib/localization";
 import { useAuthStore } from "../../store/useAuthStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import {
@@ -29,6 +32,7 @@ import {
 } from "../../lib/storefrontCopy";
 import { buildSupportPath } from "../../lib/supportRouting";
 import { siteConfig } from "../../lib/siteConfig";
+import { StorefrontPage } from "../../components/storefront/StorefrontScaffold";
 
 function formatOrderAmount(amount, currency) {
   const numericAmount = Number(amount || 0);
@@ -40,16 +44,13 @@ function formatOrderDate(value) {
     return "Date unavailable";
   }
 
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "Date unavailable";
-  }
-
-  return date.toLocaleDateString("en-US", {
+  const formatted = formatUSDate(value, {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
+
+  return formatted || "Date unavailable";
 }
 
 function formatLabelWord(value) {
@@ -202,7 +203,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
   const actionCardSecondaryClass =
     "border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.03)_100%)] text-white shadow-[0_22px_46px_rgba(8,6,20,0.24)] hover:border-white/16 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.04)_100%)]";
   const subtleChipClass =
-    "rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/72 shadow-[0_12px_24px_rgba(8,6,20,0.18)]";
+    "rounded-full border border-white/12 bg-[rgba(255,255,255,0.035)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/72 shadow-[0_12px_24px_rgba(8,6,20,0.18)]";
   const panelClass = "space-y-5";
   const orderCardClass =
     "rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.03)_100%)] p-4 text-white shadow-[0_18px_40px_rgba(8,6,20,0.22)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.04)_100%)]";
@@ -216,6 +217,24 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         (order) =>
           order.status === "PAID" && isMembershipCharge(order.packageId),
       ) || null,
+    [orders],
+  );
+  const totalSpentCents = useMemo(
+    () =>
+      orders.reduce((sum, order) => {
+        if (order.status !== "PAID") {
+          return sum;
+        }
+        return sum + Number(order.amount || 0);
+      }, 0),
+    [orders],
+  );
+  const paidOrdersCount = useMemo(
+    () => orders.filter((order) => order.status === "PAID").length,
+    [orders],
+  );
+  const latestOrderDate = useMemo(
+    () => formatOrderDate(orders[0]?.createdAt),
     [orders],
   );
   const scrollToSection = useCallback((id) => {
@@ -403,8 +422,8 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
 
   if (!viewerSignedIn) {
     return (
-      <div className="min-h-screen overflow-hidden bg-black text-white">
-        <main className="mx-auto flex max-w-[960px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
+      <StorefrontPage accentClass="from-[rgba(103,232,249,0.12)] via-[rgba(167,139,250,0.08)] to-[rgba(255,79,154,0.1)]">
+        <div className="mx-auto flex w-full max-w-[960px] flex-col gap-6">
           <EditorialHero
             appearance="dark"
             accent="blue"
@@ -447,28 +466,53 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               </button>
             </div>
           </SurfacePanel>
-        </main>
-      </div>
+        </div>
+      </StorefrontPage>
     );
   }
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-white">
-      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
+    <StorefrontPage accentClass="from-[rgba(103,232,249,0.12)] via-[rgba(167,139,250,0.08)] to-[rgba(255,79,154,0.1)]">
+      <div className="flex flex-col gap-8">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="dark"
             accent="blue"
             eyebrow="Orders"
-            title={viewerSignedIn ? "Orders" : "Sign in to view purchases"}
+            title={viewerSignedIn ? "Your payment shelf, cleaned up." : "Sign in to view purchases"}
             description={
-              viewerSignedIn ? "" : "Need billing help? Support can help."
+              viewerSignedIn
+                ? "Track purchases, jump back into the right commerce lane, and send billing issues with the right context."
+                : "Need billing help? Support can help."
+            }
+            stats={
+              viewerSignedIn
+                ? [
+                    {
+                      label: "Paid orders",
+                      value: `${paidOrdersCount}`,
+                    },
+                    {
+                      label: "Total spent",
+                      value: formatOrderAmount(totalSpentCents, orders[0]?.currency || "USD"),
+                    },
+                    {
+                      label: "Latest order",
+                      value: latestOrderDate,
+                    },
+                  ]
+                : []
             }
           />
 
           <StorefrontDesk
             eyebrow="Desk"
-            title={viewerSignedIn ? "Orders" : "Need billing help?"}
+            title={viewerSignedIn ? "Need a fast route?" : "Need billing help?"}
+            description={
+              viewerSignedIn
+                ? "Jump straight to purchase history, plan charges, or support."
+                : null
+            }
             actions={
               viewerSignedIn ? (
                 <>
@@ -571,13 +615,45 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               appearance="dark"
               accent="blue"
             >
-              <div className="space-y-2">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56">
-                  Tasks
-                </p>
-                <h2 className="font-display text-[2rem] font-semibold tracking-[-0.05em] text-white">
-                  Orders
-                </h2>
+              <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+                <div className="space-y-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56">
+                    Tasks
+                  </p>
+                  <h2 className="font-display text-[2rem] font-semibold tracking-[-0.05em] text-white">
+                    Keep billing in one place
+                  </h2>
+                  <p className="max-w-2xl text-sm leading-6 text-white/68">
+                    Open the right lane for receipts, plan charges, point packs,
+                    or support without hunting through the old account UI.
+                  </p>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+                  <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.18)]">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">
+                      Paid orders
+                    </div>
+                    <div className="mt-2 font-display text-[1.7rem] font-semibold tracking-[-0.05em] text-white">
+                      {paidOrdersCount}
+                    </div>
+                  </div>
+                  <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.18)]">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">
+                      Membership
+                    </div>
+                    <div className="mt-2 text-sm font-semibold leading-6 text-white">
+                      {latestMembershipOrder ? "Latest plan charge found" : "No active plan charge in history"}
+                    </div>
+                  </div>
+                  <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.18)]">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">
+                      Support lane
+                    </div>
+                    <div className="mt-2 text-sm font-semibold leading-6 text-white">
+                      Purchase questions route straight to billing support.
+                    </div>
+                  </div>
+                </div>
               </div>
               <StorefrontPathwaysGrid
                 cards={billingTaskCards}
@@ -612,7 +688,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={index}
-                  className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.22)]"
+                  className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.035)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.22)]"
                   aria-hidden="true"
                 >
                   <div className="h-4 w-24 animate-pulse rounded-full bg-white/20" />
@@ -628,7 +704,11 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             appearance="dark"
             accent="blue"
           >
-            <StorefrontSectionHeading title="No orders yet" description="" />
+            <StorefrontSectionHeading
+              eyebrow="History"
+              title="No orders yet"
+              description="When purchases land, they will show up here with the same support and follow-up tools."
+            />
             {emptyOrderActionCards.length > 0 ? (
               <StorefrontPathwaysGrid
                 cards={emptyOrderActionCards}
@@ -648,11 +728,14 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             appearance="dark"
             accent="blue"
           >
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <StorefrontSectionHeading
-                eyebrow="History"
-                title="Purchase history"
-              />
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <StorefrontSectionHeading
+                  eyebrow="History"
+                  title="Purchase history"
+                  description="Charges, refunds, and the next step for each purchase all stay in one feed."
+                />
+              </div>
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-xs font-medium text-white/55">
                   {orders.length} purchase{orders.length === 1 ? "" : "s"}{" "}
@@ -666,6 +749,33 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 >
                   {workingId === "refresh" ? "Refreshing..." : "Refresh"}
                 </button>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.18)]">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">
+                  Total spent
+                </div>
+                <div className="mt-2 font-display text-[1.7rem] font-semibold tracking-[-0.05em] text-white">
+                  {formatOrderAmount(totalSpentCents, orders[0]?.currency || "USD")}
+                </div>
+              </div>
+              <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.18)]">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">
+                  Latest charge
+                </div>
+                <div className="mt-2 text-sm font-semibold leading-6 text-white">
+                  {latestOrderDate}
+                </div>
+              </div>
+              <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.18)]">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">
+                  Support
+                </div>
+                <div className="mt-2 text-sm font-semibold leading-6 text-white">
+                  Report missing points or billing issues from the same page.
+                </div>
               </div>
             </div>
 
@@ -739,7 +849,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                           }}
                           className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] transition ${
                             workingId === order.orderId
-                              ? "cursor-not-allowed border border-white/10 bg-[rgba(255,255,255,0.04)] text-white/40 shadow-none"
+                              ? "cursor-not-allowed border border-white/10 bg-[rgba(255,255,255,0.035)] text-white/40 shadow-none"
                               : primaryButtonClass
                           }`}
                           disabled={workingId === order.orderId}
@@ -773,7 +883,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             </div>
           </SurfacePanel>
         )}
-      </main>
-    </div>
+      </div>
+    </StorefrontPage>
   );
 }

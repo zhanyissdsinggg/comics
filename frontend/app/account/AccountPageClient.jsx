@@ -23,7 +23,10 @@ import {
 } from "../../lib/region/config";
 import { setCookie } from "../../lib/cookies";
 import { applyPreferencesToStorage } from "../../lib/preferencesClient";
-import { formatUSDisplayCurrencyFromCents } from "../../lib/localization";
+import {
+  formatUSDate,
+  formatUSDisplayCurrencyFromCents,
+} from "../../lib/localization";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { apiGet, apiPost } from "../../lib/apiClient";
@@ -35,6 +38,7 @@ import {
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
 import { buildSupportPath } from "../../lib/supportRouting";
+import { StorefrontPage } from "../../components/storefront/StorefrontScaffold";
 
 const REGION_KEY = "mn_region";
 const LANG_KEY = "mn_lang";
@@ -61,22 +65,19 @@ function formatOrderDate(value) {
     return "Date unavailable";
   }
 
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "Date unavailable";
-  }
-
-  return date.toLocaleDateString("en-US", {
+  const formatted = formatUSDate(value, {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
+
+  return formatted || "Date unavailable";
 }
 
 export default function AccountPage({ initialSignedIn = false }) {
   const router = useRouter();
   const { hydrated, isSignedIn, user } = useAuthStore();
-  const { plan, subscription, loadWallet, cancelSubscription } =
+  const { plan, subscription, loadWallet, cancelSubscription, paidPts, bonusPts } =
     useWalletStore();
   const [region, setRegion] = useState("global");
   const [language, setLanguage] = useState("en");
@@ -354,7 +355,7 @@ export default function AccountPage({ initialSignedIn = false }) {
         label: "Plans",
         value: subscription?.active ? "Member" : "Free",
         hint: subscription?.renewAt
-          ? `Renews ${new Date(subscription.renewAt).toLocaleDateString()}`
+          ? `Renews ${formatUSDate(subscription.renewAt)}`
           : !hydrated
             ? "Loading"
             : "Upgrade anytime",
@@ -387,6 +388,54 @@ export default function AccountPage({ initialSignedIn = false }) {
     subscription?.active,
     subscription?.renewAt,
     user?.emailVerified,
+  ]);
+  const walletTotal = Number(paidPts || 0) + Number(bonusPts || 0);
+  const enabledAlertCount = [notifyNew, notifyTtf, notifyPromo].filter(Boolean).length;
+  const accountOverviewCards = useMemo(() => {
+    if (!viewerSignedIn) {
+      return [];
+    }
+
+    return [
+      {
+        label: "Wallet",
+        value: `${walletTotal.toLocaleString()} pts`,
+        hint:
+          walletTotal > 0
+            ? `${Number(paidPts || 0).toLocaleString()} paid / ${Number(bonusPts || 0).toLocaleString()} bonus`
+            : "Top up when you are ready to keep reading.",
+      },
+      {
+        label: "Alerts",
+        value: `${enabledAlertCount}`,
+        hint:
+          enabledAlertCount > 0
+            ? "Reading alerts and deals are live."
+            : "All alerts are currently muted.",
+      },
+      {
+        label: "Identity",
+        value: user?.emailVerified ? "Verified" : "Verify Email",
+        hint: user?.email || user?.id || "Account ready",
+      },
+      {
+        label: "Mode",
+        value: hideAdultHistory ? "Private device" : "Standard history",
+        hint: hideAdultHistory
+          ? "Mature reads stay hidden on this device."
+          : "Reading history is shown normally on this device.",
+      },
+    ];
+  }, [
+    bonusPts,
+    enabledAlertCount,
+    hideAdultHistory,
+    paidPts,
+    user?.email,
+    user?.emailVerified,
+    user?.id,
+    viewerSignedIn,
+    walletTotal,
   ]);
 
   const actionSecondaryButtonClass =
@@ -449,14 +498,11 @@ export default function AccountPage({ initialSignedIn = false }) {
         title: "Plans",
         description: subscription?.active
           ? subscription?.renewAt
-            ? `Renews ${new Date(subscription.renewAt).toLocaleDateString(
-                "en-US",
-                {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                },
-              )}`
+            ? `Renews ${formatUSDate(subscription.renewAt, {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}`
             : "Active"
           : "",
         cta: subscription?.active ? "Plans" : "See plans",
@@ -542,6 +588,8 @@ export default function AccountPage({ initialSignedIn = false }) {
       ? "Orders, plans, support"
       : "Settings"
     : "Reset your password or contact support.";
+  const panelClassName = "space-y-5 border-white/10 bg-[linear-gradient(180deg,rgba(18,17,28,0.96)_0%,rgba(11,12,20,0.94)_100%)]";
+  const sidePanelClassName = "space-y-5 border-white/10 bg-[linear-gradient(180deg,rgba(15,17,27,0.98)_0%,rgba(9,11,18,0.96)_100%)]";
   const signedOutSignInHref = "/account?openLogin=1&returnTo=%2Faccount";
   const signedOutCreateAccountHref =
     "/account?openLogin=1&mode=register&returnTo=%2Faccount";
@@ -553,8 +601,8 @@ export default function AccountPage({ initialSignedIn = false }) {
 
   if (!viewerSignedIn) {
     return (
-      <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(82,188,255,0.13),transparent_24%),radial-gradient(circle_at_12%_18%,rgba(255,87,166,0.16),transparent_28%),linear-gradient(180deg,#090912_0%,#0d1020_52%,#090912_100%)] text-white">
-        <main className="mx-auto flex max-w-[1080px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
+      <StorefrontPage accentClass="from-[rgba(103,232,249,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(255,79,154,0.12)]">
+        <div className="mx-auto flex w-full max-w-[1080px] flex-col gap-8">
           <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
             <EditorialHero
               appearance="dark"
@@ -749,14 +797,14 @@ export default function AccountPage({ initialSignedIn = false }) {
               ) : null}
             </details>
           </SurfacePanel>
-        </main>
-      </div>
+        </div>
+      </StorefrontPage>
     );
   }
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(82,188,255,0.13),transparent_24%),radial-gradient(circle_at_12%_18%,rgba(255,87,166,0.16),transparent_28%),linear-gradient(180deg,#090912_0%,#0d1020_52%,#090912_100%)] text-white">
-      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
+    <StorefrontPage accentClass="from-[rgba(103,232,249,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(255,79,154,0.12)]">
+      <div className="flex flex-col gap-8">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="dark"
@@ -912,16 +960,54 @@ export default function AccountPage({ initialSignedIn = false }) {
         ) : null}
 
         {viewerSignedIn ? (
-          <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
+          <SurfacePanel
+            className="space-y-5 border-white/10 bg-[linear-gradient(180deg,rgba(20,18,31,0.98)_0%,rgba(12,12,21,0.96)_48%,rgba(9,10,18,0.98)_100%)]"
+            appearance="dark"
+            accent="cyan"
+          >
             <div className="space-y-2">
               <p className={sectionEyebrowClass}>Actions</p>
-              <h2 className={sectionTitleClass}>Actions.</h2>
+              <h2 className={sectionTitleClass}>Quick desk</h2>
+              <p className={mutedCopyClass}>
+                Jump straight into plans, orders, library, and support.
+              </p>
             </div>
             <StorefrontPathwaysGrid
               cards={accountActionCards}
               columnsClassName="md:grid-cols-2 xl:grid-cols-4"
               appearance="dark"
             />
+          </SurfacePanel>
+        ) : null}
+
+        {viewerSignedIn && accountOverviewCards.length > 0 ? (
+          <SurfacePanel
+            className="space-y-5 border-white/10 bg-[linear-gradient(180deg,rgba(16,18,28,0.98)_0%,rgba(10,12,20,0.96)_100%)]"
+            appearance="dark"
+            accent="rose"
+          >
+            <div className="space-y-2">
+              <p className={sectionEyebrowClass}>Overview</p>
+              <h2 className={sectionTitleClass}>Reading desk</h2>
+              <p className={mutedCopyClass}>
+                Wallet, alerts, identity, and device privacy at a glance.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {accountOverviewCards.map((card) => (
+                <div key={card.label} className={storefrontInsetCardClass}>
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/50">
+                    {card.label}
+                  </p>
+                  <p className="mt-3 font-display text-[1.4rem] font-black tracking-[-0.04em] text-white">
+                    {card.value}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-white/64">
+                    {card.hint}
+                  </p>
+                </div>
+              ))}
+            </div>
           </SurfacePanel>
         ) : null}
 
@@ -1067,7 +1153,7 @@ export default function AccountPage({ initialSignedIn = false }) {
 
             {viewerSignedIn ? (
               <SurfacePanel
-                className="space-y-5"
+                className={panelClassName}
                 appearance="dark"
                 accent="cyan"
               >
@@ -1076,7 +1162,9 @@ export default function AccountPage({ initialSignedIn = false }) {
                   <h2 className={sectionTitleClass}>
                     Name, email, and quick help
                   </h2>
-                  <p className={mutedCopyClass}>Basics only.</p>
+                  <p className={mutedCopyClass}>
+                    Keep the core account identity tidy and easy to reach.
+                  </p>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -1188,13 +1276,16 @@ export default function AccountPage({ initialSignedIn = false }) {
 
             {viewerSignedIn ? (
               <SurfacePanel
-                className="space-y-5"
-                appearance="light"
-                accent="blue"
+                className={panelClassName}
+                appearance="dark"
+                accent="cyan"
               >
                 <div className="space-y-2">
                   <p className={sectionEyebrowClass}>Reading setup</p>
                   <h2 className={sectionTitleClass}>Region and language</h2>
+                  <p className={mutedCopyClass}>
+                    Localize catalog rules and reading language without leaving the desk.
+                  </p>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -1233,7 +1324,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </div>
 
                 <div className={storefrontNoticeClass}>
-                  Manage mature visibility and device history in one place.
+                  Mature visibility and device privacy stay tied to your current account and device.
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <button
@@ -1249,13 +1340,16 @@ export default function AccountPage({ initialSignedIn = false }) {
 
             {viewerSignedIn ? (
               <SurfacePanel
-                className="space-y-4"
-                appearance="light"
-                accent="blue"
+                className={panelClassName}
+                appearance="dark"
+                accent="rose"
               >
                 <div className="space-y-2">
                   <p className={sectionEyebrowClass}>Notifications</p>
                   <h2 className={sectionTitleClass}>Alerts</h2>
+                  <p className={mutedCopyClass}>
+                    Control chapter drops, free-read pings, and promo nudges.
+                  </p>
                 </div>
 
                 <label className={checkboxCardClass}>
@@ -1293,13 +1387,16 @@ export default function AccountPage({ initialSignedIn = false }) {
             {!viewerSignedIn ? null : (
               <>
                 <SurfacePanel
-                  className="space-y-4"
-                  appearance="light"
-                  accent="blue"
+                  className={sidePanelClassName}
+                  appearance="dark"
+                  accent="rose"
                 >
                   <div className="space-y-2">
                     <p className={sectionEyebrowClass}>Billing</p>
                     <h2 className={sectionTitleClass}>Billing</h2>
+                    <p className={mutedCopyClass}>
+                      Membership state, renew date, and checkout paths live here.
+                    </p>
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-4 text-sm font-semibold text-white/70">
                     <div>
@@ -1310,7 +1407,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                       {subscription?.renewAt ? (
                         <div className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
                           Renews on{" "}
-                          {new Date(subscription.renewAt).toLocaleDateString()}
+                          {formatUSDate(subscription.renewAt)}
                         </div>
                       ) : null}
                     </div>
@@ -1354,13 +1451,16 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </SurfacePanel>
 
                 <SurfacePanel
-                  className="space-y-4"
-                  appearance="light"
-                  accent="blue"
+                  className={sidePanelClassName}
+                  appearance="dark"
+                  accent="cyan"
                 >
                   <div className="space-y-2">
                     <p className={sectionEyebrowClass}>Security</p>
                     <h2 className={sectionTitleClass}>Sign-in and recovery</h2>
+                    <p className={mutedCopyClass}>
+                      Password, Google link state, and account recovery in one block.
+                    </p>
                   </div>
 
                   {hydrated && isSignedIn ? (
@@ -1476,13 +1576,16 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </SurfacePanel>
 
                 <SurfacePanel
-                  className="space-y-4"
-                  appearance="light"
-                  accent="blue"
+                  className={sidePanelClassName}
+                  appearance="dark"
+                  accent="amber"
                 >
                   <div className="space-y-2">
                     <p className={sectionEyebrowClass}>Purchases</p>
                     <h2 className={sectionTitleClass}>Orders</h2>
+                    <p className={mutedCopyClass}>
+                      Recent point packs and payment history stay visible here.
+                    </p>
                   </div>
                   {!hydrated || ordersLoading ? (
                     <div
@@ -1502,7 +1605,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                     </div>
                   ) : orders.length === 0 ? (
                     <div className={softInfoCardClass}>
-                      <p>No orders yet</p>
+                      <p>No orders yet.</p>
                       <div className="mt-4 flex flex-wrap gap-2">
                         <button
                           type="button"
@@ -1576,14 +1679,14 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </SurfacePanel>
 
                 <SurfacePanel
-                  className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-                  appearance="light"
-                  accent="blue"
+                  className="flex flex-col gap-4 border-white/10 bg-[linear-gradient(180deg,rgba(18,17,28,0.98)_0%,rgba(10,11,18,0.96)_100%)] sm:flex-row sm:items-center sm:justify-between"
+                  appearance="dark"
+                  accent="rose"
                 >
                   <div>
-                    <p className={sectionEyebrowClass}>Save</p>
+                    <p className={sectionEyebrowClass}>Apply</p>
                     <p className="mt-2 text-sm font-semibold leading-6 text-white/70">
-                      Save
+                      Save account, alert, and reading preference changes.
                     </p>
                   </div>
                   <button
@@ -1598,7 +1701,7 @@ export default function AccountPage({ initialSignedIn = false }) {
             )}
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </StorefrontPage>
   );
 }

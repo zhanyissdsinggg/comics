@@ -39,6 +39,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { formatUSDate, formatUSDisplayCurrency } from "../../lib/localization";
 import { resolvePublicCommerceMode } from "../../lib/storefrontBillingState";
 import { siteConfig } from "../../lib/siteConfig";
+import { StorefrontPage } from "../storefront/StorefrontScaffold";
 
 function openAuthPrompt() {
   if (typeof window === "undefined") {
@@ -348,8 +349,8 @@ export default function SubscribePage({
 
   if (!siteConfig.monetization.membershipEnabled) {
     return (
-      <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(82,188,255,0.14),transparent_26%),radial-gradient(circle_at_20%_20%,rgba(255,87,166,0.16),transparent_32%),linear-gradient(180deg,#090912_0%,#0d1020_52%,#090912_100%)] text-white">
-        <main className="mx-auto flex max-w-[960px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
+      <StorefrontPage accentClass="from-[rgba(103,232,249,0.12)] via-[rgba(167,139,250,0.08)] to-[rgba(255,79,154,0.1)]">
+        <div className="mx-auto flex w-full max-w-[960px] flex-col gap-6">
           <SurfacePanel className="space-y-5" appearance="dark" accent="blue">
             <div className="space-y-3">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
@@ -378,14 +379,14 @@ export default function SubscribePage({
               </Link>
             </div>
           </SurfacePanel>
-        </main>
-      </div>
+        </div>
+      </StorefrontPage>
     );
   }
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(82,188,255,0.14),transparent_26%),radial-gradient(circle_at_20%_20%,rgba(255,87,166,0.16),transparent_32%),linear-gradient(180deg,#090912_0%,#0d1020_52%,#090912_100%)] text-white">
-      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
+    <StorefrontPage accentClass="from-[rgba(103,232,249,0.12)] via-[rgba(167,139,250,0.08)] to-[rgba(255,79,154,0.1)]">
+      <div className="flex flex-col gap-8">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             accent="blue"
@@ -646,7 +647,7 @@ export default function SubscribePage({
                           className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${
                             isBest
                               ? "border-cyan-300/30 bg-[linear-gradient(135deg,rgba(56,189,248,0.22)_0%,rgba(96,165,250,0.14)_100%)] text-cyan-100 shadow-[0_18px_34px_rgba(34,211,238,0.16)]"
-                              : "border-white/12 bg-[rgba(255,255,255,0.06)] text-amber-100 shadow-[0_16px_30px_rgba(8,6,20,0.2)]"
+                              : "border-white/12 bg-[rgba(255,255,255,0.035)] text-amber-100 shadow-[0_16px_30px_rgba(8,6,20,0.2)]"
                           }`}
                         >
                           {getPlanIcon(plan.id)}
@@ -930,7 +931,7 @@ export default function SubscribePage({
             </div>
           </SurfacePanel>
         ) : null}
-      </main>
-    </div>
+      </div>
+    </StorefrontPage>
   );
 }

@@ -41,6 +41,14 @@ import FigmaChrome from "./FigmaChrome";
 import FigmaCommentsSection from "./FigmaCommentsSection";
 import UnlockChapterModal from "../series/UnlockChapterModal";
 import {
+  storefrontBadgeClass,
+  storefrontInfoCardClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+  StorefrontSectionHeading,
+} from "../common/StorefrontPagePrimitives";
+import {
   FIGMA_CONTENT_TYPES,
   buildFigmaCatalog,
   buildFigmaSeriesItem,
@@ -128,27 +136,65 @@ function ModeBlockedState({
   return (
     <main className={cn("min-h-screen", palette.rootBg)}>
       <FigmaChrome>
-        <div className="flex min-h-[78vh] flex-col items-center justify-center px-4 py-20 text-center">
-          <Lock className="mb-6 h-16 w-16 text-red-500 opacity-80" />
-          <h2 className="mb-4 text-3xl font-black text-white">{title}</h2>
-          <p className="mb-8 max-w-md text-gray-400">{description}</p>
-          <button
-            type="button"
-            onClick={onCta}
-            className={cn(
-              "rounded-xl px-8 py-3.5 font-black text-white shadow-[0_0_20px_rgba(220,38,38,0.4)] transition-all active:scale-95",
-              palette.primaryBg,
-            )}
-          >
-            {ctaLabel}
-          </button>
-          <button
-            type="button"
-            onClick={onBack}
-            className="mt-6 font-bold text-gray-500 transition-colors hover:text-white"
-          >
-            Go Back
-          </button>
+        <div className="mx-auto flex min-h-[78vh] max-w-[1040px] items-center px-4 py-16">
+          <div className="w-full overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(145deg,rgba(20,16,28,0.98)_0%,rgba(10,12,19,0.96)_52%,rgba(16,12,22,0.98)_100%)] shadow-[0_32px_84px_rgba(0,0,0,0.34)]">
+            <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
+              <div>
+                <p className="inline-flex rounded-full border border-[rgba(255,151,189,0.24)] bg-[rgba(255,79,154,0.12)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#ffd6e5]">
+                  Catalog gate
+                </p>
+                <h2 className="mt-5 font-display text-[2.45rem] font-semibold leading-[0.92] tracking-[-0.05em] text-white sm:text-[3.1rem]">
+                  {title}
+                </h2>
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-white/68">
+                  {description}
+                </p>
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                  <button
+                    type="button"
+                    onClick={onCta}
+                    className={cn(
+                      "inline-flex min-h-[52px] items-center justify-center rounded-full px-6 py-3 text-sm font-black text-white shadow-[0_18px_40px_rgba(255,79,154,0.22)] transition-transform active:scale-[0.98]",
+                      palette.primaryBg,
+                    )}
+                  >
+                    {ctaLabel}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onBack}
+                    className="inline-flex min-h-[52px] items-center justify-center rounded-full border border-white/10 bg-[rgba(255,255,255,0.035)] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[rgba(255,255,255,0.075)]"
+                  >
+                    Go Back
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                <div className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.035)] px-4 py-4 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+                    Access
+                  </p>
+                  <p className="mt-3 text-base font-semibold text-white">
+                    Private by default
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-white/60">
+                    This title only opens when the current content mode matches the catalog.
+                  </p>
+                </div>
+                <div className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.035)] px-4 py-4 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+                    Return
+                  </p>
+                  <p className="mt-3 text-base font-semibold text-white">
+                    Series browser
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-white/60">
+                    Leave the gate and head back without changing routes or data state.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </FigmaChrome>
     </main>
@@ -524,18 +570,20 @@ function SeriesDetailContent({
   return (
     <main className={cn("min-h-screen", palette.rootBg)}>
       <FigmaChrome>
-        <div className="relative min-h-[420px] w-full bg-black sm:min-h-[520px] md:min-h-[620px]">
-            <div className="absolute inset-0">
-              <div
-                aria-hidden="true"
-                className="h-full w-full scale-110 object-cover opacity-20 blur-xl"
-                style={{
-                  backgroundImage: `url("${coverImageUrl}")`,
-                  backgroundPosition: "center",
-                  backgroundRepeat: "no-repeat",
-                  backgroundSize: "cover",
-                }}
-              />
+        <div className="relative min-h-[420px] w-full overflow-hidden bg-black sm:min-h-[520px] md:min-h-[620px]">
+          <div className="absolute inset-0 overflow-hidden">
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 opacity-20 blur-xl"
+              style={{
+                backgroundImage: `url("${coverImageUrl}")`,
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "cover",
+                transform: "scale(1.06)",
+                transformOrigin: "center",
+              }}
+            />
             <div
               className={cn(
                 "absolute inset-0 bg-gradient-to-t from-5% to-transparent",
@@ -558,7 +606,8 @@ function SeriesDetailContent({
                     <span
                       key={tag}
                       className={cn(
-                        "rounded-md border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] backdrop-blur-sm md:px-3 md:text-xs",
+                        storefrontBadgeClass,
+                        "px-3 py-1.5 text-[10px] md:text-xs",
                         palette.primarySoft,
                       )}
                     >
@@ -603,15 +652,15 @@ function SeriesDetailContent({
                       <span>{heroMetadata.latestText}</span>
                     ) : null}
                   </div>
-                  <span className="flex items-center gap-1 text-yellow-500">
+                  <span className={cn(storefrontBadgeClass, "gap-1.5 text-yellow-300")}>
                     <Star className="h-4 w-4 fill-current" />
                     {detailItem.rating} Rating
                   </span>
-                  <span className="flex items-center gap-1">
+                  <span className={cn(storefrontBadgeClass, "gap-1.5")}>
                     <Eye className="h-4 w-4" />
                     {detailItem.viewsText} Views
                   </span>
-                  <span className="flex items-center gap-1">
+                  <span className={cn(storefrontBadgeClass, "gap-1.5")}>
                     <Heart className="h-4 w-4" />
                     {detailItem.likesText} Likes
                   </span>
@@ -622,8 +671,8 @@ function SeriesDetailContent({
                     href={detailItem.readHref}
                     data-testid="series-primary-action"
                     className={cn(
-                      "flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all hover:scale-105 active:scale-95 sm:min-h-[48px] sm:w-auto sm:justify-start sm:whitespace-nowrap md:min-h-[52px] md:px-8 md:py-3.5 md:text-base",
-                      palette.primaryBg,
+                      storefrontPrimaryButtonClass,
+                      "min-h-[46px] w-full justify-center sm:min-h-[48px] sm:w-auto sm:justify-start sm:whitespace-nowrap md:min-h-[52px] md:px-8 md:py-3.5 md:text-base",
                     )}
                   >
                     <PlayCircle className="h-5 w-5" />
@@ -637,9 +686,8 @@ function SeriesDetailContent({
                         isFollowing ? "Remove from saved" : "Save series"
                       }
                       className={cn(
-                        "flex min-h-[46px] items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold shadow-lg transition-all hover:bg-white/10 active:scale-95 md:min-h-[48px] md:px-5",
-                        palette.surface,
-                        palette.border,
+                        storefrontSecondaryButtonClass,
+                        "min-h-[46px] rounded-full px-4 md:min-h-[48px] md:px-5",
                       )}
                     >
                       <BookmarkPlus className="h-5 w-5" />
@@ -649,9 +697,8 @@ function SeriesDetailContent({
                       type="button"
                       aria-label={`Share ${detailItem.title}`}
                       className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-xl border shadow-lg transition-all hover:bg-white/10 active:scale-95 md:h-12 md:w-12",
-                        palette.surface,
-                        palette.border,
+                        storefrontSecondaryButtonClass,
+                        "h-10 w-10 rounded-full p-0 md:h-12 md:w-12",
                       )}
                     >
                       <Share2 className="h-5 w-5" />
@@ -663,6 +710,42 @@ function SeriesDetailContent({
                 </p>
               </div>
             </div>
+
+            <div className="mt-6 grid gap-3 md:grid-cols-3">
+              <div className={storefrontInfoCardClass}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46">
+                  Reading flow
+                </p>
+                <p className="mt-3 text-base font-semibold text-white">
+                  {chapterItems.length > 0 ? "Jump in tonight" : "Waiting on release"}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-white/62">
+                  Start from the first installment or open the latest live drop from the episode shelf.
+                </p>
+              </div>
+              <div className={storefrontInfoCardClass}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46">
+                  Catalog mode
+                </p>
+                <p className="mt-3 text-base font-semibold text-white">
+                  {isAdultContent(detailItem) ? "18+ only" : "Standard catalog"}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-white/62">
+                  The page stays aligned with the current normal or adult mode without changing route structure.
+                </p>
+              </div>
+              <div className={storefrontInfoCardClass}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46">
+                  Episode access
+                </p>
+                <p className="mt-3 text-base font-semibold text-white">
+                  {chapterItems.length} listed
+                </p>
+                <p className="mt-2 text-sm leading-6 text-white/62">
+                  Read, unlock, and preview states are surfaced directly in the chapter rail below.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -670,22 +753,20 @@ function SeriesDetailContent({
           <div className="order-2 w-full shrink-0 pt-2 md:order-1 md:w-72 md:pt-0">
             <div
               className={cn(
-                "rounded-[24px] border p-4 shadow-xl md:rounded-[28px] md:p-6",
-                palette.surface,
-                palette.border,
+                storefrontInfoCardClass,
+                "rounded-[24px] p-4 md:rounded-[28px] md:p-6",
               )}
             >
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
-                Why Start
-              </p>
-              <h3 className="mt-3 text-lg font-black text-white md:text-xl">
-                Open this if you want
-              </h3>
+              <StorefrontSectionHeading
+                eyebrow="Why Start"
+                title="Open this if you want"
+                className="space-y-0"
+              />
               <p className="mt-3 text-sm leading-6 text-gray-400 md:leading-relaxed">
                 {detailItem.description}
               </p>
               <div className="mt-5 space-y-3">
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                <div className={storefrontSoftCardClass}>
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
                     Format
                   </p>
@@ -697,7 +778,7 @@ function SeriesDetailContent({
                         : "Comic series"}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                <div className={storefrontSoftCardClass}>
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
                     Status
                   </p>
@@ -717,23 +798,23 @@ function SeriesDetailContent({
             />
             <div
               className={cn(
-                "rounded-[26px] border p-4 shadow-xl md:rounded-[30px] md:p-6",
-                palette.surface,
-                palette.border,
+                storefrontInfoCardClass,
+                "rounded-[26px] p-4 md:rounded-[30px] md:p-6",
               )}
             >
               <div className="mb-5 flex flex-col items-start gap-2.5 border-b border-gray-800 pb-3 sm:flex-row sm:items-center sm:justify-between md:mb-6 md:pb-4">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
-                    Start Reading
-                  </p>
-                  <h2 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-white md:text-xl">
-                    <List className={cn("h-5 w-5", palette.primaryText)} />
-                    {chapterPrefix} ({chapterItems.length})
-                  </h2>
-                  <p className="mt-1 text-sm text-gray-400">
-                    Begin at chapter one or jump into the newest drop.
-                  </p>
+                  <StorefrontSectionHeading
+                    eyebrow="Start Reading"
+                    title={
+                      <span className="flex items-center gap-2 text-lg font-bold tracking-tight text-white md:text-xl">
+                        <List className={cn("h-5 w-5", palette.primaryText)} />
+                        {chapterPrefix} ({chapterItems.length})
+                      </span>
+                    }
+                    description="Begin at chapter one or jump into the newest drop."
+                    className="space-y-0"
+                  />
                 </div>
               </div>
 
@@ -803,9 +884,8 @@ function SeriesDetailContent({
                           });
                         }}
                         className={cn(
-                          "inline-flex min-h-[44px] items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:bg-white/10 active:scale-95",
-                          palette.surface,
-                          palette.border,
+                          storefrontSecondaryButtonClass,
+                          "min-h-[44px] rounded-full px-4 py-2.5 text-sm font-bold",
                         )}
                       >
                         Unlock with Points

@@ -1,6 +1,10 @@
 "use client";
 
 import { cn } from "../../lib/utils";
+import {
+  storefrontBadgeClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 function ReaderSkeletonLine({
   widthClass = "w-full",
@@ -59,7 +63,7 @@ export default function ReaderSkeleton({
                   className={cn(
                     "inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]",
                     isComic
-                      ? "border-white/10 bg-white/[0.05] text-white/78"
+                      ? `${storefrontBadgeClass} text-white/78`
                       : `${borderClassName} bg-transparent ${mutedClassName}`,
                   )}
                 >
@@ -69,7 +73,7 @@ export default function ReaderSkeleton({
                   className={cn(
                     "inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]",
                     isComic
-                      ? "border-white/10 bg-white/[0.05] text-white/62"
+                      ? `${storefrontBadgeClass} text-white/62`
                       : `${borderClassName} bg-transparent ${mutedClassName}`,
                   )}
                 >
@@ -99,8 +103,8 @@ export default function ReaderSkeleton({
               className={cn(
                 "inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-full border px-4 text-sm font-bold transition-colors",
                 isComic
-                  ? "border-white/10 bg-white/[0.05] text-white hover:bg-white/[0.09]"
-                  : `${borderClassName} bg-black/[0.03] text-current hover:bg-black/[0.05]`,
+                  ? `${storefrontSecondaryButtonClass} text-white`
+                  : `${borderClassName} bg-[rgba(15,23,42,0.02)] text-current hover:bg-[rgba(15,23,42,0.04)]`,
               )}
             >
               View Series

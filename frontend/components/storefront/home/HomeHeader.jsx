@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { ArrowRight, Compass, Search, Sparkles, TrendingUp } from "lucide-react";
+import {
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+} from "../../common/StorefrontPagePrimitives";
 import GenreChip from "./GenreChip";
 
 export default function HomeHeader({
@@ -15,7 +19,7 @@ export default function HomeHeader({
   ];
 
   return (
-    <section className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_44%,rgba(255,255,255,0.02)_100%)] p-4 shadow-[0_20px_56px_rgba(0,0,0,0.26)] backdrop-blur-2xl sm:p-5">
+    <section className={`relative overflow-hidden rounded-[30px] bg-[linear-gradient(135deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_44%,rgba(255,255,255,0.02)_100%)] p-4 backdrop-blur-2xl sm:p-5 ${storefrontSoftCardClass}`}>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,92,164,0.12),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(103,232,249,0.1),transparent_32%)]" />
       <div className="relative flex flex-col gap-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
@@ -30,7 +34,7 @@ export default function HomeHeader({
 
           <Link
             href="/search"
-            className="inline-flex min-h-[44px] items-center gap-2 self-start rounded-full border border-white/10 bg-[rgba(7,10,18,0.62)] px-4 text-sm font-medium text-white/78 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.08)] hover:text-white"
+            className={`${storefrontSecondaryButtonClass} min-h-[44px] self-start px-4 text-white/78`}
           >
             <Search className="size-4" />
             Search series, authors...
@@ -45,7 +49,7 @@ export default function HomeHeader({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="inline-flex min-h-[48px] items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white/74 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/16 hover:bg-white/[0.09] hover:text-white"
+                  className={`${storefrontSecondaryButtonClass} min-h-[48px] px-4 text-white/74`}
                 >
                   <Icon className="size-4" />
                   {item.label}

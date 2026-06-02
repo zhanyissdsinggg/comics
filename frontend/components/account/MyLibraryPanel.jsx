@@ -12,12 +12,14 @@ import {
 } from "lucide-react";
 import SurfacePanel from "../common/SurfacePanel";
 import {
+  storefrontAccentChipClass,
   storefrontBadgeClass,
-  storefrontHighlightBadgeClass,
+  storefrontChipClass,
   storefrontInsetCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
   storefrontSoftCardClass,
+  StorefrontSectionHeading,
 } from "../common/StorefrontPagePrimitives";
 import { apiGet } from "../../lib/apiClient";
 import {
@@ -136,7 +138,7 @@ function sortByUpdatedAt(items) {
 function CoverThumb({ title, coverUrl, coverTone }) {
   if (coverUrl) {
     return (
-      <div className="relative h-[92px] w-[72px] overflow-hidden rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-[0_14px_30px_rgba(8,6,20,0.2)]">
+      <div className={`relative h-[92px] w-[72px] overflow-hidden rounded-[18px] ${storefrontSoftCardClass} p-0`}>
         <Image
           src={resolveDisplayImageUrl(coverUrl, { kind: "cover" })}
           alt={`Cover image for ${title}`}
@@ -151,7 +153,7 @@ function CoverThumb({ title, coverUrl, coverTone }) {
 
   return (
     <div
-      className="flex h-[92px] w-[72px] items-end rounded-[18px] border border-white/10 px-3 py-3 text-white shadow-[0_14px_30px_rgba(8,6,20,0.2)]"
+      className={`flex h-[92px] w-[72px] items-end rounded-[18px] ${storefrontSoftCardClass} px-3 py-3 text-white`}
       style={{
         background:
           coverTone ||
@@ -177,7 +179,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
     .join(" / ");
 
   return (
-    <article className="rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.045)] p-4 text-white shadow-[0_18px_42px_rgba(8,6,20,0.24)] backdrop-blur-xl transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16">
+    <article className={`${storefrontInsetCardClass} p-4 text-white transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16`}>
       <div className="flex items-start gap-4">
         <CoverThumb
           title={item.title}
@@ -263,7 +265,7 @@ function PanelSkeleton() {
       {[0, 1, 2].map((index) => (
         <div
           key={`account-library-skeleton-${index}`}
-          className="h-[124px] animate-pulse rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.045)]"
+          className={`h-[124px] animate-pulse ${storefrontInsetCardClass}`}
         />
       ))}
     </div>
@@ -580,6 +582,27 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
     [bookmarkItems.length, continueItems.length, unlockedItems.length],
   );
 
+  const librarySnapshot = useMemo(
+    () => [
+      {
+        label: "Continue",
+        value: signedInCount.continue,
+        hint: "Series still open.",
+      },
+      {
+        label: "Saved",
+        value: signedInCount.bookmarks,
+        hint: "Bookmarks and follows.",
+      },
+      {
+        label: "Unlocked",
+        value: signedInCount.unlocked,
+        hint: "Owned to revisit.",
+      },
+    ],
+    [signedInCount.continue, signedInCount.bookmarks, signedInCount.unlocked],
+  );
+
   const openSeries = useCallback(
     (item) => {
       router.push(
@@ -625,15 +648,13 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       appearance="dark"
       accent="blue"
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
-            Saved Series
-          </p>
-          <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
-            Your library
-          </h2>
-        </div>
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <StorefrontSectionHeading
+          eyebrow="Saved shelf"
+          title="Your library keeps the next read within reach"
+          description="Resume in-progress titles, reopen bookmarks, and jump back into unlocked series without touching the underlying account logic."
+          className="max-w-2xl"
+        />
 
         {showSignedInShell ? (
           <button
@@ -646,12 +667,36 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
         ) : null}
       </div>
 
+      {showSignedInShell ? (
+        <div className="grid gap-3 md:grid-cols-3">
+          {librarySnapshot.map((card) => (
+            <div
+              key={card.label}
+              className={`${storefrontInsetCardClass} text-white`}
+            >
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/50">
+                {card.label}
+              </p>
+              <p className="mt-3 font-display text-[1.5rem] font-black tracking-[-0.04em] text-white">
+                {card.value}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-white/64">
+                {card.hint}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       {!showSignedInShell ? (
         <div className={`${storefrontInsetCardClass} p-5 text-white`}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.06em] text-white">
                 Sign in to save your library
+              </p>
+              <p className="mt-2 text-sm font-semibold leading-6 text-white/68">
+                Keep bookmarks, follows, and unlocked progress in one shelf.
               </p>
             </div>
             <button
@@ -684,8 +729,8 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={`inline-flex min-h-[42px] items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] transition-[background-color,border-color,box-shadow,transform] duration-200 ${
                     isActive
-                      ? "border border-[rgba(86,215,255,0.34)] bg-[linear-gradient(135deg,rgba(86,215,255,0.22)_0%,rgba(124,92,255,0.2)_100%)] text-white shadow-[0_16px_30px_rgba(86,215,255,0.16)]"
-                      : "border border-white/12 bg-[rgba(255,255,255,0.04)] text-white/75 shadow-[0_14px_26px_rgba(8,6,20,0.18)] hover:border-white/20 hover:bg-[rgba(255,255,255,0.07)] active:translate-y-px"
+                      ? `${storefrontAccentChipClass} text-white`
+                      : `${storefrontChipClass} text-white/75 active:translate-y-px`
                   }`}
                 >
                   <Icon className="size-4" />
@@ -720,15 +765,16 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                 ))}
               </div>
             ) : (
-              <div className="rounded-[28px] border border-dashed border-white/14 bg-[rgba(255,255,255,0.03)] px-5 py-8 text-center backdrop-blur-xl">
-                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-[linear-gradient(135deg,rgba(255,79,154,0.18)_0%,rgba(124,58,237,0.18)_100%)] text-white shadow-[0_16px_30px_rgba(255,79,154,0.14)]">
+              <div className={`${storefrontInsetCardClass} border-dashed border-white/14 px-5 py-8 text-center`}>
+                <div className={`mx-auto flex h-11 w-11 items-center justify-center rounded-2xl ${storefrontAccentChipClass} px-0 text-white`}>
                   <BookMarked className="size-5" />
                 </div>
                 <p className="mt-4 text-base font-black uppercase tracking-[0.04em] text-white">
                   {tabData[activeTab]?.emptyTitle}
                 </p>
                 <p className="mx-auto mt-2 max-w-lg text-sm font-semibold leading-6 text-white/70">
-                  {tabData[activeTab]?.emptyDescription}
+                  {tabData[activeTab]?.emptyDescription ||
+                    "Open a title, save it, or unlock chapters and this shelf will start filling in."}
                 </p>
               </div>
             )}

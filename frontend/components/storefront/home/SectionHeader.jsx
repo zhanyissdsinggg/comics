@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { storefrontSecondaryButtonClass } from "../../common/StorefrontPagePrimitives";
 
 export default function SectionHeader({
   eyebrow = "",
@@ -29,7 +30,7 @@ export default function SectionHeader({
       {actionLabel && actionHref ? (
         <Link
           href={actionHref}
-          className="inline-flex min-h-[44px] items-center gap-2 self-start rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white/74 shadow-[0_14px_30px_rgba(8,6,20,0.18)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-white/16 hover:bg-white/[0.08] hover:text-white"
+          className={`${storefrontSecondaryButtonClass} min-h-[44px] self-start px-4 text-white/74`}
         >
           {actionLabel}
           <ArrowUpRight className="size-4" />

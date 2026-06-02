@@ -5,6 +5,10 @@ import { BookOpen, Heart } from "lucide-react";
 import Cover from "../common/Cover";
 import ShareButton from "../common/ShareButton";
 import {
+  storefrontAccentChipClass,
+  storefrontBadgeClass,
+  storefrontChipClass,
+  storefrontSoftCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
   storefrontInfoCardClass,
@@ -238,11 +242,11 @@ export default function SeriesHeader({
         <div className="relative grid gap-5 p-4 sm:p-6 lg:grid-cols-[minmax(0,1.06fr)_320px] lg:gap-10 xl:p-8">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-white/12 bg-white/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/72">
+              <span className={`${storefrontBadgeClass} px-3 py-1 text-[11px] tracking-[0.22em] text-white/72`}>
                 {formatSeriesKind(series?.type)}
               </span>
               {isAdult ? (
-                <span className="rounded-full border border-[rgba(255,189,205,0.28)] bg-[rgba(255,79,154,0.14)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#ffd6e5]">
+                <span className={`${storefrontAccentChipClass} min-h-[32px] px-3 py-1 text-[11px] tracking-[0.2em] text-[#ffd6e5]`}>
                   18+
                 </span>
               ) : null}
@@ -291,7 +295,7 @@ export default function SeriesHeader({
                 {headerHighlights.map((item) => (
                   <span
                     key={`series-highlight-${item}`}
-                    className="rounded-full border border-white/12 bg-white/[0.05] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-white/78"
+                    className={`${storefrontBadgeClass} px-3 py-1.5 text-[11px] text-white/78`}
                   >
                     {item}
                   </span>
@@ -307,7 +311,7 @@ export default function SeriesHeader({
                   onClick={onFollowToggle}
                   className={`inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-all duration-150 sm:w-auto ${
                     isFollowing
-                      ? "border border-[rgba(255,79,154,0.24)] bg-[rgba(255,79,154,0.14)] text-[#ffd5e5] shadow-[0_14px_30px_rgba(255,79,154,0.16)] hover:-translate-y-0.5"
+                      ? `${storefrontAccentChipClass} text-[#ffd5e5] hover:-translate-y-0.5`
                       : storefrontSecondaryButtonClass
                   }`}
                   aria-label={
@@ -331,7 +335,7 @@ export default function SeriesHeader({
           </div>
 
           <div className="order-first space-y-4 lg:order-none">
-            <div className="overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(9,8,14,0.78)] shadow-[0_28px_74px_rgba(8,6,20,0.36)]">
+            <div className={`overflow-hidden rounded-[30px] ${storefrontSoftCardClass} p-0 shadow-[0_28px_74px_rgba(8,6,20,0.36)]`}>
               <div className="aspect-[4/5] w-full overflow-hidden sm:aspect-[3/4]">
                 <Cover
                   tone={series?.coverTone}

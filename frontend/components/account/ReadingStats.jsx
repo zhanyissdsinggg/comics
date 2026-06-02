@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { Clock3, Library, Sparkles, Trophy } from "lucide-react";
 import SurfacePanel from "../common/SurfacePanel";
 import {
   storefrontBadgeClass,
   storefrontInsetCardClass,
   storefrontSoftCardClass,
+  StorefrontSectionHeading,
 } from "../common/StorefrontPagePrimitives";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useProgressStore } from "../../store/useProgressStore";
@@ -79,28 +81,32 @@ const ReadingStats = React.memo(() => {
 
   const statCards = [
     {
-      label: "Time read",
+      label: "Tonight's pace",
       value: `${stats.readingHours}h${stats.readingMinutes > 0 ? ` ${stats.readingMinutes}m` : ""}`,
-      hint: "Based on recent reading.",
+      hint: "Estimated from your recent reads.",
       highlighted: true,
+      icon: Clock3,
     },
     {
-      label: "Reads",
+      label: "Reads logged",
       value: `${stats.totalEpisodesRead}`,
       hint:
         stats.totalEpisodesRead === 1
           ? "1 read finished."
           : `${stats.totalEpisodesRead} reads finished.`,
+      icon: Sparkles,
     },
     {
-      label: "Active series",
+      label: "Open series",
       value: `${stats.seriesInProgress}`,
       hint: `Average progress ${stats.avgProgress}%.`,
+      icon: Library,
     },
     {
-      label: "Saved Series",
+      label: "Saved shelf",
       value: `${stats.followedCount}`,
       hint: "Ready to read.",
+      icon: Trophy,
     },
   ];
 
@@ -111,18 +117,28 @@ const ReadingStats = React.memo(() => {
       tone="muted"
       className="space-y-5"
     >
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
-            Reading
-          </p>
-          <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
-            Reading
-          </h2>
+      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <StorefrontSectionHeading
+          eyebrow="Reading desk"
+          title="Your pace, streak, and shelf activity"
+          description="A quick view of how much you're reading, what is still open, and how stacked your saved shelf looks tonight."
+        />
+        <div
+          className={`${storefrontSoftCardClass} flex items-start justify-between gap-4 text-white`}
+        >
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">
+              Right now
+            </p>
+            <h3 className="mt-2 text-lg font-black tracking-[-0.03em] text-white">
+              Reading note
+            </h3>
+            <p className="mt-3 text-sm font-semibold leading-7 text-white/75">
+              {tip}
+            </p>
+          </div>
+          <span className={storefrontBadgeClass}>Live</span>
         </div>
-        <p className="text-sm font-semibold uppercase tracking-[0.08em] text-white/65">
-          Progress
-        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -136,9 +152,14 @@ const ReadingStats = React.memo(() => {
                 : "",
             ].join(" ")}
           >
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
-              {card.label}
-            </p>
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
+                {card.label}
+              </p>
+              <div className="flex h-10 w-10 items-center justify-center rounded-[18px] border border-white/12 bg-[linear-gradient(135deg,rgba(255,79,154,0.16)_0%,rgba(86,215,255,0.14)_100%)] text-white shadow-[0_14px_30px_rgba(8,6,20,0.16)]">
+                <card.icon className="size-4" />
+              </div>
+            </div>
             <p className="mt-3 font-display text-3xl font-black uppercase tracking-[-0.05em] text-white">
               {card.value}
             </p>
@@ -154,6 +175,9 @@ const ReadingStats = React.memo(() => {
           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
             Milestones
           </p>
+          <h3 className="mt-3 text-lg font-black tracking-[-0.03em] text-white">
+            Progress markers
+          </h3>
           <div className="mt-3 flex flex-wrap gap-2">
             {achievements.length > 0 ? (
               achievements.map((achievement) => (
@@ -174,13 +198,15 @@ const ReadingStats = React.memo(() => {
 
         <div className={`${storefrontSoftCardClass} text-white`}>
           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
-            Right now
+            Focus
           </p>
-          <h3 className="mt-3 text-base font-black tracking-[-0.02em] text-white">
-            Note
+          <h3 className="mt-3 text-lg font-black tracking-[-0.03em] text-white">
+            Next move
           </h3>
           <p className="mt-2 text-sm font-semibold leading-7 text-white/75">
-            {tip}
+            {stats.seriesInProgress > 0
+              ? `You have ${stats.seriesInProgress} active series open. Good time to finish one cleanly before stacking more.`
+              : "No active series yet. Open one title and this panel starts tracking momentum."}
           </p>
         </div>
       </div>

@@ -2,6 +2,12 @@
 
 import Link from "next/link";
 import { ArrowRight, Gamepad2, Route, Sparkles } from "lucide-react";
+import {
+  storefrontBadgeClass,
+  storefrontInfoCardClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+} from "../../common/StorefrontPagePrimitives";
 import { resolveDisplayImageUrl } from "../../../lib/fallbackImage";
 import { trackEvent } from "../../../lib/trackEvent";
 import {
@@ -32,7 +38,7 @@ function InteractiveCover({ series, position }) {
         })
       }
     >
-      <div className="overflow-hidden rounded-[22px] border border-white/10 bg-white/[0.04] shadow-[0_18px_40px_rgba(0,0,0,0.3)] transition-all duration-200 group-hover:-translate-y-1 group-hover:border-white/16">
+      <div className={`overflow-hidden rounded-[22px] transition-all duration-200 group-hover:-translate-y-1 group-hover:border-white/16 ${storefrontSoftCardClass} p-0`}>
         <div className="aspect-[0.78] overflow-hidden">
           <img
             src={imageUrl}
@@ -73,7 +79,7 @@ function ChoiceMap() {
       {nodes.map((node) => (
         <span
           key={node.label}
-          className={`absolute inline-flex min-h-[32px] items-center rounded-full border border-white/12 bg-[rgba(255,255,255,0.07)] px-3 py-1 text-[11px] font-semibold tracking-[0.02em] text-white/82 ${node.className}`}
+          className={`absolute min-h-[32px] px-3 py-1 text-[11px] tracking-[0.02em] text-white/82 ${storefrontBadgeClass} ${node.className}`}
         >
           {node.label}
         </span>
@@ -137,7 +143,7 @@ export default function InteractiveStoriesBanner({ items = [] }) {
             </Link>
             <Link
               href="/search?format=interactive"
-              className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-white/12 bg-white/[0.06] px-5 text-sm font-medium text-white/82 transition-colors hover:bg-white/[0.1]"
+              className={`${storefrontSecondaryButtonClass} min-h-[48px] px-5 text-white/82`}
             >
               More Routes
               <Route className="size-4" />
@@ -158,7 +164,7 @@ export default function InteractiveStoriesBanner({ items = [] }) {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.05)] p-4 backdrop-blur-xl">
+          <div className={`${storefrontInfoCardClass} rounded-[28px] p-4`}>
             <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-100/70">
               <Gamepad2 className="size-4" />
               Story flow
@@ -173,7 +179,7 @@ export default function InteractiveStoriesBanner({ items = [] }) {
             ].map((copy) => (
               <div
                 key={copy}
-                className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 backdrop-blur-xl"
+                className={`${storefrontSoftCardClass} p-4`}
               >
                 <Sparkles className="size-4 text-[var(--gush-warning)]" />
                 <p className="mt-3 text-sm leading-6 text-white/72">{copy}</p>

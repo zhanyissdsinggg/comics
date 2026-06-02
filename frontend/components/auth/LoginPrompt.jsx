@@ -4,6 +4,7 @@ import { memo, useEffect, useState } from "react";
 import { X, Sparkles, Gift, BookOpen } from "lucide-react";
 import SurfacePanel from "../common/SurfacePanel";
 import {
+  storefrontChipClass,
   storefrontBadgeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
@@ -98,7 +99,7 @@ const LoginPrompt = memo(function LoginPrompt({
           <button
             type="button"
             onClick={handleClose}
-            className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/12 bg-white/6 p-2 text-white/74 shadow-[0_14px_28px_rgba(8,6,20,0.24)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 hover:text-white"
+            className={`absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center p-2 text-white/74 ${storefrontChipClass}`}
             aria-label="Close sign-in prompt"
           >
             <X size={20} />
@@ -132,7 +133,7 @@ const LoginPrompt = memo(function LoginPrompt({
                 return (
                   <div
                     key={`${feature.text}-${index}`}
-                    className={`flex items-center gap-3 ${storefrontSoftCardClass} border-white/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.025)_100%)] p-3.5`}
+                    className={`flex items-center gap-3 ${storefrontSoftCardClass} p-3.5`}
                   >
                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[18px] border border-white/12 bg-[linear-gradient(135deg,rgba(255,122,177,0.92)_0%,rgba(125,244,255,0.9)_100%)] text-[#170c1d] shadow-[0_14px_28px_rgba(255,79,154,0.2)]">
                       <Icon size={20} />

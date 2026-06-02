@@ -16,6 +16,12 @@ import { useWalletStore } from "../../store/useWalletStore";
 import { siteConfig } from "../../lib/siteConfig";
 import { cn } from "@/lib/utils";
 import {
+  storefrontBadgeClass,
+  storefrontInfoCardClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
+import {
   navigateWithDocument,
   shouldUseDocumentNavigation,
 } from "../../lib/adultRouteNavigation";
@@ -140,7 +146,7 @@ export default function HeaderMenuModal({
           <div className="relative border-b border-white/10 p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="inline-flex rounded-full border border-white/10 bg-[rgba(255,255,255,0.05)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/62">
+                <p className={`${storefrontBadgeClass} text-white/62`}>
                   Menu
                 </p>
                 <h2 className="mt-3 font-display text-[2rem] font-semibold leading-[0.96] tracking-[-0.06em] text-white">
@@ -150,7 +156,7 @@ export default function HeaderMenuModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-[rgba(255,255,255,0.06)] text-white shadow-[0_14px_32px_rgba(8,6,20,0.26)] transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-300/28 hover:bg-[rgba(255,255,255,0.11)]"
+                className={`${storefrontSecondaryButtonClass} h-11 w-11 px-0 text-white`}
                 aria-label="Close menu"
               >
                 <ChevronRight className="size-5 rotate-45" />
@@ -158,7 +164,7 @@ export default function HeaderMenuModal({
             </div>
           </div>
 
-          <div className="relative m-4 rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.045)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.22)] backdrop-blur-xl">
+          <div className={`relative m-4 ${storefrontInfoCardClass} rounded-[26px] p-4`}>
             {hydrated && isSignedIn ? (
               <>
                 <div className="flex items-start justify-between gap-3">
@@ -181,10 +187,10 @@ export default function HeaderMenuModal({
                     const Icon = item.icon;
                     return renderMenuLink(
                       item,
-                      "flex min-h-12 items-center justify-between gap-3 rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.045)] px-4 py-3 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_14px_30px_rgba(8,6,20,0.2)] transition-all duration-150 hover:-translate-y-0.5 hover:border-cyan-300/26 hover:bg-[rgba(255,255,255,0.08)]",
+                      `flex min-h-12 items-center justify-between gap-3 rounded-[22px] px-4 py-3 text-sm font-semibold tracking-[0.01em] ${storefrontInfoCardClass} transition-all duration-150 hover:-translate-y-0.5 hover:border-cyan-300/26 hover:bg-[rgba(255,255,255,0.075)]`,
                       <>
                         <span className="flex items-center gap-3">
-                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-[rgba(255,255,255,0.05)] text-white/90">
+                          <span className={`${storefrontBadgeClass} h-9 w-9 justify-center px-0 py-0 text-white/90`}>
                             <Icon className="size-4" />
                           </span>
                           {item.label}
@@ -216,7 +222,7 @@ export default function HeaderMenuModal({
                       onClose();
                       onOpenLogin?.();
                     }}
-                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-[rgba(255,79,154,0.32)] bg-[linear-gradient(135deg,#ff4f9a_0%,#ff7ab1_52%,#ff9cc0_100%)] px-4 py-3 text-sm font-semibold tracking-[0em] text-[#1a0e16] shadow-[0_18px_36px_rgba(255,79,154,0.22)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_24px_46px_rgba(255,79,154,0.28)]"
+                    className={`inline-flex min-h-11 flex-1 px-4 py-3 ${storefrontPrimaryButtonClass}`}
                   >
                     Sign In
                   </button>
@@ -239,12 +245,12 @@ export default function HeaderMenuModal({
                     "flex min-h-12 items-center justify-between gap-3 rounded-[22px] border px-4 py-3 text-sm font-semibold tracking-[0.01em] shadow-[0_14px_30px_rgba(8,6,20,0.2)] transition-all duration-150 hover:-translate-y-0.5",
                     isActive
                       ? "border-[rgba(255,120,164,0.28)] bg-[linear-gradient(135deg,rgba(255,79,154,0.28)_0%,rgba(119,68,255,0.18)_100%)] text-white"
-                      : "border-white/10 bg-[rgba(255,255,255,0.045)] text-white hover:border-[#ffd77a]/26 hover:bg-[rgba(255,255,255,0.08)]",
+                      : `${storefrontInfoCardClass} text-white hover:border-[#ffd77a]/26 hover:bg-[rgba(255,255,255,0.075)]`,
                   ),
                   <>
                     <span className="flex items-center gap-3">
                       {Icon ? (
-                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-[rgba(255,255,255,0.05)] text-white/90">
+                        <span className={`${storefrontBadgeClass} h-9 w-9 justify-center px-0 py-0 text-white/90`}>
                           <Icon className="size-4" />
                         </span>
                       ) : null}
