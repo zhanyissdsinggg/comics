@@ -77,7 +77,7 @@ function HomeLandingContent({ initialHomeData = null }) {
     const readersNowIds = new Set(readersRightNow.map((series) => String(series?.id || "").trim()));
     const trending = popularPool
       .filter((series) => !readersNowIds.has(String(series?.id || "").trim()))
-      .slice(0, 8);
+      .slice(0, 6);
     const updates = uniqueBySeriesId([
       ...buildUpdatedRail(seriesList, 12).filter(
         (series) => String(series?.id || "").trim() !== featuredId,

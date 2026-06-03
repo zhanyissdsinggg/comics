@@ -9,12 +9,21 @@ function ButtonContent({
   icon: Icon = null,
   iconPosition = "start",
   iconOnly = false,
+  suppressIconOnlyText = false,
 }) {
   return (
     <>
-      {Icon && iconPosition === "start" ? <Icon className="size-4" /> : null}
-      {iconOnly ? <span className="sr-only">{children}</span> : children}
-      {Icon && iconPosition === "end" ? <Icon className="size-4" /> : null}
+      {Icon && iconPosition === "start" ? (
+        <Icon aria-hidden="true" className="size-4" />
+      ) : null}
+      {iconOnly ? (
+        suppressIconOnlyText ? null : <span className="sr-only">{children}</span>
+      ) : (
+        children
+      )}
+      {Icon && iconPosition === "end" ? (
+        <Icon aria-hidden="true" className="size-4" />
+      ) : null}
     </>
   );
 }
@@ -34,11 +43,15 @@ export default function IconButton({
     iconOnly ? "h-11 w-11 min-h-0 px-0" : "px-4",
     className,
   );
+  const accessibleLabel = typeof props["aria-label"] === "string"
+    ? props["aria-label"].trim()
+    : "";
   const content = (
     <ButtonContent
       icon={icon}
       iconPosition={iconPosition}
       iconOnly={iconOnly}
+      suppressIconOnlyText={iconOnly && Boolean(accessibleLabel)}
     >
       {children}
     </ButtonContent>

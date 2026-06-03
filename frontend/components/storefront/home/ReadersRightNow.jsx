@@ -4,10 +4,10 @@ import SectionHeader from "./SectionHeader";
 import StoryMiniCard from "./StoryMiniCard";
 
 const readersHooksByTitle = {
-  "Crimson Tide": "Vampire panic, sharp tension, and a hook that lands fast.",
-  "Cherry Blossom High": "Soft romance energy until the feelings get messy.",
-  "Wild Hearts": "Big survival stakes, quick chapters, zero chill.",
-  "Solar Wind": "One wrong move in deep space and it spirals hard.",
+  "Crimson Tide": "A vampire hunter crosses a line she can’t uncross.",
+  "Cherry Blossom High": "One new semester, three messy crushes, zero chill.",
+  "Wild Hearts": "Rivals, survival, and feelings neither of them planned.",
+  "Solar Wind": "A salvage crew finds something that should have stayed buried.",
 };
 
 export default function ReadersRightNow({ items = [] }) {

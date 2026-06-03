@@ -10,6 +10,7 @@ export default function SearchPill({
   label = "",
   icon: Icon = Search,
   showIcon = true,
+  hideVisualLabelFromAccessibility = false,
   compact = false,
   className = "",
   children = null,
@@ -24,8 +25,18 @@ export default function SearchPill({
   );
   const content = (
     <>
-      {showIcon && Icon ? <Icon className={compact ? "size-3.5" : "size-4"} /> : null}
-      <span className="truncate">{contentLabel}</span>
+      {showIcon && Icon ? (
+        <Icon
+          aria-hidden="true"
+          className={compact ? "size-3.5" : "size-4"}
+        />
+      ) : null}
+      <span
+        aria-hidden={hideVisualLabelFromAccessibility ? "true" : undefined}
+        className="truncate"
+      >
+        {contentLabel}
+      </span>
     </>
   );
 

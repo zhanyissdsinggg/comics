@@ -12,11 +12,6 @@ import GenreChip from "./GenreChip";
 import GradientButton from "./GradientButton";
 import IconButton from "./IconButton";
 
-function buildCoverAlt(series) {
-  const title = String(series?.title || "").trim() || "Untitled";
-  return `Featured artwork for ${title}`;
-}
-
 export default function FeaturedHero({
   series,
   primaryHref,
@@ -56,7 +51,8 @@ export default function FeaturedHero({
       <div className="absolute inset-0">
         <img
           src={backgroundUrl}
-          alt={buildCoverAlt(series)}
+          alt=""
+          aria-hidden="true"
           className="h-full w-full scale-[1.03] object-cover object-[72%_center] opacity-[0.54] lg:object-right"
         />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,19,0.97)_0%,rgba(7,10,19,0.82)_34%,rgba(7,10,19,0.38)_62%,rgba(7,10,19,0.18)_100%)]" />
@@ -67,7 +63,10 @@ export default function FeaturedHero({
       </div>
 
       <div className="relative min-h-[520px] p-5 sm:p-7 lg:grid lg:h-full lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end lg:gap-8 lg:p-8 xl:grid-cols-[minmax(0,1fr)_344px] xl:p-9">
-        <div className="pointer-events-none absolute right-4 top-5 z-10 w-[150px] sm:right-6 sm:top-6 sm:w-[182px] lg:static lg:order-2 lg:flex lg:w-full lg:justify-end">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-4 top-5 z-10 w-[150px] sm:right-6 sm:top-6 sm:w-[182px] lg:static lg:order-2 lg:flex lg:w-full lg:justify-end"
+        >
           <div className="relative ml-auto w-full max-w-[150px] sm:max-w-[182px] lg:max-w-[320px] xl:max-w-[344px]">
             <div className="absolute inset-6 rounded-[26px] bg-[rgba(236,72,153,0.18)] blur-3xl" />
             <div className="absolute inset-5 rounded-[24px] bg-[rgba(124,58,237,0.16)] blur-3xl" />
@@ -76,7 +75,8 @@ export default function FeaturedHero({
             <div className="relative aspect-[0.72] overflow-hidden rounded-[24px] border border-white/12 shadow-[0_28px_82px_rgba(0,0,0,0.52)]">
               <img
                 src={posterUrl}
-                alt={buildCoverAlt(series)}
+                alt=""
+                aria-hidden="true"
                 className="h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,transparent_20%,rgba(0,0,0,0.58)_100%)]" />
