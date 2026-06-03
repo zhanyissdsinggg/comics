@@ -64,25 +64,35 @@ export default function FeaturedHero({
       </div>
 
       <div className="relative min-h-[520px] p-5 sm:p-7 lg:grid lg:h-full lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end lg:gap-8 lg:p-8 xl:grid-cols-[minmax(0,1fr)_344px] xl:p-9">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute right-4 top-5 z-10 w-[150px] sm:right-6 sm:top-6 sm:w-[182px] lg:static lg:order-2 lg:flex lg:w-full lg:justify-end"
-        >
+        <div className="pointer-events-none absolute right-4 top-5 z-10 w-[150px] sm:right-6 sm:top-6 sm:w-[182px] lg:static lg:order-2 lg:flex lg:w-full lg:justify-end">
           <div className="relative ml-auto w-full max-w-[150px] sm:max-w-[182px] lg:max-w-[320px] xl:max-w-[344px]">
-            <div className="absolute inset-6 rounded-[26px] bg-[rgba(236,72,153,0.18)] blur-3xl" />
-            <div className="absolute inset-5 rounded-[24px] bg-[rgba(124,58,237,0.16)] blur-3xl" />
-            <div className="absolute inset-3 -rotate-[5deg] rounded-[24px] border border-white/8 bg-[rgba(255,255,255,0.028)]" />
-            <div className="absolute inset-2 rotate-[4deg] rounded-[24px] border border-white/8 bg-[rgba(236,72,153,0.08)]" />
+            <div
+              aria-hidden="true"
+              className="absolute inset-6 rounded-[26px] bg-[rgba(236,72,153,0.18)] blur-3xl"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-5 rounded-[24px] bg-[rgba(124,58,237,0.16)] blur-3xl"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-3 -rotate-[5deg] rounded-[24px] border border-white/8 bg-[rgba(255,255,255,0.028)]"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-2 rotate-[4deg] rounded-[24px] border border-white/8 bg-[rgba(236,72,153,0.08)]"
+            />
             <div className="relative aspect-[0.72] overflow-hidden rounded-[24px] border border-white/12 shadow-[0_28px_82px_rgba(0,0,0,0.52)]">
               <img
                 src={posterUrl}
-                alt=""
-                aria-hidden="true"
-                role="presentation"
+                alt={`Featured artwork for ${title}`}
                 className="h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,transparent_20%,rgba(0,0,0,0.58)_100%)]" />
-              <div className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[rgba(7,10,19,0.66)] px-3 py-1.5 backdrop-blur-xl">
+              <div
+                aria-hidden="true"
+                className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[rgba(7,10,19,0.66)] px-3 py-1.5 backdrop-blur-xl"
+              >
                 <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--gush-home-text-muted)]">
                   <Sparkles className="size-3.5 text-[var(--gush-warning)]" />
                   Artwork Spotlight

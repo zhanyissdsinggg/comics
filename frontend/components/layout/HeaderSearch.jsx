@@ -10,15 +10,15 @@ const SearchBar = dynamic(() => import("../common/SearchBar"), {
 
 export default function HeaderSearch({ onSearch, variant = "default" }) {
   const placeholder = "Stories, creators, genres";
+  const mobileSearchLabel = "Find stories and creators";
 
   return (
     <>
       <div className="md:hidden">
         <Link
           href="/search"
-          aria-label="Open search"
+          aria-label={mobileSearchLabel}
           className="inline-flex h-11 w-full items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_12px_32px_rgba(0,0,0,0.24)] backdrop-blur-xl transition-all duration-150 hover:border-white/16 hover:bg-white/[0.07] focus-within:border-[rgba(255,79,154,0.34)]"
-          title="Open search"
         >
           <Search aria-hidden="true" className="size-4 text-white/68" />
           <span

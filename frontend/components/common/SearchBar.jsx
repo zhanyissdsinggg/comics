@@ -284,7 +284,7 @@ const SearchBar = memo(function SearchBar({
           )}
           aria-expanded={showSuggestions}
           aria-controls={listboxId}
-          aria-label="Search series, creators, or genres"
+          aria-label="Find series, creators, or genres"
           data-testid="storefront-search-input"
         />
         {value ? (

@@ -57,7 +57,7 @@ export default function HomeHeader({
           <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
             <SearchPill
               href="/search"
-              aria-label={searchHint ? `Search ${searchHint}` : "Search stories and creators"}
+              aria-label={searchHint ? `Find ${searchHint}` : "Find stories and creators"}
               hideVisualLabelFromAccessibility
               className="hidden h-11 w-[320px] min-h-0 justify-start rounded-full px-4 text-left md:inline-flex lg:w-[360px] xl:w-[380px]"
             >
@@ -66,7 +66,7 @@ export default function HomeHeader({
 
             <IconButton
               href="/search"
-              aria-label="Open search"
+              aria-label="Find stories and creators"
               icon={Search}
               iconOnly
               className="h-11 w-11 min-h-0 rounded-full md:hidden"
