@@ -22,18 +22,21 @@ function ChoiceMap() {
   ];
 
   return (
-    <div className="relative h-[190px] overflow-hidden rounded-[24px] border border-[rgba(103,232,249,0.18)] bg-[rgba(9,14,28,0.48)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl sm:h-[224px]">
-      <div className="absolute left-[12%] top-[16%] h-[42%] w-px bg-gradient-to-b from-[#67e8f9] to-[#22d3ee] shadow-[0_0_18px_rgba(103,232,249,0.42)]" />
-      <div className="absolute left-[12%] top-[16%] h-px w-[23%] bg-gradient-to-r from-[#67e8f9] to-[#38bdf8] shadow-[0_0_18px_rgba(56,189,248,0.36)]" />
-      <div className="absolute left-[12%] top-[38%] h-px w-[48%] bg-gradient-to-r from-[#67e8f9] via-[#38bdf8] to-[#f472b6] shadow-[0_0_20px_rgba(56,189,248,0.3)]" />
-      <div className="absolute left-[12%] top-[58%] h-px w-[72%] bg-gradient-to-r from-[#38bdf8] via-[#c084fc] to-[#f472b6] shadow-[0_0_22px_rgba(244,114,182,0.28)]" />
-      <div className="absolute left-[34%] top-[38%] h-[34%] w-px bg-gradient-to-b from-[#38bdf8] to-[#f472b6] shadow-[0_0_18px_rgba(244,114,182,0.28)]" />
-      <div className="absolute left-[62%] top-[20%] h-[44%] w-px bg-gradient-to-b from-[#38bdf8] to-[#f472b6] shadow-[0_0_18px_rgba(244,114,182,0.28)]" />
-      <span className="absolute left-[10%] top-[12%] h-2.5 w-2.5 rounded-full bg-[#67e8f9] shadow-[0_0_0_6px_rgba(103,232,249,0.14),0_0_22px_rgba(103,232,249,0.5)]" />
+    <div className="relative h-[198px] overflow-hidden rounded-[24px] border border-[rgba(103,232,249,0.20)] bg-[linear-gradient(180deg,rgba(9,14,28,0.72)_0%,rgba(7,11,22,0.52)_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_18px_48px_rgba(0,0,0,0.22)] backdrop-blur-xl sm:h-[236px]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(56,189,248,0.18),transparent_24%),radial-gradient(circle_at_86%_18%,rgba(236,72,153,0.18),transparent_24%),radial-gradient(circle_at_66%_74%,rgba(192,132,252,0.12),transparent_26%)]" />
+      <div className="absolute left-[12%] top-[16%] h-[42%] w-[2px] bg-gradient-to-b from-[#67e8f9] to-[#22d3ee] shadow-[0_0_20px_rgba(103,232,249,0.5)]" />
+      <div className="absolute left-[12%] top-[16%] h-[2px] w-[23%] bg-gradient-to-r from-[#67e8f9] to-[#38bdf8] shadow-[0_0_20px_rgba(56,189,248,0.4)]" />
+      <div className="absolute left-[12%] top-[38%] h-[2px] w-[48%] bg-gradient-to-r from-[#67e8f9] via-[#38bdf8] to-[#f472b6] shadow-[0_0_22px_rgba(56,189,248,0.34)]" />
+      <div className="absolute left-[12%] top-[58%] h-[2px] w-[72%] bg-gradient-to-r from-[#38bdf8] via-[#c084fc] to-[#f472b6] shadow-[0_0_24px_rgba(244,114,182,0.32)]" />
+      <div className="absolute left-[34%] top-[38%] h-[34%] w-[2px] bg-gradient-to-b from-[#38bdf8] to-[#f472b6] shadow-[0_0_20px_rgba(244,114,182,0.32)]" />
+      <div className="absolute left-[62%] top-[20%] h-[44%] w-[2px] bg-gradient-to-b from-[#38bdf8] to-[#f472b6] shadow-[0_0_20px_rgba(244,114,182,0.32)]" />
+      <span className="absolute left-[10%] top-[12%] h-2.5 w-2.5 rounded-full bg-[#67e8f9] shadow-[0_0_0_7px_rgba(103,232,249,0.16),0_0_26px_rgba(103,232,249,0.56)]" />
+      <span className="absolute left-[33%] top-[36%] h-2.5 w-2.5 rounded-full bg-[#38bdf8] shadow-[0_0_0_7px_rgba(56,189,248,0.14),0_0_26px_rgba(56,189,248,0.48)]" />
+      <span className="absolute left-[61%] top-[18%] h-2.5 w-2.5 rounded-full bg-[#c084fc] shadow-[0_0_0_7px_rgba(192,132,252,0.14),0_0_24px_rgba(192,132,252,0.42)]" />
       {choiceNodes.map((node) => (
         <span
           key={node.label}
-          className={`absolute inline-flex min-h-[34px] items-center rounded-full border border-[rgba(103,232,249,0.22)] bg-[rgba(56,189,248,0.12)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[#c8f8ff] shadow-[0_0_0_1px_rgba(56,189,248,0.08),0_0_28px_rgba(56,189,248,0.16)] backdrop-blur-xl ${node.className}`}
+          className={`absolute inline-flex min-h-[34px] items-center rounded-full border border-[rgba(103,232,249,0.24)] bg-[rgba(56,189,248,0.14)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[#c8f8ff] shadow-[0_0_0_1px_rgba(56,189,248,0.08),0_0_32px_rgba(56,189,248,0.18)] backdrop-blur-xl ${node.className}`}
         >
           {node.label}
         </span>
@@ -41,7 +44,7 @@ function ChoiceMap() {
       {endNodes.map((node) => (
         <span
           key={node.label}
-          className={`absolute inline-flex min-h-[32px] items-center rounded-full border border-[rgba(244,114,182,0.28)] bg-[rgba(236,72,153,0.14)] px-3 py-1 text-[11px] font-black tracking-[0.12em] text-[#ffd2e8] shadow-[0_0_0_1px_rgba(236,72,153,0.08),0_0_26px_rgba(236,72,153,0.14)] backdrop-blur-xl ${node.className}`}
+          className={`absolute inline-flex min-h-[32px] items-center rounded-full border border-[rgba(244,114,182,0.30)] bg-[rgba(236,72,153,0.16)] px-3 py-1 text-[11px] font-black tracking-[0.12em] text-[#ffd2e8] shadow-[0_0_0_1px_rgba(236,72,153,0.08),0_0_28px_rgba(236,72,153,0.18)] backdrop-blur-xl ${node.className}`}
         >
           {node.label}
         </span>

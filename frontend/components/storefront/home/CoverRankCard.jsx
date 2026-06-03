@@ -150,15 +150,15 @@ export default function CoverRankCard({
         <div
           className={cn(
             storefrontHomeInteractiveCardClass,
-            "relative aspect-[3/4] overflow-hidden rounded-[22px] border-[rgba(255,255,255,0.10)] p-0 group-hover:border-[rgba(236,72,153,0.40)] group-hover:shadow-[0_0_42px_rgba(236,72,153,0.14),0_28px_68px_rgba(3,6,18,0.46)]",
+            "relative aspect-[3/4] overflow-hidden rounded-[22px] border-[rgba(255,255,255,0.10)] bg-[rgba(255,255,255,0.04)] p-0 group-hover:border-[rgba(236,72,153,0.40)] group-hover:shadow-[0_0_42px_rgba(236,72,153,0.14),0_28px_68px_rgba(3,6,18,0.46)]",
           )}
         >
           <img
             src={coverUrl}
             alt={buildCoverAlt(series)}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.045]"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,8,15,0.04)_0%,rgba(7,8,17,0.08)_40%,rgba(7,8,17,0.24)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,8,15,0.04)_0%,rgba(7,8,17,0.08)_34%,rgba(7,8,17,0.28)_100%)]" />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[34%] bg-[linear-gradient(180deg,rgba(7,10,19,0)_0%,rgba(7,10,19,0.18)_42%,rgba(7,10,19,0.82)_100%)]" />
 
           <span
@@ -172,7 +172,7 @@ export default function CoverRankCard({
         </div>
 
         <div className="space-y-2 px-1">
-          <h3 className="truncate text-[14px] font-black leading-[1.1] tracking-[-0.03em] text-[color:var(--gush-home-text-primary)]">
+          <h3 className="truncate text-[14px] font-black leading-[1.08] tracking-[-0.03em] text-[color:var(--gush-home-text-primary)]">
             {series.title}
           </h3>
           <div className="flex items-center justify-between gap-3 text-[12px] text-[color:var(--gush-home-text-muted)]">

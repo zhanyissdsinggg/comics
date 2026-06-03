@@ -56,16 +56,18 @@ export default function FeaturedHero({
         <img
           src={backgroundUrl}
           alt={buildCoverAlt(series)}
-          className="h-full w-full object-cover object-[72%_center] opacity-[0.46] lg:object-right"
+          className="h-full w-full scale-[1.03] object-cover object-[72%_center] opacity-[0.54] lg:object-right"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,19,0.96)_0%,rgba(7,10,19,0.72)_42%,rgba(7,10,19,0.18)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_14%,rgba(236,72,153,0.32),transparent_24%),radial-gradient(circle_at_34%_6%,rgba(124,58,237,0.28),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.14),transparent_26%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,10,19,0.04)_0%,rgba(7,10,19,0.18)_42%,rgba(7,10,19,0.46)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,19,0.97)_0%,rgba(7,10,19,0.82)_34%,rgba(7,10,19,0.38)_62%,rgba(7,10,19,0.18)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_14%,rgba(236,72,153,0.34),transparent_24%),radial-gradient(circle_at_28%_4%,rgba(124,58,237,0.30),transparent_30%),radial-gradient(circle_at_84%_18%,rgba(56,189,248,0.16),transparent_24%)]" />
+        <div className="absolute left-[-10%] top-[18%] h-[44%] w-[32%] rounded-full bg-[rgba(124,58,237,0.18)] blur-[110px]" />
+        <div className="absolute bottom-[-10%] right-[6%] h-[38%] w-[26%] rounded-full bg-[rgba(236,72,153,0.12)] blur-[100px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,10,19,0.06)_0%,rgba(7,10,19,0.22)_42%,rgba(7,10,19,0.54)_100%)]" />
       </div>
 
-      <div className="relative min-h-[520px] p-5 sm:p-7 lg:grid lg:h-full lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end lg:gap-8 lg:p-8 xl:grid-cols-[minmax(0,1fr)_304px] xl:p-9">
-        <div className="pointer-events-none absolute right-4 top-5 z-10 w-[156px] sm:right-6 sm:top-6 sm:w-[186px] lg:static lg:order-2 lg:flex lg:w-full lg:justify-end">
-          <div className="relative ml-auto w-full max-w-[156px] sm:max-w-[186px] lg:max-w-[280px] xl:max-w-[304px]">
+      <div className="relative min-h-[520px] p-5 sm:p-7 lg:grid lg:h-full lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end lg:gap-8 lg:p-8 xl:grid-cols-[minmax(0,1fr)_344px] xl:p-9">
+        <div className="pointer-events-none absolute right-4 top-5 z-10 w-[150px] sm:right-6 sm:top-6 sm:w-[182px] lg:static lg:order-2 lg:flex lg:w-full lg:justify-end">
+          <div className="relative ml-auto w-full max-w-[150px] sm:max-w-[182px] lg:max-w-[320px] xl:max-w-[344px]">
             <div className="absolute inset-6 rounded-[26px] bg-[rgba(236,72,153,0.18)] blur-3xl" />
             <div className="absolute inset-5 rounded-[24px] bg-[rgba(124,58,237,0.16)] blur-3xl" />
             <div className="absolute inset-3 -rotate-[5deg] rounded-[24px] border border-white/8 bg-[rgba(255,255,255,0.028)]" />
@@ -90,7 +92,7 @@ export default function FeaturedHero({
           </div>
         </div>
 
-        <div className="relative z-20 flex min-h-[480px] flex-col justify-end gap-4 pt-[230px] pb-1 sm:min-h-[486px] sm:pt-[258px] lg:order-1 lg:min-h-0 lg:max-w-[40rem] lg:justify-end lg:gap-5 lg:pt-0">
+        <div className="relative z-20 flex min-h-[480px] flex-col justify-end gap-4 pt-[228px] pb-1 sm:min-h-[486px] sm:pt-[252px] lg:order-1 lg:min-h-0 lg:max-w-[41rem] lg:justify-end lg:gap-5 lg:pt-0">
           <div className="space-y-3 sm:space-y-4">
             <p className={storefrontHomeSectionEyebrowClass}>Featured Today</p>
             <h1 className="max-w-[9ch] font-display text-[2.72rem] font-black leading-[0.96] tracking-[-0.04em] text-[color:var(--gush-home-text-primary)] sm:text-[3.15rem] lg:text-[3.7rem] xl:text-[4.2rem]">
