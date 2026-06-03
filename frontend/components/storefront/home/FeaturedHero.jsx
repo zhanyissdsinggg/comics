@@ -53,6 +53,7 @@ export default function FeaturedHero({
           src={backgroundUrl}
           alt=""
           aria-hidden="true"
+          role="presentation"
           className="h-full w-full scale-[1.03] object-cover object-[72%_center] opacity-[0.54] lg:object-right"
         />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,19,0.97)_0%,rgba(7,10,19,0.82)_34%,rgba(7,10,19,0.38)_62%,rgba(7,10,19,0.18)_100%)]" />
@@ -77,6 +78,7 @@ export default function FeaturedHero({
                 src={posterUrl}
                 alt=""
                 aria-hidden="true"
+                role="presentation"
                 className="h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,transparent_20%,rgba(0,0,0,0.58)_100%)]" />

@@ -240,6 +240,7 @@ const SearchBar = memo(function SearchBar({
         style={{ WebkitTapHighlightColor: "transparent" }}
       >
         <Search
+          aria-hidden="true"
           size={18}
           className={cn(
             "transition-colors duration-200 md:h-4 md:w-4",
