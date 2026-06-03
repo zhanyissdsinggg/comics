@@ -37,31 +37,9 @@ export default function HomeHeader({
             className="group relative shrink-0"
             aria-label="Gush home"
           >
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 108 36"
-              className="h-8 w-[94px] overflow-visible drop-shadow-[0_12px_28px_rgba(236,72,153,0.18)] transition-transform duration-200 group-hover:-translate-y-0.5"
-            >
-              <defs>
-                <linearGradient id="gush-home-logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#f9a8d4" />
-                  <stop offset="42%" stopColor="#ec4899" />
-                  <stop offset="100%" stopColor="#7c3aed" />
-                </linearGradient>
-              </defs>
-              <text
-                x="1"
-                y="28"
-                fill="url(#gush-home-logo-gradient)"
-                fontSize="28"
-                fontWeight="900"
-                fontStyle="italic"
-                letterSpacing="-3"
-                className="font-display"
-              >
-                Gush
-              </text>
-            </svg>
+            <span className="inline-block bg-[linear-gradient(135deg,#f9a8d4_0%,#ec4899_42%,#7c3aed_100%)] bg-clip-text font-display text-[28px] font-black italic leading-none tracking-[-0.08em] text-transparent drop-shadow-[0_12px_28px_rgba(236,72,153,0.18)] transition-transform duration-200 group-hover:-translate-y-0.5">
+              Gush
+            </span>
           </Link>
 
           <nav className="ml-4 hidden items-center gap-5 lg:flex">

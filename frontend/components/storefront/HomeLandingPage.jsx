@@ -74,40 +74,34 @@ function HomeLandingContent({ initialHomeData = null }) {
       (series) => String(series?.id || "").trim() !== featuredId,
     );
     const readersRightNow = popularPool.slice(0, 4);
-    const readersNowIds = new Set(
-      readersRightNow.map((series) => String(series?.id || "").trim()),
-    );
+    const readersNowIds = new Set(readersRightNow.map((series) => String(series?.id || "").trim()));
     const trending = popularPool
       .filter((series) => !readersNowIds.has(String(series?.id || "").trim()))
       .slice(0, 8);
-    const usedIds = new Set(
-      [featuredId, ...readersRightNow, ...trending]
-        .map((series) =>
-          typeof series === "string"
-            ? series
-            : String(series?.id || "").trim(),
-        )
-        .filter(Boolean),
-    );
-    const updates = buildUpdatedRail(seriesList, 20).filter(
-      (series) => !usedIds.has(String(series?.id || "").trim()),
-    );
+    const updates = uniqueBySeriesId([
+      ...buildUpdatedRail(seriesList, 12).filter(
+        (series) => String(series?.id || "").trim() !== featuredId,
+      ),
+      ...popularPool,
+    ]).slice(0, 3);
     const continueItems = buildContinueReadingItems(seriesList, bySeriesId).slice(
       0,
       8,
     );
-    const continueIds = new Set(
-      continueItems.map((series) => String(series?.id || "").trim()),
-    );
-    const completed = buildCompletedRail(seriesList, 12).filter(
-      (series) =>
-        !usedIds.has(String(series?.id || "").trim()) &&
-        !continueIds.has(String(series?.id || "").trim()),
-    );
-    const interactiveStories = buildPopularRail(
-      filterSeriesByType(seriesList, "interactive"),
-      6,
-    ).filter((series) => String(series?.id || "").trim() !== featuredId);
+    const completed = uniqueBySeriesId([
+      ...buildCompletedRail(seriesList, 12).filter(
+        (series) => String(series?.id || "").trim() !== featuredId,
+      ),
+      ...popularPool.filter(
+        (series) => String(series?.id || "").trim() !== featuredId,
+      ),
+    ]).slice(0, 5);
+    const interactiveStories = uniqueBySeriesId([
+      ...buildPopularRail(filterSeriesByType(seriesList, "interactive"), 6).filter(
+        (series) => String(series?.id || "").trim() !== featuredId,
+      ),
+      ...popularPool,
+    ]).slice(0, 4);
     const readTonight = uniqueBySeriesId([
       ...continueItems,
       ...updates,
@@ -123,11 +117,11 @@ function HomeLandingContent({ initialHomeData = null }) {
       featured,
       readersRightNow,
       trending,
-      updates: updates.slice(0, 3),
+      updates,
       continueItems,
       completedLead: completed[0] || null,
       completedItems: completed.slice(1, 5),
-      interactiveStories: interactiveStories.slice(0, 4),
+      interactiveStories,
       readTonight: readTonight.slice(0, 4),
       rankingsPreview,
       searchSuggestions,
