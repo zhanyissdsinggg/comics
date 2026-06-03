@@ -42,6 +42,7 @@ export default function FeaturedHero({
     kind: "cover",
     adult: series?.adult || series?.isAdult,
   });
+  const compactStats = Array.isArray(stats) ? stats.slice(0, 3) : [];
 
   return (
     <section
@@ -79,14 +80,11 @@ export default function FeaturedHero({
                 className="h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,transparent_20%,rgba(0,0,0,0.58)_100%)]" />
-              <div className="absolute inset-x-3 bottom-3 rounded-[18px] border border-white/10 bg-[rgba(7,10,19,0.72)] p-3 backdrop-blur-xl">
+              <div className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[rgba(7,10,19,0.66)] px-3 py-1.5 backdrop-blur-xl">
                 <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--gush-home-text-muted)]">
                   <Sparkles className="size-3.5 text-[var(--gush-warning)]" />
-                  Featured Today
+                  Artwork Spotlight
                 </div>
-                <p className="mt-2 text-[0.95rem] font-semibold leading-[1.1] text-[color:var(--gush-home-text-primary)]">
-                  Open a story you&apos;ll keep thinking about.
-                </p>
               </div>
             </div>
           </div>
@@ -148,17 +146,17 @@ export default function FeaturedHero({
             </IconButton>
           </div>
 
-          {stats.length > 0 ? (
-            <div className="hidden gap-3 sm:grid sm:grid-cols-3">
-              {stats.map((stat) => (
+          {compactStats.length > 0 ? (
+            <div className="hidden gap-2.5 sm:flex sm:flex-wrap">
+              {compactStats.map((stat) => (
                 <div
                   key={stat.label}
-                  className={`${storefrontHomeGlassCardClass} rounded-[18px] bg-[rgba(7,10,19,0.56)] px-4 py-3`}
+                  className={`${storefrontHomeGlassCardClass} inline-flex min-h-[42px] items-center gap-2 rounded-full bg-[rgba(7,10,19,0.56)] px-4 py-2.5`}
                 >
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--gush-home-text-muted)]">
                     {stat.label}
                   </p>
-                  <p className="mt-2 text-[0.98rem] font-semibold tracking-[-0.02em] text-[color:var(--gush-home-text-primary)]">
+                  <p className="text-[0.95rem] font-semibold tracking-[-0.02em] text-[color:var(--gush-home-text-primary)]">
                     {stat.value}
                   </p>
                 </div>

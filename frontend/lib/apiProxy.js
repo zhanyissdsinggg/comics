@@ -119,6 +119,18 @@ function stripHopByHopHeaders(headers) {
   return next;
 }
 
+function sanitizeProxyResponseHeaders(headers) {
+  const next = new Headers(headers);
+  [
+    "connection",
+    "content-encoding",
+    "content-length",
+    "keep-alive",
+    "transfer-encoding",
+  ].forEach((key) => next.delete(key));
+  return next;
+}
+
 function parsePositiveInt(value, fallback) {
   const parsed = Number.parseInt(String(value || ""), 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
@@ -351,6 +363,6 @@ export async function handler(request) {
 
   return new Response(response.body, {
     status: response.status,
-    headers: new Headers(response.headers),
+    headers: sanitizeProxyResponseHeaders(response.headers),
   });
 }

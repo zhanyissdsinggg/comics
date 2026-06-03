@@ -3,6 +3,13 @@
 import SectionHeader from "./SectionHeader";
 import StoryMiniCard from "./StoryMiniCard";
 
+const readersHooksByTitle = {
+  "Crimson Tide": "Vampire panic, sharp tension, and a hook that lands fast.",
+  "Cherry Blossom High": "Soft romance energy until the feelings get messy.",
+  "Wild Hearts": "Big survival stakes, quick chapters, zero chill.",
+  "Solar Wind": "One wrong move in deep space and it spirals hard.",
+};
+
 export default function ReadersRightNow({ items = [] }) {
   if (!items.length) {
     return null;
@@ -24,7 +31,10 @@ export default function ReadersRightNow({ items = [] }) {
               key={series.id}
               series={series}
               href={`/series/${series.id}`}
-              summary="A punchy opener, strong art, and the kind of cliffhanger people send to friends."
+              summary={
+                readersHooksByTitle[String(series?.title || "").trim()] ||
+                "Quick hook, strong mood, and the kind of chapter people text around."
+              }
               eyebrow={Array.isArray(series?.genres) && series.genres.length > 0 ? series.genres[0] : "Reader pick"}
               sourceSection="home_readers_right_now"
               position={index + 1}
