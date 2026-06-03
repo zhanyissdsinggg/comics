@@ -1,8 +1,9 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import {
-  storefrontAccentChipClass,
-  storefrontBadgeClass,
+  storefrontHomeAccentChipClass,
+  storefrontHomeChipClass,
 } from "../../common/StorefrontPagePrimitives";
 
 export default function GenreChip({
@@ -16,14 +17,14 @@ export default function GenreChip({
 
   const toneClass =
     tone === "accent"
-      ? `${storefrontAccentChipClass} min-h-[30px] px-3 py-1.5 text-white`
+      ? storefrontHomeAccentChipClass
       : tone === "ghost"
-        ? `${storefrontBadgeClass} min-h-[30px] px-3 py-1.5 text-white/76`
-        : "border-white/12 bg-[rgba(11,14,23,0.52)] text-white/82";
+        ? `${storefrontHomeChipClass} bg-[rgba(255,255,255,0.03)] text-[color:var(--gush-home-text-secondary)]`
+        : storefrontHomeChipClass;
 
   return (
     <span
-      className={`inline-flex min-h-[30px] items-center rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] backdrop-blur-xl ${toneClass} ${className}`}
+      className={cn("justify-center whitespace-nowrap", toneClass, className)}
     >
       {label}
     </span>

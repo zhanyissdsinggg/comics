@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -153,9 +154,20 @@ export function useCatalogFeed({
 export function StorefrontPage({
   children,
   accentClass = "from-[rgba(255,79,154,0.16)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.1)]",
+  theme = "default",
+  className = "",
+  contentClassName = "",
 }) {
+  if (theme === "home") {
+    return (
+      <main className={cn("gush-home-page pb-12", className)}>
+        <div className={cn("gush-home-page-main", contentClassName)}>{children}</div>
+      </main>
+    );
+  }
+
   return (
-    <main className="relative min-h-screen overflow-hidden pb-12 text-white">
+    <main className={cn("relative min-h-screen overflow-hidden pb-12 text-white", className)}>
       <div
         className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(180deg,#090b12_0%,#0e1018_28%,#13131d_100%)]"
       />
@@ -171,7 +183,12 @@ export function StorefrontPage({
       <div
         className="pointer-events-none absolute inset-x-0 top-[34%] z-0 h-[620px] bg-[linear-gradient(180deg,transparent_0%,rgba(6,7,12,0.18)_24%,rgba(6,7,12,0.56)_100%)]"
       />
-      <div className="relative z-10 mx-auto flex w-full max-w-[1320px] flex-col gap-8 px-4 py-5 sm:gap-10 sm:px-6 sm:py-8 lg:px-8">
+      <div
+        className={cn(
+          "relative z-10 mx-auto flex w-full max-w-[1320px] flex-col gap-8 px-4 py-5 sm:gap-10 sm:px-6 sm:py-8 lg:px-8",
+          contentClassName,
+        )}
+      >
         {children}
       </div>
     </main>

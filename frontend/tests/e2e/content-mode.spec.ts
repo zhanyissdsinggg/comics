@@ -1482,7 +1482,7 @@ test.describe("Content mode filtering", () => {
       });
   });
 
-  test("mobile bottom nav should switch with the same adult-only catalog rules", async ({
+  test("mobile header toggle should switch with the same adult-only catalog rules", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
@@ -1500,7 +1500,7 @@ test.describe("Content mode filtering", () => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    const mobileToggle = page.getByTestId("mobile-content-mode-toggle");
+    const mobileToggle = page.getByTestId("adult-toggle-button");
     await expect(mobileToggle).toBeVisible({ timeout: UI_TIMEOUT_MS });
     await mobileToggle.click();
 

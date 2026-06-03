@@ -404,7 +404,7 @@ test.describe("Header adult toggle", () => {
     });
   });
 
-  test("mobile bottom navigation should expose the same 18+ mode entry", async ({
+  test("mobile bottom navigation should stay focused on the five core tabs", async ({
     page,
   }) => {
     mockBackendState.signedIn = false;
@@ -423,9 +423,10 @@ test.describe("Header adult toggle", () => {
       name: "Mobile bottom navigation",
     });
     await expect(bottomNav).toBeVisible();
+    await expect(bottomNav.getByRole("link")).toHaveCount(5);
     await expect(
       bottomNav.getByRole("button", { name: /Enter 18\+ mode|18\+/i }),
-    ).toBeVisible();
+    ).toHaveCount(0);
   });
 
   test("adult route should redirect signed-out readers to login first", async ({

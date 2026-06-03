@@ -1,82 +1,142 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Search, Trophy } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { resolveDisplayImageUrl } from "../../../lib/fallbackImage";
+import { trackEvent } from "../../../lib/trackEvent";
 import {
-  storefrontInfoCardClass,
-  storefrontSoftCardClass,
+  storefrontHomeSectionEyebrowClass,
 } from "../../common/StorefrontPagePrimitives";
-import { buildReadHref } from "../landingUtils";
-import GenreChip from "./GenreChip";
+import {
+  buildGenreLabel,
+  buildSeriesHook,
+  normalizeType,
+  uniqueBySeriesId,
+} from "../landingUtils";
 import SectionHeader from "./SectionHeader";
-import StoryCard from "./StoryCard";
 
-function SearchSuggestionPanel({ suggestions = [] }) {
-  return (
-    <div className={`${storefrontSoftCardClass} p-4`}>
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/44">
-        <Search className="size-4" />
-        Search suggestions
-      </div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        {suggestions.length > 0 ? (
-          suggestions.map((item) => (
-            <Link
-              key={item.value}
-              href={`/search?q=${encodeURIComponent(item.value)}`}
-            >
-              <GenreChip label={item.label} tone="ghost" />
-            </Link>
-          ))
-        ) : (
-          <p className="text-sm text-white/58">
-            Search by title, genre, or whatever vibe you want tonight.
-          </p>
-        )}
-      </div>
-    </div>
-  );
+function buildEntryCards(items = [], rankings = []) {
+  const pool = uniqueBySeriesId([...(Array.isArray(items) ? items : []), ...(Array.isArray(rankings) ? rankings : [])]);
+  const comic = pool.find((series) => normalizeType(series?.type) === "comic") || pool[0] || null;
+  const novel =
+    pool.find((series) => normalizeType(series?.type) === "novel") ||
+    pool.find((series) => series?.id !== comic?.id) ||
+    comic;
+  const discovery =
+    pool.find(
+      (series) => series?.id !== comic?.id && series?.id !== novel?.id,
+    ) ||
+    pool.find((series) => series?.id !== comic?.id) ||
+    novel ||
+    comic;
+
+  return [
+    {
+      id: "comics",
+      title: "Comics",
+      subtitle: "Epic art. Fast reads.",
+      href: "/comics",
+      series: comic,
+      gradient: "linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%)",
+      glow:
+        "radial-gradient(circle at 84% 18%, rgba(255,255,255,0.24), transparent 28%), radial-gradient(circle at 72% 78%, rgba(129,140,248,0.34), transparent 32%)",
+      eyebrow: "Tonight's comic",
+    },
+    {
+      id: "novels",
+      title: "Novels",
+      subtitle: "Dive deep. Get hooked.",
+      href: "/novels",
+      series: novel,
+      gradient: "linear-gradient(135deg, #EC4899 0%, #FB7185 100%)",
+      glow:
+        "radial-gradient(circle at 86% 20%, rgba(255,255,255,0.22), transparent 26%), radial-gradient(circle at 76% 80%, rgba(251,191,202,0.3), transparent 34%)",
+      eyebrow: "Tonight's novel",
+    },
+    {
+      id: "discovery",
+      title: "Discovery",
+      subtitle: "Find your next obsession.",
+      href: "/search",
+      series: discovery,
+      gradient: "linear-gradient(135deg, #2563EB 0%, #38BDF8 100%)",
+      glow:
+        "radial-gradient(circle at 82% 18%, rgba(255,255,255,0.22), transparent 28%), radial-gradient(circle at 72% 80%, rgba(125,211,252,0.3), transparent 34%)",
+      eyebrow: "Fresh discovery",
+    },
+  ];
 }
 
-function RankingsPreview({ items = [] }) {
-  return (
-    <div className={`${storefrontInfoCardClass} p-4`}>
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/44">
-          <Trophy className="size-4" />
-          Rankings preview
-        </div>
-        <Link
-          href="/rankings"
-          className="inline-flex items-center gap-1 text-xs font-medium text-white/58 transition-colors hover:text-white"
-        >
-          View all
-          <ArrowUpRight className="size-3.5" />
-        </Link>
-      </div>
+function ReadTonightCard({ entry, position }) {
+  const series = entry?.series;
+  const coverUrl = resolveDisplayImageUrl(series?.coverUrl, {
+    kind: "cover",
+    adult: series?.adult || series?.isAdult,
+  });
+  const metaLabel =
+    series?.title ||
+    buildGenreLabel(series, 1) ||
+    "Tonight's pick";
+  const detail =
+    buildSeriesHook(series, 56) ||
+    buildGenreLabel(series, 2) ||
+    "One more chapter energy.";
 
-      <div className="mt-4 grid gap-2.5">
-        {items.slice(0, 5).map((series, index) => (
-          <Link
-            key={series.id}
-            href={`/series/${series.id}`}
-            className="grid grid-cols-[28px_minmax(0,1fr)] items-center gap-3 rounded-[18px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.025)_100%)] px-3 py-2.5 shadow-[0_14px_30px_rgba(8,6,20,0.18)] transition-all hover:-translate-y-0.5 hover:border-white/16 hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.04)_100%)]"
-          >
-            <span className="text-center font-display text-[1.3rem] font-semibold text-white/78">
-              {index + 1}
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white">
-                {series.title}
-              </p>
-              <p className="truncate text-xs text-white/54">
-                {series?.type || "Series"}
-              </p>
-            </div>
-          </Link>
-        ))}
+  return (
+    <Link
+      href={entry.href}
+      className="group relative block min-h-[128px] overflow-hidden rounded-[26px] p-6 shadow-[0_24px_48px_rgba(6,10,24,0.28)] transition-transform duration-200 hover:-translate-y-1"
+      style={{
+        backgroundImage: `${entry.glow}, ${entry.gradient}`,
+      }}
+      onClick={() =>
+        trackEvent("story_click", {
+          seriesId: series?.id || null,
+          sourceSection: "home_read_tonight_entry",
+          position,
+          destination: entry.id,
+        })
+      }
+    >
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,19,0.08)_0%,rgba(7,10,19,0.02)_34%,rgba(7,10,19,0.22)_100%)]" />
+      <div className="absolute -right-8 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full bg-[rgba(255,255,255,0.16)] blur-3xl" />
+      {coverUrl ? (
+        <div className="absolute inset-y-3 right-3 w-[34%] min-w-[96px] overflow-hidden rounded-[20px] border border-[rgba(255,255,255,0.16)] bg-[rgba(255,255,255,0.08)] shadow-[0_18px_40px_rgba(5,8,20,0.26)]">
+          <img
+            src={coverUrl}
+            alt={`Spotlight artwork for ${metaLabel}`}
+            className="h-full w-full object-cover opacity-70 mix-blend-screen transition-transform duration-500 group-hover:scale-[1.05]"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0)),linear-gradient(270deg,rgba(255,255,255,0.02),rgba(7,10,19,0.44))]" />
+        </div>
+      ) : null}
+
+      <div className="relative flex h-full min-h-[80px] max-w-[70%] flex-col justify-between sm:max-w-[68%]">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[rgba(255,255,255,0.72)]">
+            {entry.eyebrow}
+          </p>
+          <h3 className="mt-2 text-[24px] font-black leading-[0.96] tracking-[-0.05em] text-white sm:text-[26px]">
+            {entry.title}
+          </h3>
+          <p className="mt-2 text-[13px] leading-[1.5] text-[rgba(255,255,255,0.82)]">
+            {entry.subtitle}
+          </p>
+        </div>
+
+        <div className="mt-4 flex items-end justify-between gap-4">
+          <div className="min-w-0">
+            <p className={storefrontHomeSectionEyebrowClass}>{metaLabel}</p>
+            <p className="mt-1 line-clamp-1 text-[12px] text-[rgba(255,255,255,0.76)]">
+              {detail}
+            </p>
+          </div>
+          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[rgba(255,255,255,0.18)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-xl transition-transform duration-200 group-hover:translate-x-0.5">
+            <ArrowUpRight className="size-4" />
+          </span>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -85,7 +145,9 @@ export default function ReadTonightSection({
   suggestions = [],
   rankings = [],
 }) {
-  if (!items.length && !suggestions.length && !rankings.length) {
+  const entries = buildEntryCards(items, rankings);
+
+  if (!entries.some((entry) => entry?.series) && !suggestions.length && !rankings.length) {
     return null;
   }
 
@@ -96,33 +158,14 @@ export default function ReadTonightSection({
         description="Choose your next read"
       />
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(300px,0.9fr)]">
-        <div className="-mx-4 overflow-x-auto px-4 pb-2 no-scrollbar sm:mx-0 sm:px-0">
-          <div className="grid min-w-max gap-3 md:grid-cols-2">
-            {items.slice(0, 4).map((series, index) => (
-              <div
-                key={series.id}
-                className="w-[calc(100vw-2.5rem)] max-w-[360px] md:w-auto md:max-w-none"
-              >
-                <StoryCard
-                  series={series}
-                  href={buildReadHref(series)}
-                  badge={index === 0 ? "Tonight's Pick" : ""}
-                  summary="One good opener, one bad decision, then your evening is gone."
-                  ctaLabel="Start Reading"
-                  sourceSection="home_read_tonight"
-                  position={index + 1}
-                  compact
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid gap-4">
-          <SearchSuggestionPanel suggestions={suggestions.slice(0, 6)} />
-          <RankingsPreview items={rankings} />
-        </div>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 xl:gap-[18px]">
+        {entries.map((entry, index) => (
+          <ReadTonightCard
+            key={entry.id}
+            entry={entry}
+            position={index + 1}
+          />
+        ))}
       </div>
     </section>
   );

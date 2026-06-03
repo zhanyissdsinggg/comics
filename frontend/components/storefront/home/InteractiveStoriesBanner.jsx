@@ -1,96 +1,56 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowRight, Gamepad2, Route, Sparkles } from "lucide-react";
+import { ArrowRight, Route, Sparkles } from "lucide-react";
 import {
-  storefrontBadgeClass,
-  storefrontInfoCardClass,
-  storefrontSecondaryButtonClass,
-  storefrontSoftCardClass,
+  storefrontHomeGlassCardClass,
+  storefrontHomeSectionEyebrowClass,
 } from "../../common/StorefrontPagePrimitives";
-import { resolveDisplayImageUrl } from "../../../lib/fallbackImage";
 import { trackEvent } from "../../../lib/trackEvent";
-import {
-  buildGenreLabel,
-  buildStatusLabel,
-} from "../landingUtils";
-import GenreChip from "./GenreChip";
-
-function InteractiveCover({ series, position }) {
-  if (!series) {
-    return null;
-  }
-
-  const imageUrl = resolveDisplayImageUrl(series?.coverUrl, {
-    kind: "cover",
-    adult: series?.adult || series?.isAdult,
-  });
-
-  return (
-    <Link
-      href={`/series/${series.id}`}
-      className="group block w-[42vw] max-w-[180px] min-w-[140px] shrink-0 scroll-snap-item"
-      onClick={() =>
-        trackEvent("story_click", {
-          seriesId: series?.id,
-          sourceSection: "home_interactive_shelf",
-          position,
-        })
-      }
-    >
-      <div className={`overflow-hidden rounded-[22px] transition-all duration-200 group-hover:-translate-y-1 group-hover:border-white/16 ${storefrontSoftCardClass} p-0`}>
-        <div className="aspect-[0.78] overflow-hidden">
-          <img
-            src={imageUrl}
-            alt={`Cover image for ${series.title}`}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-          />
-        </div>
-        <div className="space-y-1 p-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100/70">
-            {buildGenreLabel(series, 2) || "Interactive"}
-          </p>
-          <h3 className="line-clamp-2 text-sm font-semibold leading-[1.1] tracking-[-0.02em] text-white">
-            {series.title}
-          </h3>
-          <p className="text-xs text-white/52">{buildStatusLabel(series)}</p>
-        </div>
-      </div>
-    </Link>
-  );
-}
+import GradientButton from "./GradientButton";
+import IconButton from "./IconButton";
 
 function ChoiceMap() {
-  const nodes = [
-    { label: "Continue", className: "left-0 top-8" },
-    { label: "Trust them", className: "left-[42%] top-0" },
-    { label: "Go alone", className: "right-2 top-12" },
-    { label: "Lie first", className: "left-[40%] top-24" },
-    { label: "Save them", className: "right-0 top-32" },
+  const choiceNodes = [
+    { label: "Trust them", className: "left-0 top-2" },
+    { label: "Walk away", className: "left-[28%] top-16" },
+    { label: "Report them", className: "left-[55%] top-5" },
+  ];
+  const endNodes = [
+    { label: "END 01", className: "left-[14%] bottom-3" },
+    { label: "END 02", className: "left-[44%] bottom-9" },
+    { label: "END 03", className: "right-0 bottom-4" },
   ];
 
   return (
-    <div className="relative h-[176px] overflow-hidden rounded-[26px] border border-white/10 bg-[rgba(8,10,18,0.58)] p-4 backdrop-blur-xl">
-      <div className="absolute left-[18%] top-[34%] h-px w-[28%] bg-gradient-to-r from-[#7af0c9] to-[#8ec5ff]" />
-      <div className="absolute left-[46%] top-[24%] h-[36%] w-px bg-gradient-to-b from-[#8ec5ff] to-[#ff7db1]" />
-      <div className="absolute left-[48%] top-[52%] h-px w-[26%] bg-gradient-to-r from-[#ff7db1] to-[#9b8cff]" />
-      <div className="absolute left-[60%] top-[16%] h-[44%] w-px bg-gradient-to-b from-[#8ec5ff] to-[#ff7db1]" />
-      <div className="absolute left-[62%] top-[72%] h-px w-[20%] bg-gradient-to-r from-[#9b8cff] to-[#ff7db1]" />
-      {nodes.map((node) => (
+    <div className="relative h-[190px] overflow-hidden rounded-[24px] border border-[rgba(103,232,249,0.18)] bg-[rgba(9,14,28,0.48)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl sm:h-[224px]">
+      <div className="absolute left-[12%] top-[16%] h-[42%] w-px bg-gradient-to-b from-[#67e8f9] to-[#22d3ee] shadow-[0_0_18px_rgba(103,232,249,0.42)]" />
+      <div className="absolute left-[12%] top-[16%] h-px w-[23%] bg-gradient-to-r from-[#67e8f9] to-[#38bdf8] shadow-[0_0_18px_rgba(56,189,248,0.36)]" />
+      <div className="absolute left-[12%] top-[38%] h-px w-[48%] bg-gradient-to-r from-[#67e8f9] via-[#38bdf8] to-[#f472b6] shadow-[0_0_20px_rgba(56,189,248,0.3)]" />
+      <div className="absolute left-[12%] top-[58%] h-px w-[72%] bg-gradient-to-r from-[#38bdf8] via-[#c084fc] to-[#f472b6] shadow-[0_0_22px_rgba(244,114,182,0.28)]" />
+      <div className="absolute left-[34%] top-[38%] h-[34%] w-px bg-gradient-to-b from-[#38bdf8] to-[#f472b6] shadow-[0_0_18px_rgba(244,114,182,0.28)]" />
+      <div className="absolute left-[62%] top-[20%] h-[44%] w-px bg-gradient-to-b from-[#38bdf8] to-[#f472b6] shadow-[0_0_18px_rgba(244,114,182,0.28)]" />
+      <span className="absolute left-[10%] top-[12%] h-2.5 w-2.5 rounded-full bg-[#67e8f9] shadow-[0_0_0_6px_rgba(103,232,249,0.14),0_0_22px_rgba(103,232,249,0.5)]" />
+      {choiceNodes.map((node) => (
         <span
           key={node.label}
-          className={`absolute min-h-[32px] px-3 py-1 text-[11px] tracking-[0.02em] text-white/82 ${storefrontBadgeClass} ${node.className}`}
+          className={`absolute inline-flex min-h-[34px] items-center rounded-full border border-[rgba(103,232,249,0.22)] bg-[rgba(56,189,248,0.12)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[#c8f8ff] shadow-[0_0_0_1px_rgba(56,189,248,0.08),0_0_28px_rgba(56,189,248,0.16)] backdrop-blur-xl ${node.className}`}
         >
           {node.label}
         </span>
       ))}
-      <div className="absolute bottom-4 left-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/42">
-          Fractured Path
-        </p>
-        <p className="mt-2 max-w-[18rem] text-sm text-white/64">
-          Your choice changes the story.
-        </p>
+      {endNodes.map((node) => (
+        <span
+          key={node.label}
+          className={`absolute inline-flex min-h-[32px] items-center rounded-full border border-[rgba(244,114,182,0.28)] bg-[rgba(236,72,153,0.14)] px-3 py-1 text-[11px] font-black tracking-[0.12em] text-[#ffd2e8] shadow-[0_0_0_1px_rgba(236,72,153,0.08),0_0_26px_rgba(236,72,153,0.14)] backdrop-blur-xl ${node.className}`}
+        >
+          {node.label}
+        </span>
+      ))}
+      <div className="absolute inset-x-4 top-0 flex items-center justify-between pt-1">
+        <p className={storefrontHomeSectionEyebrowClass}>Neon route</p>
+        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[rgba(255,255,255,0.46)]">
+          Choice map
+        </span>
       </div>
     </div>
   );
@@ -102,87 +62,111 @@ export default function InteractiveStoriesBanner({ items = [] }) {
   }
 
   const featured = items[0];
-  const imageUrl = resolveDisplayImageUrl(
-    featured?.bannerUrl || featured?.coverUrl,
-    {
-      kind: featured?.bannerUrl ? "banner" : "cover",
-      adult: featured?.adult || featured?.isAdult,
-    },
-  );
+  const relatedTitles = items.slice(1, 4).map((series) => series?.title).filter(Boolean);
 
   return (
-    <section className="relative overflow-hidden rounded-[34px] border border-[rgba(103,232,249,0.16)] bg-[linear-gradient(135deg,rgba(7,10,18,0.98)_0%,rgba(13,11,25,0.98)_50%,rgba(16,12,24,0.98)_100%)] p-5 shadow-[0_26px_72px_rgba(0,0,0,0.34)] sm:p-6">
+    <section
+      className="relative overflow-hidden rounded-[30px] border border-[rgba(244,114,182,0.20)] p-6 shadow-[0_24px_90px_rgba(0,0,0,0.35)] sm:p-7 xl:min-h-[296px] xl:p-8"
+      style={{
+        borderRadius: "30px",
+        borderColor: "rgba(244,114,182,0.20)",
+        boxShadow: "0 24px 90px rgba(0,0,0,0.35)",
+      }}
+    >
       <div className="absolute inset-0">
-        <img
-          src={imageUrl}
-          alt={`Artwork for ${featured.title}`}
-          className="h-full w-full object-cover opacity-18"
-        />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,92,164,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(103,232,249,0.16),transparent_30%),linear-gradient(135deg,rgba(8,10,18,0.9),rgba(9,11,21,0.96))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(236,72,153,0.30),transparent_32%),radial-gradient(circle_at_60%_80%,rgba(56,189,248,0.15),transparent_30%),linear-gradient(135deg,#181028,#101522)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(124,58,237,0.26),transparent_28%),radial-gradient(circle_at_86%_14%,rgba(236,72,153,0.22),transparent_22%),radial-gradient(circle_at_72%_82%,rgba(56,189,248,0.12),transparent_22%)] opacity-90" />
       </div>
 
-      <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.92fr)] xl:items-center">
-        <div className="space-y-4">
-          <GenreChip label="Interactive Stories" tone="accent" />
+      <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.98fr)] xl:items-center">
+        <div className="space-y-5">
           <div className="space-y-3">
-            <h2 className="max-w-[12ch] font-display text-[2.2rem] font-semibold leading-[0.94] tracking-[-0.06em] text-white sm:text-[3rem]">
+            <p className={storefrontHomeSectionEyebrowClass}>Interactive Stories</p>
+            <h2 className="max-w-[12ch] font-display text-[2.25rem] font-black leading-[0.94] tracking-[-0.06em] text-[color:var(--gush-home-text-primary)] sm:text-[3rem]">
               Your Choice Changes the Story
             </h2>
-            <p className="max-w-[35rem] text-sm leading-7 text-white/70">
-              Choice-driven stories built like late-night obsession fuel. Route swaps, secret scenes, and endings that shift because you touched the wrong thing first.
+            <p className="max-w-[34rem] text-[15px] leading-[1.72] text-[color:var(--gush-home-text-secondary)]">
+              Make decisions, unlock new scenes, paths, and endings. You&apos;re in control.
             </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link
+            <GradientButton
               href="/interactive"
-              className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-[linear-gradient(135deg,#67e8f9_0%,#7af0c9_100%)] px-6 text-sm font-semibold text-[#08111b] transition-transform duration-200 hover:-translate-y-0.5"
+              icon={ArrowRight}
+              className="px-6"
             >
               Explore Stories
-              <ArrowRight className="size-4" />
-            </Link>
-            <Link
+            </GradientButton>
+            <IconButton
               href="/search?format=interactive"
-              className={`${storefrontSecondaryButtonClass} min-h-[48px] px-5 text-white/82`}
+              icon={Route}
+              className="min-h-[48px] px-5 text-white"
             >
-              More Routes
-              <Route className="size-4" />
-            </Link>
+              More Stories
+            </IconButton>
           </div>
 
-          <div className="-mx-1 overflow-x-auto px-1 pb-1 no-scrollbar">
-            <div className="flex min-w-max gap-3">
-              {items.slice(0, 4).map((series, index) => (
-                <InteractiveCover
-                  key={series.id}
-                  series={series}
-                  position={index + 1}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className={`${storefrontInfoCardClass} rounded-[28px] p-4`}>
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-100/70">
-              <Gamepad2 className="size-4" />
-              Story flow
-            </div>
-            <ChoiceMap />
+          <div className="flex flex-wrap gap-2.5">
+            <span className={`${storefrontHomeGlassCardClass} inline-flex min-h-[34px] items-center rounded-full px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--gush-home-text-secondary)]`}>
+              {featured?.title || "Interactive pick"}
+            </span>
+            {relatedTitles.map((title) => (
+              <span
+                key={title}
+                className="inline-flex min-h-[34px] items-center rounded-full border border-[rgba(255,255,255,0.10)] bg-[rgba(255,255,255,0.04)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[rgba(255,255,255,0.68)] backdrop-blur-xl"
+              >
+                {title}
+              </span>
+            ))}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
             {[
-              "Secret routes unlock with better choices.",
-              "Bad decisions can still be the fun route.",
+              "Trust the wrong person, and a hidden route opens.",
+              "Every branch pushes you toward a different ending.",
             ].map((copy) => (
               <div
                 key={copy}
-                className={`${storefrontSoftCardClass} p-4`}
+                className={`${storefrontHomeGlassCardClass} rounded-[20px] p-4`}
               >
                 <Sparkles className="size-4 text-[var(--gush-warning)]" />
-                <p className="mt-3 text-sm leading-6 text-white/72">{copy}</p>
+                <p className="mt-3 text-sm leading-6 text-[color:var(--gush-home-text-secondary)]">
+                  {copy}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div
+            className={`${storefrontHomeGlassCardClass} rounded-[24px] p-4 sm:p-5`}
+            onClick={() =>
+              trackEvent("story_click", {
+                seriesId: featured?.id,
+                sourceSection: "home_interactive_featured",
+                position: 1,
+              })
+            }
+          >
+            <ChoiceMap />
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+            {[
+              { label: "Scene", value: "New branch unlocked" },
+              { label: "Risk", value: "One choice shifts the ending" },
+              { label: "Mode", value: "Play it your way" },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className={`${storefrontHomeGlassCardClass} rounded-[18px] p-4`}
+              >
+                <p className={storefrontHomeSectionEyebrowClass}>{item.label}</p>
+                <p className="mt-2 text-sm font-semibold text-[color:var(--gush-home-text-primary)]">
+                  {item.value}
+                </p>
               </div>
             ))}
           </div>

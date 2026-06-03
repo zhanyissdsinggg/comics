@@ -1,5 +1,10 @@
 export { default as GenreChip } from "./GenreChip";
 export { default as SectionHeader } from "./SectionHeader";
+export { default as GradientButton } from "./GradientButton";
+export { default as IconButton } from "./IconButton";
+export { default as SearchPill } from "./SearchPill";
+export { default as StoryMiniCard } from "./StoryMiniCard";
+export { default as CoverRankCard } from "./CoverRankCard";
 export { default as CoverCard } from "./CoverCard";
 export { default as StoryCard } from "./StoryCard";
 export { default as HomeHeader } from "./HomeHeader";

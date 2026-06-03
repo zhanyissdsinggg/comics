@@ -34,6 +34,29 @@ export const storefrontNoticeClass =
 export const storefrontInfoCardClass =
   "rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.035)] px-5 py-4 shadow-[0_18px_38px_rgba(8,6,20,0.24)] backdrop-blur-xl";
 
+export const storefrontHomeGlassCardClass = "gush-home-glass-card";
+
+export const storefrontHomeInteractiveCardClass =
+  "gush-home-glass-card gush-home-glass-card--interactive";
+
+export const storefrontHomeSectionEyebrowClass =
+  "text-[11px] font-semibold uppercase tracking-[0.26em] text-[color:var(--gush-home-text-muted)]";
+
+export const storefrontHomePrimaryButtonClass =
+  "inline-flex min-h-[48px] shrink-0 items-center justify-center gap-2 rounded-full border border-white/10 px-5 text-sm font-semibold text-[color:var(--gush-home-text-primary)] shadow-[0_18px_42px_rgba(124,58,237,0.28)] transition-all duration-200 ease-out [background:var(--gush-home-primary-gradient)] hover:-translate-y-[2px] hover:shadow-[0_26px_56px_rgba(124,58,237,0.34)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f9a8d4]";
+
+export const storefrontHomeIconButtonClass =
+  "inline-flex min-h-[46px] shrink-0 items-center justify-center gap-2 rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.045)] px-4 text-sm font-medium text-[color:var(--gush-home-text-secondary)] shadow-[0_18px_36px_rgba(3,6,18,0.24)] backdrop-blur-xl transition-all duration-200 ease-out hover:-translate-y-[2px] hover:border-[rgba(236,72,153,0.35)] hover:bg-[rgba(255,255,255,0.065)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c084fc]";
+
+export const storefrontHomeSearchPillClass =
+  "inline-flex min-h-[46px] shrink-0 items-center justify-center gap-2 rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.045)] px-4 text-sm font-medium text-[color:var(--gush-home-text-secondary)] shadow-[0_18px_36px_rgba(3,6,18,0.22)] backdrop-blur-xl transition-all duration-200 ease-out hover:-translate-y-[2px] hover:border-[rgba(236,72,153,0.35)] hover:bg-[rgba(255,255,255,0.065)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c084fc]";
+
+export const storefrontHomeChipClass =
+  "inline-flex min-h-[34px] items-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.045)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--gush-home-text-secondary)] shadow-[0_12px_24px_rgba(3,6,18,0.16)] backdrop-blur-xl";
+
+export const storefrontHomeAccentChipClass =
+  "inline-flex min-h-[34px] items-center rounded-full border border-[rgba(236,72,153,0.24)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_16px_30px_rgba(124,58,237,0.22)] [background:linear-gradient(135deg,rgba(236,72,153,0.22)_0%,rgba(124,58,237,0.2)_100%)] backdrop-blur-xl";
+
 export function StorefrontSectionHeading({
   eyebrow,
   title,

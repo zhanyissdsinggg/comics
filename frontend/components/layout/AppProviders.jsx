@@ -96,6 +96,7 @@ export default function AppProviders({
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith("/admin");
   const isReaderRoute = pathname?.startsWith("/read");
+  const isHomeRoute = pathname === "/";
   // PublicHeader/PublicFooter are the single public shell for non-admin,
   // non-reader routes. Figma pages can still mount their own overlays
   // through FigmaChrome, but they do not render a second header or footer.
@@ -141,7 +142,7 @@ export default function AppProviders({
                                           />
                                         ) : null}
                                         {children}
-                                        {shouldShowPublicChrome ? (
+                                        {shouldShowPublicChrome && !isHomeRoute ? (
                                           <PublicFooter
                                             initialShowInteractiveNav={initialShowInteractiveNav}
                                           />

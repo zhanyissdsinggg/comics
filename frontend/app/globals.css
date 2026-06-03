@@ -71,6 +71,31 @@
   --gush-home-ink: var(--gush-text);
   --gush-home-ink-soft: var(--gush-text-muted);
   --gush-home-accent: var(--gush-rose);
+  --gush-home-page-base: #070a13;
+  --gush-home-page-elevated: #080b14;
+  --gush-home-page-bg:
+    radial-gradient(circle at 18% 0%, rgba(124, 58, 237, 0.22), transparent 34%),
+    radial-gradient(circle at 85% 12%, rgba(236, 72, 153, 0.16), transparent 30%),
+    radial-gradient(circle at 50% 65%, rgba(56, 189, 248, 0.07), transparent 35%),
+    linear-gradient(180deg, #090b16 0%, #070a13 100%);
+  --gush-home-card-bg: rgba(255, 255, 255, 0.045);
+  --gush-home-card-border: rgba(255, 255, 255, 0.08);
+  --gush-home-card-border-hover: rgba(236, 72, 153, 0.35);
+  --gush-home-primary-gradient: linear-gradient(135deg, #ec4899 0%, #7c3aed 100%);
+  --gush-home-text-primary: #ffffff;
+  --gush-home-text-secondary: rgba(255, 255, 255, 0.72);
+  --gush-home-text-muted: rgba(255, 255, 255, 0.52);
+  --gush-home-page-max: 1480px;
+  --gush-home-page-gutter: 32px;
+  --gush-home-card-radius: 24px;
+  --gush-home-card-radius-tight: 20px;
+  --gush-home-card-shadow:
+    0 24px 72px rgba(3, 6, 18, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --gush-home-card-glow:
+    0 28px 80px rgba(3, 6, 18, 0.42),
+    0 0 0 1px rgba(236, 72, 153, 0.12),
+    0 0 42px rgba(124, 58, 237, 0.2);
   --gush-page-gutter: clamp(1rem, 3vw, 2rem);
   --gush-page-max: 1280px;
   --gush-page-max-wide: 1320px;
@@ -84,7 +109,7 @@
   --gush-text-body-sm: clamp(0.84rem, 0.82rem + 0.05vw, 0.9rem);
   --gush-leading-display: 1;
   --gush-leading-copy: 1.68;
-  --gush-mobile-bottom-nav-height: 6.4rem;
+  --gush-mobile-bottom-nav-height: 5.95rem;
 }
 
 html.dark {
@@ -187,6 +212,7 @@ main {
     --gush-section-gap: 1.6rem;
     --gush-text-display-lg: clamp(2.15rem, 11vw, 3.35rem);
     --gush-text-title-lg: clamp(1.42rem, 6.8vw, 1.9rem);
+    --gush-home-page-gutter: 16px;
   }
 
   body::before {
@@ -211,6 +237,24 @@ main {
   :where(h4, h5, h6).font-display {
     letter-spacing: -0.01em;
     line-height: 1.08;
+  }
+
+  .gush-home-page-main {
+    padding-top: 20px;
+    padding-bottom: 48px;
+    gap: 24px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  :root {
+    --gush-home-page-gutter: 24px;
+  }
+
+  .gush-home-page-main {
+    padding-top: 24px;
+    padding-bottom: 56px;
+    gap: 28px;
   }
 }
 
@@ -369,6 +413,78 @@ textarea {
 
 html.dark .gush-home-shell {
   background: var(--gush-home-bg);
+}
+
+.gush-home-page {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  overflow: hidden;
+  color: var(--gush-home-text-primary);
+  background: var(--gush-home-page-bg);
+}
+
+.gush-home-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(124, 58, 237, 0.2), transparent 26%),
+    radial-gradient(circle at 82% 14%, rgba(236, 72, 153, 0.16), transparent 24%),
+    radial-gradient(circle at 56% 52%, rgba(56, 189, 248, 0.08), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(7, 10, 19, 0) 22%);
+  opacity: 0.92;
+}
+
+.gush-home-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(180deg, rgba(7, 10, 19, 0) 0%, rgba(7, 10, 19, 0.12) 34%, rgba(7, 10, 19, 0.34) 100%);
+}
+
+.gush-home-page-main {
+  position: relative;
+  z-index: 1;
+  width: min(
+    var(--gush-home-page-max),
+    calc(100% - (var(--gush-home-page-gutter) * 2))
+  );
+  margin-inline: auto;
+  padding-top: 32px;
+  padding-bottom: 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.gush-home-glass-card {
+  border-radius: var(--gush-home-card-radius);
+  border: 1px solid var(--gush-home-card-border);
+  background: var(--gush-home-card-bg);
+  box-shadow: var(--gush-home-card-shadow);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.gush-home-glass-card--interactive {
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.gush-home-glass-card--interactive:hover {
+  transform: translateY(-3px);
+  border-color: var(--gush-home-card-border-hover);
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: var(--gush-home-card-glow);
 }
 
 .gush-page-ambient {

@@ -152,7 +152,7 @@ function HomeLandingContent({ initialHomeData = null }) {
     : [];
 
   return (
-    <StorefrontPage>
+    <StorefrontPage theme="home">
       {homeModel.featured ? (
         <>
           <HomeHeader suggestions={homeModel.searchSuggestions} />

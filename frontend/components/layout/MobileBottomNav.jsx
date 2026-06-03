@@ -7,8 +7,6 @@ import {
   Bookmark,
   Compass,
   House,
-  RotateCcw,
-  ShieldAlert,
   Trophy,
   User,
 } from "lucide-react";
@@ -73,12 +71,7 @@ const TAB_ITEMS = [
   },
 ];
 
-export default function MobileBottomNav({
-  isAdultMode = false,
-  legalAge = 18,
-  onAdultToggleClick,
-  showAdultToggle = true,
-}) {
+export default function MobileBottomNav() {
   const pathname = usePathname() || "/";
   const [isMobileViewport, setIsMobileViewport] = useState(false);
 
@@ -128,8 +121,7 @@ export default function MobileBottomNav({
     >
       <div
         className={cn(
-          "mx-auto grid max-w-[720px] gap-1 rounded-[28px] border border-white/10 bg-[rgba(20,16,27,0.94)] px-1.5 py-1.5 shadow-[0_24px_48px_rgba(0,0,0,0.38)] backdrop-blur-2xl",
-          showAdultToggle ? "grid-cols-6" : "grid-cols-5",
+          "mx-auto grid max-w-[560px] grid-cols-5 gap-1.5 rounded-[26px] border border-white/10 bg-[rgba(20,16,27,0.96)] px-2 py-2 shadow-[0_24px_48px_rgba(0,0,0,0.38)] backdrop-blur-2xl",
         )}
       >
         {TAB_ITEMS.map((item) => {
@@ -156,10 +148,10 @@ export default function MobileBottomNav({
               {...navItemProps}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "relative flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-[20px] px-1.5 py-2 text-center transition-all duration-150",
+                "relative flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-[18px] px-1.5 py-2 text-center transition-all duration-150",
                 isActive
                   ? "border border-white/12 bg-[linear-gradient(180deg,rgba(255,79,154,0.18)_0%,rgba(167,139,250,0.16)_100%)] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12),0_14px_26px_rgba(0,0,0,0.24)]"
-                  : `${storefrontSecondaryButtonClass} h-auto border-transparent bg-[rgba(255,255,255,0.025)] px-1.5 py-2 text-white/58 shadow-none hover:border-white/10 hover:bg-[rgba(255,255,255,0.075)] hover:text-white`,
+                  : `${storefrontSecondaryButtonClass} h-auto border-transparent bg-[rgba(255,255,255,0.025)] px-1.5 py-2 text-white/62 shadow-none hover:border-white/10 hover:bg-[rgba(255,255,255,0.075)] hover:text-white`,
               )}
             >
               <span
@@ -173,7 +165,7 @@ export default function MobileBottomNav({
               <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.95} />
               <span
                 className={cn(
-                  "text-[10px] leading-none",
+                  "text-[11px] leading-none",
                   isActive
                     ? "font-semibold uppercase tracking-[0.1em]"
                     : "font-medium uppercase tracking-[0.08em]",
@@ -184,48 +176,6 @@ export default function MobileBottomNav({
             </NavItem>
           );
         })}
-
-        {showAdultToggle ? (
-          <button
-            type="button"
-            onClick={onAdultToggleClick}
-            aria-pressed={isAdultMode}
-            aria-label={
-              isAdultMode ? "Back to normal mode" : `Enter ${legalAge}+ mode`
-            }
-            data-testid="mobile-content-mode-toggle"
-            className={cn(
-              "relative flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-[20px] px-1.5 py-2 text-center transition-all duration-150",
-              isAdultMode
-                ? "border border-[rgba(255,79,154,0.28)] bg-[linear-gradient(180deg,rgba(255,79,154,0.18)_0%,rgba(120,54,84,0.16)_100%)] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1),0_14px_26px_rgba(0,0,0,0.24)]"
-                : `${storefrontSecondaryButtonClass} h-auto border-transparent bg-[rgba(255,255,255,0.025)] px-1.5 py-2 text-white/58 shadow-none hover:border-white/10 hover:bg-[rgba(255,255,255,0.075)] hover:text-white`,
-            )}
-          >
-            <span
-              className={cn(
-                "absolute left-1/2 top-1.5 h-[3px] w-6 -translate-x-1/2 rounded-full transition-all duration-200",
-                isAdultMode
-                  ? "bg-[#ffd6e8] opacity-100"
-                  : "bg-transparent opacity-0",
-              )}
-            />
-            {isAdultMode ? (
-              <RotateCcw className="size-5" strokeWidth={2.2} />
-            ) : (
-              <ShieldAlert className="size-5" strokeWidth={1.95} />
-            )}
-            <span
-              className={cn(
-                "text-[10px] leading-none",
-                isAdultMode
-                  ? "font-semibold uppercase tracking-[0.1em]"
-                  : "font-medium uppercase tracking-[0.08em]",
-              )}
-            >
-              {isAdultMode ? "Normal" : `${legalAge}+`}
-            </span>
-          </button>
-        ) : null}
       </div>
     </nav>
   );
