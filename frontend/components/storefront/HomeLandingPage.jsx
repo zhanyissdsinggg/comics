@@ -34,7 +34,6 @@ import {
   CompletedBingeSection,
   FeaturedHero,
   HomeFooter,
-  HomeHeader,
   InteractiveStoriesBanner,
   NewEpisodesToday,
   ReadersRightNow,
@@ -173,7 +172,6 @@ function HomeLandingContent({ initialHomeData = null }) {
     <StorefrontPage theme="home">
       {homeModel.featured ? (
         <>
-          <HomeHeader suggestions={homeModel.searchSuggestions} />
           <FeaturedHero
             series={homeModel.featured}
             primaryHref={buildReadHref(homeModel.featured)}
