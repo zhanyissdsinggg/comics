@@ -7,8 +7,6 @@ import {
 } from "../../common/StorefrontPagePrimitives";
 import { resolveDisplayImageUrl } from "../../../lib/fallbackImage";
 import { trackEvent } from "../../../lib/trackEvent";
-import { buildCreatorLabel } from "../landingUtils";
-import GenreChip from "./GenreChip";
 import GradientButton from "./GradientButton";
 import IconButton from "./IconButton";
 
@@ -16,15 +14,13 @@ export default function FeaturedHero({
   series,
   primaryHref,
   secondaryHref,
-  chips = [],
-  stats = [],
+  metaChips = [],
 }) {
   if (!series) {
     return null;
   }
 
   const title = String(series?.title || "").trim();
-  const creator = buildCreatorLabel(series);
   const description = "Open a story you'll keep thinking about.";
   const backgroundUrl = resolveDisplayImageUrl(
     series?.bannerUrl || series?.coverUrl,
@@ -33,9 +29,7 @@ export default function FeaturedHero({
       adult: series?.adult || series?.isAdult,
     },
   );
-  const backgroundPosition =
-    String(series?.homeHeroArtwork?.position || "").trim() || "78% center";
-  const compactStats = Array.isArray(stats) ? stats.slice(0, 3) : [];
+  const compactMetaChips = Array.isArray(metaChips) ? metaChips.slice(0, 3) : [];
 
   return (
     <section
@@ -52,15 +46,27 @@ export default function FeaturedHero({
           alt=""
           aria-hidden="true"
           role="presentation"
-          className="h-full w-full scale-[1.02] object-cover opacity-[0.72]"
-          style={{ objectPosition: backgroundPosition }}
+          className="h-full w-full scale-[1.02] object-cover object-[60%_center] opacity-[0.8] lg:object-[center_right]"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,8,18,0.98)_0%,rgba(5,8,18,0.92)_28%,rgba(7,10,19,0.58)_56%,rgba(7,10,19,0.20)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,8,18,0.98)_0%,rgba(5,8,18,0.94)_30%,rgba(7,10,19,0.62)_56%,rgba(7,10,19,0.22)_100%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_14%,rgba(236,72,153,0.18),transparent_24%),radial-gradient(circle_at_28%_4%,rgba(124,58,237,0.24),transparent_30%),radial-gradient(circle_at_84%_18%,rgba(56,189,248,0.10),transparent_24%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,10,19,0.12)_0%,rgba(7,10,19,0.26)_44%,rgba(7,10,19,0.58)_100%)]" />
       </div>
 
       <div className="relative min-h-[520px] p-5 sm:p-7 lg:flex lg:h-full lg:items-end lg:p-8 xl:p-9">
+        {compactMetaChips.length > 0 ? (
+          <div className="absolute right-5 top-5 z-20 flex max-w-[14rem] flex-wrap justify-end gap-2 sm:right-7 sm:top-7 lg:right-8 lg:top-8 xl:right-9 xl:top-9">
+            {compactMetaChips.map((item) => (
+              <span
+                key={item}
+                className="inline-flex min-h-[34px] items-center rounded-full border border-[rgba(255,255,255,0.10)] bg-[rgba(7,10,19,0.54)] px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.02em] text-[color:var(--gush-home-text-primary)] shadow-[0_14px_34px_rgba(0,0,0,0.24)] backdrop-blur-xl"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        ) : null}
+
         <div className="relative z-20 flex min-h-[480px] max-w-[42rem] flex-col justify-end gap-4 pb-1 sm:min-h-[486px] lg:min-h-0 lg:gap-5">
           <div className="space-y-3 sm:space-y-4">
             <p className={storefrontHomeSectionEyebrowClass}>Featured Today</p>
@@ -70,20 +76,7 @@ export default function FeaturedHero({
             <p className="max-w-[34rem] text-[15px] leading-[1.68] text-[color:var(--gush-home-text-secondary)] sm:text-base">
               {description}
             </p>
-            {creator ? (
-              <p className="text-sm font-medium uppercase tracking-[0.14em] text-[rgba(255,255,255,0.60)]">
-                by {creator}
-              </p>
-            ) : null}
           </div>
-
-          {chips.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {chips.map((chip) => (
-                <GenreChip key={`hero-${chip}`} label={chip} tone="ghost" />
-              ))}
-            </div>
-          ) : null}
 
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <GradientButton
@@ -116,24 +109,6 @@ export default function FeaturedHero({
               View Series
             </IconButton>
           </div>
-
-          {compactStats.length > 0 ? (
-            <div className="hidden gap-2.5 sm:flex sm:flex-wrap">
-              {compactStats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className={`${storefrontHomeGlassCardClass} inline-flex min-h-[42px] items-center gap-2 rounded-full bg-[rgba(7,10,19,0.56)] px-4 py-2.5`}
-                >
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--gush-home-text-muted)]">
-                    {stat.label}
-                  </p>
-                  <p className="text-[0.95rem] font-semibold tracking-[-0.02em] text-[color:var(--gush-home-text-primary)]">
-                    {stat.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : null}
         </div>
       </div>
     </section>

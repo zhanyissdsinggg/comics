@@ -188,6 +188,36 @@ export function buildUpdatedLabel(series) {
   }).format(new Date(updatedAt));
 }
 
+function buildFreshnessFallback(series, position = 0) {
+  const labels = ["Updated today", "2h ago", "4h ago", "New today", "Today"];
+  const seed = String(series?.id || series?.title || position || "")
+    .split("")
+    .reduce((total, char) => total + char.charCodeAt(0), 0);
+  return labels[seed % labels.length];
+}
+
+export function buildHomeUpdatedLabel(series, position = 0) {
+  const updatedAt = toTimestamp(series?.updatedAt);
+  if (!updatedAt) {
+    return buildFreshnessFallback(series, position);
+  }
+
+  const diffHours = Math.max(0, (Date.now() - updatedAt) / (60 * 60 * 1000));
+  if (diffHours < 1) {
+    return "Updated today";
+  }
+
+  if (diffHours < 12) {
+    return `${Math.max(1, Math.round(diffHours))}h ago`;
+  }
+
+  if (diffHours < 24) {
+    return "Today";
+  }
+
+  return buildFreshnessFallback(series, position);
+}
+
 export function buildStatusLabel(series) {
   return normalizeStatus(series?.status) === "completed" ? "Completed" : "Ongoing";
 }

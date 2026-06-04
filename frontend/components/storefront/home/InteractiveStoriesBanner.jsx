@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Route, Sparkles } from "lucide-react";
+import { ArrowRight, Route } from "lucide-react";
 import {
   storefrontHomeGlassCardClass,
   storefrontHomeSectionEyebrowClass,
@@ -50,12 +50,6 @@ function ChoiceMap() {
           {node.label}
         </span>
       ))}
-      <div className="absolute inset-x-4 top-0 flex items-center justify-between pt-1">
-        <p className={storefrontHomeSectionEyebrowClass}>Neon route</p>
-        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[rgba(255,255,255,0.46)]">
-          Choice map
-        </span>
-      </div>
     </div>
   );
 }
@@ -66,7 +60,6 @@ export default function InteractiveStoriesBanner({ items = [] }) {
   }
 
   const featured = items[0];
-  const relatedTitles = items.slice(1, 4).map((series) => series?.title).filter(Boolean);
 
   return (
     <section
@@ -90,7 +83,7 @@ export default function InteractiveStoriesBanner({ items = [] }) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(124,58,237,0.24),transparent_28%),radial-gradient(circle_at_86%_14%,rgba(236,72,153,0.16),transparent_22%),radial-gradient(circle_at_72%_82%,rgba(56,189,248,0.14),transparent_22%)] opacity-90" />
       </div>
 
-      <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.98fr)] xl:items-center">
+      <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.98fr)] xl:items-center">
         <div className="space-y-5">
           <div className="space-y-3">
             <p className={storefrontHomeSectionEyebrowClass}>Interactive Stories</p>
@@ -106,7 +99,7 @@ export default function InteractiveStoriesBanner({ items = [] }) {
             <GradientButton
               href="/interactive"
               icon={ArrowRight}
-              className="px-6"
+              className="min-h-[48px] px-6"
             >
               Explore Stories
             </GradientButton>
@@ -119,36 +112,6 @@ export default function InteractiveStoriesBanner({ items = [] }) {
             </IconButton>
           </div>
 
-          <div className="flex flex-wrap gap-2.5">
-            <span className={`${storefrontHomeGlassCardClass} inline-flex min-h-[34px] items-center rounded-full px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--gush-home-text-secondary)]`}>
-              {featured?.title || "Interactive pick"}
-            </span>
-            {relatedTitles.map((title) => (
-              <span
-                key={title}
-                className="inline-flex min-h-[34px] items-center rounded-full border border-[rgba(255,255,255,0.10)] bg-[rgba(255,255,255,0.04)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[rgba(255,255,255,0.68)] backdrop-blur-xl"
-              >
-                {title}
-              </span>
-            ))}
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {[
-              "Trust the wrong person, and a hidden route opens.",
-              "Every branch pushes you toward a different ending.",
-            ].map((copy) => (
-              <div
-                key={copy}
-                className={`${storefrontHomeGlassCardClass} rounded-[20px] p-4`}
-              >
-                <Sparkles className="size-4 text-[var(--gush-warning)]" />
-                <p className="mt-3 text-sm leading-6 text-[color:var(--gush-home-text-secondary)]">
-                  {copy}
-                </p>
-              </div>
-            ))}
-          </div>
         </div>
 
         <div className="space-y-4">
@@ -163,24 +126,6 @@ export default function InteractiveStoriesBanner({ items = [] }) {
             }
           >
             <ChoiceMap />
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-            {[
-              { label: "Scene", value: "New branch unlocked" },
-              { label: "Risk", value: "One choice shifts the ending" },
-              { label: "Mode", value: "Play it your way" },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className={`${storefrontHomeGlassCardClass} rounded-[18px] p-4`}
-              >
-                <p className={storefrontHomeSectionEyebrowClass}>{item.label}</p>
-                <p className="mt-2 text-sm font-semibold text-[color:var(--gush-home-text-primary)]">
-                  {item.value}
-                </p>
-              </div>
-            ))}
           </div>
         </div>
       </div>

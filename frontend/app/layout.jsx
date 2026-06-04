@@ -125,9 +125,9 @@ export default async function RootLayout({ children }) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${displayFont.variable} ${bodyFont.variable} ${readerFont.variable} font-sans dark`}
+      className={`${displayFont.variable} ${bodyFont.variable} ${readerFont.variable} bg-[#070A13] font-sans dark`}
     >
-      <body className="min-h-screen font-sans antialiased">
+      <body className="min-h-screen bg-[#070A13] font-sans antialiased">
         <div
           hidden
           data-build-revision={BUILD_REVISION || "unknown"}

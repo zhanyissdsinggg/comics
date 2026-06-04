@@ -9,8 +9,9 @@ const SearchBar = dynamic(() => import("../common/SearchBar"), {
 });
 
 export default function HeaderSearch({ onSearch, variant = "default" }) {
-  const placeholder = "Stories, creators, genres";
-  const mobileSearchLabel = "Find stories and creators";
+  void variant;
+  const placeholder = "Search stories, creators...";
+  const mobileSearchLabel = "Search stories and creators";
 
   return (
     <>
@@ -25,7 +26,7 @@ export default function HeaderSearch({ onSearch, variant = "default" }) {
             aria-hidden="true"
             className="min-w-0 truncate text-sm font-medium tracking-[0.01em] text-white/72"
           >
-            Stories, creators...
+            Search stories, creators...
           </span>
         </Link>
       </div>

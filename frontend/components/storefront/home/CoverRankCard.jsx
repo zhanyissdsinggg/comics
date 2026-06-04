@@ -12,8 +12,8 @@ import { trackEvent } from "../../../lib/trackEvent";
 import {
   buildCreatorLabel,
   buildGenreLabel,
+  buildHomeUpdatedLabel,
   buildStatusLabel,
-  buildUpdatedLabel,
 } from "../landingUtils";
 
 function buildCoverAlt(series) {
@@ -194,7 +194,7 @@ export default function CoverRankCard({
             </p>
           ) : (
             <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--gush-home-text-muted)]">
-              {buildUpdatedLabel(series)}
+              {buildHomeUpdatedLabel(series, position)}
             </p>
           )}
         </div>

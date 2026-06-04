@@ -12,8 +12,8 @@ import { resolveDisplayImageUrl } from "../../../lib/fallbackImage";
 import { trackEvent } from "../../../lib/trackEvent";
 import {
   buildGenreLabel,
+  buildHomeUpdatedLabel,
   buildLatestInstallmentLabel,
-  buildUpdatedLabel,
 } from "../landingUtils";
 import GenreChip from "./GenreChip";
 
@@ -56,7 +56,7 @@ export default function StoryMiniCard({
       : [
           {
             icon: Clock3,
-            label: buildUpdatedLabel(series),
+            label: buildHomeUpdatedLabel(series, position),
           },
           {
             icon: Sparkles,
@@ -202,7 +202,7 @@ export default function StoryMiniCard({
             <div
               className={cn(
                 storefrontHomeSearchPillClass,
-                "mt-4 inline-flex min-h-[38px] px-3.5 py-0 text-white group-hover:text-white",
+                "mt-4 inline-flex min-h-[44px] px-3.5 py-0 text-white group-hover:text-white",
               )}
             >
               <ArrowRight className="size-3.5" />

@@ -2,7 +2,7 @@ const HOME_ARTWORK_BY_TITLE = {
   "The Last Kingdom": {
     hero: {
       src: "/images/home/the-last-kingdom-hero.png",
-      position: "78% center",
+      position: "center right",
     },
   },
   "Crimson Tide": {
@@ -40,9 +40,19 @@ export const HOME_PRIORITY_TITLES = [
   "Solar Wind",
 ];
 
+export const HOME_TRENDING_PRIORITY_TITLES = [
+  "Crimson Tide",
+  "Cherry Blossom High",
+  "Wild Hearts",
+  "Solar Wind",
+  "Starfall Academy",
+  "Shadow Protocol",
+];
+
 export const HOME_COMPLETED_PRIORITY_TITLES = [
   "Crimson Tide",
   "Cherry Blossom High",
+  "Wild Hearts",
 ];
 
 export const HOME_UPDATES_PRIORITY_TITLES = [

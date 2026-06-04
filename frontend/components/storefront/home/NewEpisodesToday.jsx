@@ -13,8 +13,8 @@ import { buildReadHref } from "../landingUtils";
 import {
   buildCardHook,
   buildGenreLabel,
+  buildHomeUpdatedLabel,
   buildLatestInstallmentLabel,
-  buildUpdatedLabel,
 } from "../landingUtils";
 import SectionHeader from "./SectionHeader";
 
@@ -87,10 +87,10 @@ function EpisodeCard({ series, position }) {
               </span>
               <span className="inline-flex min-w-0 items-center gap-1 truncate text-[rgba(255,255,255,0.62)]">
                 <Flame className="size-3.5 shrink-0 text-[#fb923c]" />
-                {buildUpdatedLabel(series)}
+                {buildHomeUpdatedLabel(series, position)}
               </span>
             </div>
-            <span className={`${storefrontHomeSearchPillClass} min-h-[34px] px-3 text-xs text-white`}>
+            <span className={`${storefrontHomeSearchPillClass} min-h-[44px] px-3 text-xs text-white`}>
               Start Reading
             </span>
           </div>

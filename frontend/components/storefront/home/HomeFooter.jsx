@@ -43,8 +43,8 @@ export default function HomeFooter() {
       </div>
 
       <div className="mt-5 flex flex-col gap-1 text-[13px] leading-6 text-[rgba(255,255,255,0.34)] sm:flex-row sm:items-center sm:justify-between">
-        <p>Copyright 2026 Targaryen technology Co., Limited</p>
-        <p>Gush Comics is operated by Targaryen technology Co., Limited.</p>
+        <p>Copyright 2026 Targaryen Technology Co., Limited.</p>
+        <p>Gush Comics is operated by Targaryen Technology Co., Limited.</p>
       </div>
     </footer>
   );

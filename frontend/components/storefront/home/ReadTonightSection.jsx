@@ -9,7 +9,6 @@ import {
 } from "../../common/StorefrontPagePrimitives";
 import {
   buildGenreLabel,
-  buildSeriesHook,
   normalizeType,
   uniqueBySeriesId,
 } from "../landingUtils";
@@ -77,10 +76,6 @@ function ReadTonightCard({ entry, position }) {
     series?.title ||
     buildGenreLabel(series, 1) ||
     "Tonight's pick";
-  const detail =
-    buildSeriesHook(series, 56) ||
-    buildGenreLabel(series, 2) ||
-    "One more chapter energy.";
 
   return (
     <Link
@@ -127,9 +122,6 @@ function ReadTonightCard({ entry, position }) {
         <div className="mt-4 flex items-end justify-between gap-4">
           <div className="min-w-0">
             <p className={storefrontHomeSectionEyebrowClass}>{metaLabel}</p>
-            <p className="mt-1 line-clamp-1 text-[12px] text-[rgba(255,255,255,0.76)]">
-              {detail}
-            </p>
           </div>
           <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[rgba(255,255,255,0.18)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-xl transition-transform duration-200 group-hover:translate-x-0.5">
             <ArrowUpRight className="size-4" />

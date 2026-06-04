@@ -9,6 +9,7 @@ import {
   HOME_COMPLETED_PRIORITY_TITLES,
   HOME_FEATURED_TITLE,
   HOME_PRIORITY_TITLES,
+  HOME_TRENDING_PRIORITY_TITLES,
   HOME_UPDATES_PRIORITY_TITLES,
   pickSeriesByExactTitle,
   prioritizeSeriesByTitles,
@@ -87,7 +88,11 @@ function HomeLandingContent({ initialHomeData = null }) {
       HOME_PRIORITY_TITLES,
       4,
     );
-    const trending = prioritizeSeriesByTitles(popularPool, HOME_PRIORITY_TITLES, 6);
+    const trending = prioritizeSeriesByTitles(
+      popularPool,
+      HOME_TRENDING_PRIORITY_TITLES,
+      6,
+    );
     const updates = prioritizeSeriesByTitles(
       uniqueBySeriesId([
         ...buildUpdatedRail(seriesList, 12).filter(
@@ -112,7 +117,7 @@ function HomeLandingContent({ initialHomeData = null }) {
         ),
       ]),
       HOME_COMPLETED_PRIORITY_TITLES,
-      5,
+      3,
     );
     const interactiveStories = uniqueBySeriesId([
       ...buildPopularRail(filterSeriesByType(seriesList, "interactive"), 6).filter(
@@ -147,7 +152,7 @@ function HomeLandingContent({ initialHomeData = null }) {
       continueItems,
       completedLead: withHomeArtwork(completed[0] || null, "cover"),
       completedItems: completed
-        .slice(1, 5)
+        .slice(1, 3)
         .map((series) => withHomeArtwork(series, "cover")),
       interactiveStories,
       readTonight: readTonight.slice(0, 4),
@@ -156,20 +161,11 @@ function HomeLandingContent({ initialHomeData = null }) {
     };
   }, [bySeriesId, hotKeywords, seriesList]);
 
-  const featuredStats = homeModel.featured
+  const featuredMetaChips = homeModel.featured
     ? [
-        {
-          label: "Latest",
-          value: buildLatestInstallmentLabel(homeModel.featured),
-        },
-        {
-          label: "Shelf",
-          value: buildStatusLabel(homeModel.featured),
-        },
-        {
-          label: "Genres",
-          value: buildGenreLabel(homeModel.featured, 2) || "Trending",
-        },
+        `Latest · ${buildLatestInstallmentLabel(homeModel.featured)}`,
+        buildStatusLabel(homeModel.featured),
+        buildGenreLabel(homeModel.featured, 2) || "Trending",
       ]
     : [];
 
@@ -182,11 +178,7 @@ function HomeLandingContent({ initialHomeData = null }) {
             series={homeModel.featured}
             primaryHref={buildReadHref(homeModel.featured)}
             secondaryHref={`/series/${homeModel.featured.id}`}
-            stats={featuredStats}
-            chips={(Array.isArray(homeModel.featured?.genres)
-              ? homeModel.featured.genres
-              : []
-            ).slice(0, 3)}
+            metaChips={featuredMetaChips}
           />
         </>
       ) : loading ? null : (

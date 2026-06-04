@@ -10,11 +10,10 @@ import {
 import { resolveDisplayImageUrl } from "../../../lib/fallbackImage";
 import { trackEvent } from "../../../lib/trackEvent";
 import {
-  buildCardHook,
   buildCreatorLabel,
   buildGenreLabel,
+  buildHomeUpdatedLabel,
   buildStatusLabel,
-  buildUpdatedLabel,
 } from "../landingUtils";
 import GenreChip from "./GenreChip";
 import SectionHeader from "./SectionHeader";
@@ -78,11 +77,6 @@ function CompletedCard({ series, position, featured = false }) {
             <ArrowRight className="mt-1 size-4 shrink-0 text-[#f9a8d4] transition-transform duration-200 group-hover:translate-x-0.5" />
           </div>
 
-          <p className="mt-2 line-clamp-2 text-[12px] leading-[1.45] text-[rgba(255,255,255,0.58)]">
-            {buildCardHook(series, featured ? 92 : 76) ||
-              "Finished story, no waiting, just keep going until your sleep schedule loses."}
-          </p>
-
           <div className="mt-3 flex items-center gap-3 text-[12px] text-[color:var(--gush-home-text-muted)]">
             <span className="inline-flex items-center gap-1">
               <Star className="size-3.5 fill-current text-[var(--gush-warning)]" />
@@ -95,9 +89,9 @@ function CompletedCard({ series, position, featured = false }) {
 
           <div className="mt-auto flex items-center justify-between gap-3 pt-3">
             <span className="truncate text-[11px] uppercase tracking-[0.14em] text-[color:var(--gush-home-text-muted)]">
-              {buildUpdatedLabel(series)}
+              {buildHomeUpdatedLabel(series, position)}
             </span>
-            <span className={`${storefrontHomeSearchPillClass} min-h-[34px] px-3 text-xs text-white`}>
+            <span className={`${storefrontHomeSearchPillClass} min-h-[44px] px-3 text-xs text-white`}>
               Start Binge
             </span>
           </div>
@@ -143,7 +137,7 @@ export default function CompletedBingeSection({ lead = null, items = [] }) {
 
         {supporting.length > 0 ? (
           <div className="grid gap-3 sm:grid-cols-2">
-            {supporting.slice(0, 4).map((series, index) => (
+            {supporting.slice(0, 2).map((series, index) => (
               <CompletedCard
                 key={series.id}
                 series={series}
