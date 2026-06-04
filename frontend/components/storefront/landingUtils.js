@@ -10,6 +10,15 @@ export function toTimestamp(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+const FRESHNESS_LABELS = [
+  "Updated today",
+  "2h ago",
+  "4h ago",
+  "New today",
+  "Today",
+  "Hot tonight",
+];
+
 export function normalizeType(value) {
   return String(value || "")
     .trim()
@@ -194,18 +203,10 @@ export function buildUpdatedLabel(series) {
 }
 
 function buildFreshnessFallback(series, position = 0) {
-  const labels = [
-    "Updated today",
-    "2h ago",
-    "4h ago",
-    "New today",
-    "Today",
-    "Hot tonight",
-  ];
   const seed = String(series?.id || series?.title || position || "")
     .split("")
     .reduce((total, char) => total + char.charCodeAt(0), 0);
-  return labels[seed % labels.length];
+  return FRESHNESS_LABELS[seed % FRESHNESS_LABELS.length];
 }
 
 export function buildHomeUpdatedLabel(series, position = 0) {

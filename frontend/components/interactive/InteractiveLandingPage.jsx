@@ -23,6 +23,11 @@ function normalizeStories(value) {
   return Array.isArray(value) ? value : [];
 }
 
+function formatShelfStoryCount(count) {
+  const total = Number.isFinite(Number(count)) ? Number(count) : 0;
+  return `${total} ${total === 1 ? "story" : "stories"} in the current shelf.`;
+}
+
 function getContinueMap(progressList) {
   const map = new Map();
   for (const item of Array.isArray(progressList) ? progressList : []) {
@@ -523,9 +528,7 @@ export default function InteractiveLandingPage({
               </h2>
             </div>
             <p className="text-sm text-white/54">
-              {filteredStories.length}{" "}
-              {filteredStories.length === 1 ? "story" : "stories"} in the
-              current shelf.
+              {formatShelfStoryCount(filteredStories.length)}
             </p>
           </div>
 

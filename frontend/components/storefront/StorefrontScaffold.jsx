@@ -231,7 +231,7 @@ export function StoryHero({
 
   return (
     <section className="relative overflow-hidden rounded-[36px] border border-white/10 bg-[linear-gradient(140deg,rgba(11,12,21,0.98)_0%,rgba(12,12,20,0.96)_44%,rgba(18,14,24,0.98)_100%)] shadow-[var(--gush-shadow-floating)]">
-      <div className="absolute inset-0">
+      <div className="absolute inset-0" aria-hidden="true">
         <img
           src={coverUrl}
           alt=""
@@ -388,7 +388,9 @@ export function CoverCard({
         <div className="relative aspect-[3/4] overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.035)] shadow-[var(--gush-shadow-card)] transition-all duration-200 group-hover:-translate-y-1.5 group-hover:border-white/18 group-hover:shadow-[0_30px_96px_rgba(0,0,0,0.42)]">
           <img
             src={coverUrl}
-            alt={coverAlt(series)}
+            alt=""
+            aria-hidden="true"
+            role="presentation"
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,8,15,0.08)_0%,rgba(7,8,17,0.18)_26%,rgba(7,8,17,0.84)_100%)]" />
@@ -441,7 +443,11 @@ export function CoverCard({
   );
 }
 
-export function UpdateList({ items = [], variant = "comic", sectionName = "" }) {
+export function UpdateList({
+  items = [],
+  variant = "comic",
+  sectionName = "",
+}) {
   if (!Array.isArray(items) || items.length === 0) {
     return null;
   }
@@ -474,7 +480,9 @@ export function UpdateList({ items = [], variant = "comic", sectionName = "" }) 
                   kind: "cover",
                   adult: series?.adult || series?.isAdult,
                 })}
-                alt={coverAlt(series)}
+                alt=""
+                aria-hidden="true"
+                role="presentation"
                 className="h-full w-full object-cover"
               />
             </div>
@@ -532,41 +540,45 @@ export function RankList({
         description={description}
       />
       <div className={`grid ${minimal ? "mt-4 gap-2.5" : "mt-5 gap-3"}`}>
-        {items.map((series, index) => (
-          <Link
-            key={`${series.id}-${index}`}
-            href={buildSeriesHref(series)}
-            className={`group grid items-center gap-3 border border-white/8 bg-[rgba(255,255,255,0.025)] transition-colors hover:bg-[rgba(255,255,255,0.075)] ${
-              minimal
-                ? "grid-cols-[30px_48px_minmax(0,1fr)] rounded-[20px] px-3 py-2.5"
-                : "grid-cols-[34px_56px_minmax(0,1fr)] rounded-[22px] px-3 py-3"
-            }`}
-          >
-            <span className={`text-center font-display font-semibold text-white/72 ${minimal ? "text-[1.25rem]" : "text-[1.5rem]"}`}>
-              {index + 1}
-            </span>
-            <div className={`aspect-[3/4] overflow-hidden border border-white/10 ${minimal ? "rounded-[14px]" : "rounded-[16px]"}`}>
-              <img
-                src={resolveDisplayImageUrl(series?.coverUrl, {
-                  kind: "cover",
-                  adult: series?.adult || series?.isAdult,
-                })}
-                alt={coverAlt(series)}
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="min-w-0">
-              <h3 className={`truncate font-semibold text-white ${minimal ? "text-[0.95rem] leading-[1]" : "text-base leading-[1]"}`}>
-                {series.title}
-              </h3>
-              <p className="truncate text-sm text-white/58">
-                {[buildGenreLabel(series, 2), buildStatusLabel(series)]
-                  .filter(Boolean)
-                  .join(" / ")}
-              </p>
-            </div>
-          </Link>
-        ))}
+        {items.map((series, index) => {
+          return (
+            <Link
+              key={`${series.id}-${index}`}
+              href={buildSeriesHref(series)}
+              className={`group grid items-center gap-3 border border-white/8 bg-[rgba(255,255,255,0.025)] transition-colors hover:bg-[rgba(255,255,255,0.075)] ${
+                minimal
+                  ? "grid-cols-[30px_48px_minmax(0,1fr)] rounded-[20px] px-3 py-2.5"
+                  : "grid-cols-[34px_56px_minmax(0,1fr)] rounded-[22px] px-3 py-3"
+              }`}
+            >
+              <span className={`text-center font-display font-semibold text-white/72 ${minimal ? "text-[1.25rem]" : "text-[1.5rem]"}`}>
+                {index + 1}
+              </span>
+              <div className={`aspect-[3/4] overflow-hidden border border-white/10 ${minimal ? "rounded-[14px]" : "rounded-[16px]"}`}>
+                <img
+                  src={resolveDisplayImageUrl(series?.coverUrl, {
+                    kind: "cover",
+                    adult: series?.adult || series?.isAdult,
+                  })}
+                  alt=""
+                  aria-hidden="true"
+                  role="presentation"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="min-w-0">
+                <h3 className={`truncate font-semibold text-white ${minimal ? "text-[0.95rem] leading-[1]" : "text-base leading-[1]"}`}>
+                  {series.title}
+                </h3>
+                <p className="truncate text-sm text-white/58">
+                  {[buildGenreLabel(series, 2), buildStatusLabel(series)]
+                    .filter(Boolean)
+                    .join(" / ")}
+                </p>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );
@@ -577,6 +589,7 @@ export function GenreShelfSection({
   variant = "comic",
   title = "Genre Shelves",
   description = "Open a shelf and keep reading.",
+  isDecorativeImage,
 }) {
   if (!Array.isArray(shelves) || shelves.length === 0) {
     return null;
@@ -598,6 +611,7 @@ export function GenreShelfSection({
                 href={buildSeriesHref(series)}
                 variant={variant}
                 actionLabel={buildLatestInstallmentLabel(series)}
+                decorativeImage={Boolean(isDecorativeImage?.(series))}
               />
             ))}
           </ShelfScroller>

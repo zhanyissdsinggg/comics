@@ -230,7 +230,11 @@ function buildSeriesHref(series, searchPath, query, campaignId) {
   });
 }
 
-function DiscoveryUpdateCard({ series, index = 0, sectionName = "search_recently_updated" }) {
+function DiscoveryUpdateCard({
+  series,
+  index = 0,
+  sectionName = "search_recently_updated",
+}) {
   if (!series) {
     return null;
   }
@@ -259,7 +263,9 @@ function DiscoveryUpdateCard({ series, index = 0, sectionName = "search_recently
               kind: "cover",
               adult: series?.adult || series?.isAdult,
             })}
-            alt={`${normalizedType} cover image for ${String(series?.title || "Untitled").trim() || "Untitled"}`}
+            alt=""
+            aria-hidden="true"
+            role="presentation"
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
         </div>

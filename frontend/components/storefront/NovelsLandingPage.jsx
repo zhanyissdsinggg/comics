@@ -295,12 +295,12 @@ export default function NovelsLandingPage({
                 key={series.id}
                 series={series}
                 href={`/series/${series.id}`}
-                variant="novel"
-                badge="Completed"
-                actionLabel="Read Full Series"
-                onClick={() =>
-                  trackEvent("story_click", {
-                    seriesId: series?.id,
+              variant="novel"
+              badge="Completed"
+              actionLabel="Read Full Series"
+              onClick={() =>
+                trackEvent("story_click", {
+                  seriesId: series?.id,
                     sourceSection: "novels_late_night_reads",
                     position: index + 1,
                   })
