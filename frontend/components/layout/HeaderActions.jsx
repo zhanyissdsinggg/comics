@@ -1,11 +1,9 @@
 "use client";
 
-import { Bell, Menu, User, Wallet } from "lucide-react";
+import { Bell, Bookmark, Menu, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { useAuthStore } from "../../store/useAuthStore";
-import { useWalletStore } from "../../store/useWalletStore";
-import { siteConfig } from "../../lib/siteConfig";
 import { cn } from "@/lib/utils";
 import {
   storefrontPrimaryButtonClass,
@@ -25,7 +23,6 @@ const ICON_BUTTON_CLASS =
   `relative inline-flex h-11 w-11 items-center justify-center px-0 ${storefrontSecondaryButtonClass}`;
 
 export default function HeaderActions({
-  onWalletClick,
   onAdultToggleClick,
   onLoginClick,
   onMenuClick,
@@ -36,57 +33,70 @@ export default function HeaderActions({
 }) {
   const router = useRouter();
   const { hydrated, isSignedIn } = useAuthStore();
-  const { paidPts, bonusPts } = useWalletStore();
   const { unreadCount } = useNotificationsStore();
   const adultToggleLabel = isAdultMode ? "Normal" : `${legalAge}+`;
   const adultToggleAriaLabel = isAdultMode
     ? "Switch to standard mode"
     : `Switch to ${legalAge}+ mode`;
-  const walletTotal = paidPts + bonusPts;
-  const showWallet = hydrated && isSignedIn && variant !== "home";
+  void variant;
   const iconButtonClass = ICON_BUTTON_CLASS;
+
+  const handleNotificationsClick = () => {
+    if (!hydrated || !isSignedIn) {
+      onLoginClick?.();
+      return;
+    }
+    router.push("/notifications");
+  };
+
+  const handleLibraryClick = () => {
+    router.push("/library");
+  };
+
+  const handleAccountClick = () => {
+    if (!hydrated || !isSignedIn) {
+      onLoginClick?.();
+      return;
+    }
+    router.push("/account");
+  };
 
   return (
     <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
-      {showWallet ? (
-        <button
-          type="button"
-          onClick={onWalletClick}
-          className={`hidden h-11 items-center gap-2 px-4 text-white lg:inline-flex ${storefrontSecondaryButtonClass}`}
-          aria-label={`View your wallet${walletTotal > 0 ? ` with ${walletTotal.toLocaleString()} points` : ""}`}
-        >
-          <Wallet className="size-4" strokeWidth={2} />
-          <span className="text-sm font-semibold tracking-[0.01em]">
-            Wallet
+      <button
+        type="button"
+        onClick={handleNotificationsClick}
+        className={cn(
+          iconButtonClass,
+          "hidden items-center justify-center md:inline-flex",
+        )}
+        aria-label={
+          hydrated && isSignedIn && unreadCount > 0
+            ? `View notifications, ${unreadCount > 99 ? "99 plus" : unreadCount} unread`
+            : "Open notifications"
+        }
+        title="Notifications"
+      >
+        <Bell aria-hidden="true" className="size-4" />
+        {hydrated && isSignedIn && unreadCount > 0 ? (
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[linear-gradient(135deg,#ff4f9a_0%,#ff7ab1_100%)] px-1 text-[10px] font-bold text-white shadow-[0_10px_24px_rgba(255,79,154,0.32)]">
+            {unreadCount > 99 ? "99+" : unreadCount}
           </span>
-          <span className="text-xs font-semibold tabular-nums text-white/62">
-            {walletTotal.toLocaleString()}
-          </span>
-        </button>
-      ) : null}
+        ) : null}
+      </button>
 
-      {hydrated && isSignedIn ? (
-        <button
-          type="button"
-          onClick={() => router.push("/notifications")}
-          className={cn(
-            iconButtonClass,
-            "hidden items-center justify-center sm:inline-flex",
-          )}
-          aria-label={
-            unreadCount > 0
-              ? `View your notifications, ${unreadCount > 99 ? "99 plus" : unreadCount} unread`
-              : "View your notifications"
-          }
-        >
-          <Bell className="size-4" />
-          {unreadCount > 0 ? (
-            <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-[0_10px_24px_rgba(239,68,68,0.35)]">
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </span>
-          ) : null}
-        </button>
-      ) : null}
+      <button
+        type="button"
+        onClick={handleLibraryClick}
+        className={cn(
+          iconButtonClass,
+          "hidden items-center justify-center md:inline-flex",
+        )}
+        aria-label="Open library"
+        title="Library"
+      >
+        <Bookmark aria-hidden="true" className="size-4" />
+      </button>
 
       {showAdultToggle ? (
         <button
@@ -137,16 +147,18 @@ export default function HeaderActions({
       {!hydrated ? (
         <AuthSkeleton variant={variant} />
       ) : isSignedIn ? (
-        <>
-          <button
-            type="button"
-            onClick={() => router.push("/account")}
-            className={`hidden h-11 items-center gap-2 border-[rgba(255,255,255,0.12)] bg-[linear-gradient(135deg,rgba(103,232,249,0.14)_0%,rgba(255,255,255,0.04)_100%)] px-4 text-sm font-medium tracking-[0.01em] text-white sm:inline-flex ${storefrontSecondaryButtonClass}`}
-          >
-            <User className="size-4" />
-            Account
-          </button>
-        </>
+        <button
+          type="button"
+          onClick={handleAccountClick}
+          className={cn(
+            iconButtonClass,
+            "hidden items-center justify-center md:inline-flex",
+          )}
+          aria-label="Open profile"
+          title="Profile"
+        >
+          <User aria-hidden="true" className="size-4" />
+        </button>
       ) : (
         <button
           type="button"

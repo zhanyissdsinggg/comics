@@ -15,4 +15,3 @@ export { default as NewEpisodesToday } from "./NewEpisodesToday";
 export { default as CompletedBingeSection } from "./CompletedBingeSection";
 export { default as InteractiveStoriesBanner } from "./InteractiveStoriesBanner";
 export { default as ReadTonightSection } from "./ReadTonightSection";
-export { default as HomeFooter } from "./HomeFooter";

@@ -7,35 +7,25 @@ import {
   navigateWithDocument,
   shouldUseDocumentNavigation,
 } from "../../lib/adultRouteNavigation";
-import { siteConfig } from "../../lib/siteConfig";
-import { storefrontSecondaryButtonClass } from "../common/StorefrontPagePrimitives";
 
 const PUBLIC_NAV_ITEMS = [
   { id: "comics", label: "Comics", href: "/comics" },
   { id: "novels", label: "Novels", href: "/novels" },
   { id: "interactive", label: "Interactive", href: "/interactive" },
-]
-  .concat(
-    siteConfig.navigation.showRankingsInNav
-      ? [{ id: "rankings", label: "Rankings", href: "/rankings" }]
-      : [],
-  )
-  .concat(
-    siteConfig.navigation.showCreatorsInNav
-      ? [{ id: "creators", label: "Creators", href: "/creators" }]
-      : [],
-  );
+  { id: "rankings", label: "Rankings", href: "/rankings" },
+];
 
 export default function HeaderNav({ variant = "default", showInteractiveNav = true }) {
   const pathname = usePathname();
   const { setHomeTab } = useHomeStore();
+  void variant;
   const navItems = PUBLIC_NAV_ITEMS.filter(
     (item) => item.id !== "interactive" || showInteractiveNav,
   );
 
   return (
-    <nav className="hidden flex-1 justify-center md:flex">
-      <div className="inline-flex items-center gap-1 rounded-full border border-white/8 bg-white/[0.02] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+    <nav aria-label="Primary" className="hidden flex-1 justify-center md:flex">
+      <div className="inline-flex items-center gap-1.5">
         {navItems.map((item) => {
           const isActive =
             item.href === "/"
@@ -71,7 +61,11 @@ export default function HeaderNav({ variant = "default", showInteractiveNav = tr
               key={item.id}
               {...navItemProps}
               aria-current={isActive ? "page" : undefined}
-              className={`rounded-full px-4 py-2.5 text-sm font-medium tracking-[0.01em] transition-all duration-150 ${isActive ? "bg-[linear-gradient(135deg,rgba(255,79,154,0.18)_0%,rgba(167,139,250,0.14)_100%)] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.14),0_10px_22px_rgba(0,0,0,0.24)]" : `${storefrontSecondaryButtonClass} h-auto bg-transparent px-4 py-2.5 text-white/68 shadow-none hover:bg-[rgba(255,255,255,0.075)]`}`}
+              className={`relative inline-flex h-10 items-center rounded-full px-3.5 text-sm font-medium tracking-[0.01em] transition-all duration-150 ${
+                isActive
+                  ? "bg-[linear-gradient(135deg,rgba(236,72,153,0.18)_0%,rgba(124,58,237,0.16)_100%)] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12),0_14px_28px_rgba(0,0,0,0.22)]"
+                  : "text-white/72 hover:bg-[rgba(255,255,255,0.045)] hover:text-[#F9A8D4]"
+              }`}
             >
               {item.label}
             </NavItem>

@@ -33,7 +33,6 @@ import {
 import {
   CompletedBingeSection,
   FeaturedHero,
-  HomeFooter,
   InteractiveStoriesBanner,
   NewEpisodesToday,
   ReadersRightNow,
@@ -200,7 +199,6 @@ function HomeLandingContent({ initialHomeData = null }) {
         suggestions={homeModel.searchSuggestions}
         rankings={homeModel.rankingsPreview}
       />
-      <HomeFooter />
     </StorefrontPage>
   );
 }

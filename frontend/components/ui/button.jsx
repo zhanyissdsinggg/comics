@@ -6,22 +6,22 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border text-sm font-semibold tracking-[0.01em] shadow-[0_14px_30px_rgba(8,6,20,0.18)] transition-all duration-150 ease-out outline-none select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 hover:-translate-y-0.5 hover:shadow-[0_20px_38px_rgba(8,6,20,0.24)] active:translate-y-px active:shadow-[0_10px_20px_rgba(8,6,20,0.16)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(193,245,255,0.7)]",
+  "gush-transition-base inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border text-sm font-semibold tracking-[0.01em] shadow-[var(--gush-shadow-pill)] outline-none select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 hover:-translate-y-0.5 hover:shadow-[var(--gush-shadow-hover)] active:translate-y-px active:shadow-[var(--gush-shadow-press)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--gush-focus-cyan)]",
   {
     variants: {
       variant: {
         default:
-          "border-[rgba(255,79,154,0.32)] bg-[linear-gradient(135deg,#ff4f9a_0%,#ff7ab1_52%,#ff9cc0_100%)] text-[#1a0e16] shadow-[0_18px_36px_rgba(255,79,154,0.22)] hover:shadow-[0_24px_46px_rgba(255,79,154,0.28)]",
+          "border-[rgba(236,72,153,0.32)] [background:var(--gush-gradient-primary)] text-[color:var(--gush-button-text-dark)] shadow-[var(--gush-shadow-button)] hover:shadow-[var(--gush-shadow-button),var(--gush-shadow-glow)]",
         outline:
-          "border-[rgba(43,33,65,0.12)] bg-[linear-gradient(180deg,rgba(255,253,249,0.96)_0%,rgba(254,249,244,0.94)_100%)] text-[var(--gush-ink-strong)] shadow-[0_14px_32px_rgba(58,44,86,0.12)] hover:border-[rgba(43,33,65,0.18)] hover:bg-white",
+          "border-[color:var(--gush-glass-border)] [background:linear-gradient(180deg,var(--gush-panel-strong),var(--gush-panel-soft)),var(--gush-glass-bg)] text-[color:var(--gush-text)] shadow-[var(--gush-glass-shadow)] hover:border-[color:var(--gush-glass-border-strong)] hover:bg-[rgba(255,255,255,0.08)]",
         secondary:
-          "border-[rgba(255,214,10,0.24)] bg-[linear-gradient(135deg,rgba(255,229,0,0.96)_0%,rgba(255,243,122,0.96)_100%)] text-[#191307] shadow-[0_16px_34px_rgba(255,210,51,0.2)] hover:shadow-[0_22px_42px_rgba(255,210,51,0.26)]",
+          "border-[rgba(255,255,255,0.12)] [background:var(--gush-gradient-cyan)] text-white shadow-[var(--gush-shadow-cyan)] hover:shadow-[var(--gush-shadow-cyan-hover)]",
         ghost:
-          "border-transparent bg-transparent text-[var(--gush-ink-strong)] shadow-none hover:bg-black/8 hover:text-[var(--gush-ink-strong)] hover:translate-y-0 hover:shadow-none dark:text-white/78 dark:hover:bg-white/10 dark:hover:text-white",
+          "border-transparent bg-transparent text-[color:var(--gush-text-secondary)] shadow-none hover:bg-white/10 hover:text-[color:var(--gush-text)] hover:translate-y-0 hover:shadow-none",
         destructive:
-          "border-[rgba(244,63,94,0.26)] bg-[linear-gradient(135deg,rgba(255,79,154,0.94)_0%,rgba(244,63,94,0.94)_100%)] text-white shadow-[0_18px_36px_rgba(244,63,94,0.2)] hover:shadow-[0_24px_46px_rgba(244,63,94,0.26)]",
+          "border-[rgba(244,63,94,0.26)] [background:var(--gush-gradient-warm)] text-white shadow-[var(--gush-shadow-danger)] hover:shadow-[var(--gush-shadow-danger-hover)]",
         link:
-          "border-transparent bg-transparent px-0 text-[var(--gush-ink-strong)] shadow-none hover:translate-y-0 hover:bg-transparent hover:underline hover:text-[var(--gush-ink-strong)] hover:shadow-none dark:text-white/82 dark:hover:text-white",
+          "border-transparent bg-transparent px-0 text-[color:var(--gush-text-secondary)] shadow-none hover:translate-y-0 hover:bg-transparent hover:text-[color:var(--gush-text)] hover:underline hover:shadow-none",
       },
       size: {
         default: "h-10 px-4 py-2",

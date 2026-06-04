@@ -24,6 +24,7 @@ import { RegionProvider } from "../../store/useRegionStore";
 import { HistoryProvider } from "../../store/useHistoryStore";
 import { ToastProvider } from "../common/ToastContext";
 import { useAuthOpenListener } from "../../hooks/useAuthOpenListener";
+import AppShell from "./AppShell";
 import PublicHeader from "./PublicHeader";
 import PublicFooter from "./PublicFooter";
 import { InteractiveAvailabilityProvider } from "../../lib/interactiveAvailability";
@@ -96,11 +97,10 @@ export default function AppProviders({
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith("/admin");
   const isReaderRoute = pathname?.startsWith("/read");
-  const isHomeRoute = pathname === "/";
-  // PublicHeader/PublicFooter are the single public shell for non-admin,
-  // non-reader routes. Figma pages can still mount their own overlays
-  // through FigmaChrome, but they do not render a second header or footer.
-  const shouldShowPublicChrome = !isAdminRoute && !isReaderRoute;
+  // PublicHeader stays off the immersive reader route, while the shared
+  // footer now covers every non-admin public route through one component.
+  const shouldShowPublicHeader = !isAdminRoute && !isReaderRoute;
+  const shouldShowPublicFooter = !isAdminRoute;
 
   return (
     <ErrorBoundary
@@ -136,17 +136,24 @@ export default function AppProviders({
                                   <NotificationsProvider>
                                     <BehaviorProvider>
                                       <HistoryProvider>
-                                        {shouldShowPublicChrome ? (
-                                          <PublicHeader
-                                            initialShowInteractiveNav={initialShowInteractiveNav}
-                                          />
-                                        ) : null}
-                                        {children}
-                                        {shouldShowPublicChrome && !isHomeRoute ? (
-                                          <PublicFooter
-                                            initialShowInteractiveNav={initialShowInteractiveNav}
-                                          />
-                                        ) : null}
+                                        <AppShell
+                                          header={
+                                            shouldShowPublicHeader ? (
+                                              <PublicHeader
+                                                initialShowInteractiveNav={initialShowInteractiveNav}
+                                              />
+                                            ) : null
+                                          }
+                                          footer={
+                                            shouldShowPublicFooter ? (
+                                              <PublicFooter
+                                                initialShowInteractiveNav={initialShowInteractiveNav}
+                                              />
+                                            ) : null
+                                          }
+                                        >
+                                          {children}
+                                        </AppShell>
                                         <PWAInstallPrompt />
                                       </HistoryProvider>
                                     </BehaviorProvider>

@@ -219,7 +219,7 @@ export default function InteractiveLandingPage({
               <div className={`absolute inset-0 ${spotlightVisual.posterClass}`} />
               <div className={`absolute inset-0 ${spotlightVisual.glowClass}`} />
               <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(11,12,20,0.96)_0%,rgba(11,12,20,0.62)_34%,rgba(11,12,20,0.08)_100%)]" />
-              <div className="absolute bottom-8 right-8 w-[240px] rounded-[30px] border border-white/12 bg-black/30 p-5 shadow-[0_24px_58px_rgba(0,0,0,0.28)] backdrop-blur-2xl">
+              <div className={`absolute bottom-8 right-8 w-[240px] ${storefrontInfoCardClass} p-5`}>
                 <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/58">
                   Tonight's Route
                 </div>
@@ -236,7 +236,7 @@ export default function InteractiveLandingPage({
                   ].map((item, index) => (
                     <div
                       key={item}
-                      className={`rounded-full border px-4 py-2 text-[11px] font-semibold shadow-[0_12px_24px_rgba(8,6,20,0.18)] ${
+                      className={`rounded-full border px-4 py-2 text-[11px] font-semibold shadow-[var(--gush-shadow-press)] ${
                         index === 0
                           ? "border-cyan-200/30 bg-cyan-200/10 text-cyan-100"
                           : index === 1
@@ -371,7 +371,7 @@ export default function InteractiveLandingPage({
                 <div className="mt-4 space-y-3 text-sm leading-[1.72] text-white/78">
                   {hasStories ? (
                     <>
-                      <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(140deg,rgba(255,79,154,0.14)_0%,rgba(103,232,249,0.08)_44%,rgba(255,255,255,0.02)_100%)] p-5 shadow-[0_18px_40px_rgba(8,6,20,0.2)]">
+                      <div className={`${storefrontInfoCardClass} p-5`}>
                         <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/55">
                           Spotlight
                         </div>
@@ -465,7 +465,7 @@ export default function InteractiveLandingPage({
                     appearance="dark"
                     className="h-full transition duration-200 group-hover:-translate-y-1"
                   >
-                    <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.035))] p-4 shadow-[0_20px_46px_rgba(8,6,20,0.22)] backdrop-blur-xl">
+                    <div className={`relative overflow-hidden ${storefrontInfoCardClass} p-4`}>
                       <div className={`absolute inset-0 ${visual.posterClass}`} />
                       <div className={`absolute inset-0 ${visual.glowClass}`} />
                       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,10,18,0.1)_0%,rgba(8,10,18,0.78)_84%,rgba(8,10,18,0.94)_100%)]" />
@@ -541,9 +541,9 @@ export default function InteractiveLandingPage({
                 <Link
                   key={story.id}
                   href={`/interactive/${encodeURIComponent(story.slug)}`}
-                  className="group rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,28,38,0.98)_0%,rgba(12,14,22,0.98)_100%)] p-5 shadow-[0_22px_48px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-1.5 hover:border-white/18 hover:shadow-[0_28px_64px_rgba(0,0,0,0.28)]"
+                  className={`group ${storefrontInfoCardClass} p-5 transition-all duration-200 hover:-translate-y-1.5 hover:border-white/18 hover:shadow-[var(--gush-shadow-panel)]`}
                 >
-                  <div className="relative overflow-hidden rounded-[24px] border border-white/10 px-4 py-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]">
+                  <div className={`relative overflow-hidden ${storefrontSoftCardClass} px-4 py-4`}>
                     <div className={`absolute inset-0 ${visual.posterClass}`} />
                     <div className={`absolute inset-0 ${visual.glowClass}`} />
                     <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,10,18,0.06)_0%,rgba(8,10,18,0.76)_88%,rgba(8,10,18,0.92)_100%)]" />
@@ -578,7 +578,7 @@ export default function InteractiveLandingPage({
                     </span>
                   </div>
                   {isResume ? (
-                    <div className="mt-4 rounded-[20px] border border-cyan-200/20 bg-cyan-200/8 px-4 py-3 text-xs leading-[1.6] text-cyan-100/88 shadow-[0_14px_28px_rgba(8,6,20,0.14)]">
+                    <div className="mt-4 rounded-[calc(var(--gush-radius-lg)-2px)] border border-cyan-200/20 bg-cyan-200/8 px-4 py-3 text-xs leading-[1.6] text-cyan-100/88 shadow-[var(--gush-shadow-press)]">
                       {continueProgress?.node?.title
                         ? `Jump back in from ${normalizeText(continueProgress.node.title)}.`
                         : "Jump back in where you left off."}
@@ -596,7 +596,7 @@ export default function InteractiveLandingPage({
               );
             })}
             {filteredStories.length === 0 ? (
-              <div className="rounded-[30px] border border-white/10 bg-[rgba(12,14,22,0.98)] p-6 text-sm leading-[1.72] text-white/70 shadow-[0_20px_46px_rgba(8,6,20,0.2)]">
+              <div className={`${storefrontInfoCardClass} p-6 text-sm leading-[1.72] text-white/70`}>
                 {showLaunchChecklist
                   ? "No interactive stories are published yet."
                   : "More interactive stories are on the way. Check back soon for fresh routes and new endings."}

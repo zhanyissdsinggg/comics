@@ -11,12 +11,14 @@ import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
+import SurfacePanel from "../common/SurfacePanel";
 import {
   storefrontAccentChipClass,
   storefrontBadgeClass,
   storefrontChipClass,
   storefrontInfoCardClass,
   storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
 } from "../common/StorefrontPagePrimitives";
 import {
   CoverCard,
@@ -248,10 +250,10 @@ function DiscoveryUpdateCard({ series, index = 0, sectionName = "search_recently
           position: index + 1,
         })
       }
-      className={`group rounded-[28px] p-3 shadow-[var(--gush-shadow-soft)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.075)] ${storefrontInfoCardClass}`}
+      className={`group ${storefrontSoftCardClass} p-3 transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.075)]`}
     >
       <article className="grid grid-cols-[88px_minmax(0,1fr)] gap-3">
-        <div className="relative aspect-[3/4] overflow-hidden rounded-[18px] border border-white/10">
+        <div className="relative aspect-[3/4] overflow-hidden rounded-[calc(var(--gush-radius-lg)-4px)] border border-white/10">
           <img
             src={resolveDisplayImageUrl(series?.coverUrl, {
               kind: "cover",
@@ -619,7 +621,12 @@ export default function DiscoverySearchPage({
 
   return (
     <StorefrontPage accentClass="from-[rgba(103,232,249,0.12)] via-[rgba(255,79,154,0.08)] to-[rgba(255,255,255,0.04)]">
-      <section className="rounded-[36px] border border-white/10 bg-[linear-gradient(140deg,rgba(10,12,20,0.98)_0%,rgba(12,12,20,0.96)_48%,rgba(18,14,24,0.98)_100%)] p-4 shadow-[var(--gush-shadow-floating)] sm:p-6 lg:p-8">
+      <SurfacePanel
+        tone="highlight"
+        accent="cyan"
+        appearance="dark"
+        className="sm:p-6 lg:p-8"
+      >
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-end">
           <div>
             <p className={storefrontBadgeClass}>
@@ -633,7 +640,7 @@ export default function DiscoverySearchPage({
             </p>
           </div>
 
-          <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.04))] p-4 shadow-[var(--gush-shadow-panel)] backdrop-blur-xl">
+          <div className={`${storefrontInfoCardClass} p-4`}>
             <SearchPageInput
               initialQuery={draftQuery}
               includeAdult={includeAdult}
@@ -725,7 +732,7 @@ export default function DiscoverySearchPage({
             </div>
           ))}
         </div>
-      </section>
+      </SurfacePanel>
 
       {!hasSearchIntent ? (
         <>

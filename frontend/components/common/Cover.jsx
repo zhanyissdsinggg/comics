@@ -1,5 +1,6 @@
 import { useState } from "react";
-import Image from "next/image";
+import { cn } from "@/lib/utils";
+import CoverImage from "@/components/ui/cover-image";
 import { normalizeLegacyImageUrl } from "../../lib/normalizeLegacyImageUrl";
 import { readLegacyPlaceholderText } from "../../lib/fallbackImage";
 import {
@@ -227,6 +228,7 @@ export default function Cover({
   sizes = "(max-width: 768px) 160px, 240px",
   decorative = false,
   altText: customAltText = "",
+  objectPosition = "center",
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -255,7 +257,7 @@ export default function Cover({
         genres={genres}
         seriesType={seriesType}
         fallbackVariant={fallbackVariant}
-        className={className}
+        className={cn("gush-cover-frame", className)}
         style={style}
         ariaLabel={altText}
         decorative={decorative}
@@ -266,7 +268,7 @@ export default function Cover({
   if (resolvedUrl) {
     return (
       <div
-        className={`relative overflow-hidden ${className}`.trim()}
+        className={cn("gush-cover-frame relative", className)}
         style={style}
       >
         {isLoading && (
@@ -292,20 +294,20 @@ export default function Cover({
             genres={genres}
             seriesType={seriesType}
             fallbackVariant={fallbackVariant}
-            className="absolute inset-0"
+            className="gush-cover-frame absolute inset-0"
             ariaLabel={altText}
             decorative={decorative}
           />
         ) : (
           <>
-            <Image
+            <CoverImage
               src={resolvedUrl}
               alt={decorative ? "" : altText}
-              fill
               sizes={sizes}
               className={`object-cover transition-opacity duration-500 ${
                 isLoading ? "opacity-0" : "opacity-100"
               }`}
+              objectPosition={objectPosition}
               onLoad={() => setIsLoading(false)}
               onError={() => {
                 setIsLoading(false);
@@ -333,7 +335,7 @@ export default function Cover({
       genres={genres}
       seriesType={seriesType}
       fallbackVariant={fallbackVariant}
-      className={`cover ${className}`.trim()}
+      className={cn("cover gush-cover-frame", className)}
       style={style}
       ariaLabel={altText}
       decorative={decorative}

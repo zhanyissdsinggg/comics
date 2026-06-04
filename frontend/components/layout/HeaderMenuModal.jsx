@@ -34,7 +34,7 @@ const PUBLIC_MENU_LINKS = [
 ]
   .concat(
     siteConfig.navigation.showRankingsInNav
-      ? [{ label: "Trending", href: "/rankings" }]
+      ? [{ label: "Rankings", href: "/rankings" }]
       : [],
   )
   .concat(
@@ -70,6 +70,7 @@ export default function HeaderMenuModal({
   variant = "default",
   showInteractiveNav = true,
 }) {
+  void variant;
   const pathname = usePathname();
   const { hydrated, isSignedIn } = useAuthStore();
   const { unreadCount } = useNotificationsStore();
@@ -147,7 +148,7 @@ export default function HeaderMenuModal({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className={`${storefrontBadgeClass} text-white/62`}>
-                  Menu
+                  Gush
                 </p>
                 <h2 className="mt-3 font-display text-[2rem] font-semibold leading-[0.96] tracking-[-0.06em] text-white">
                   Menu
@@ -191,7 +192,7 @@ export default function HeaderMenuModal({
                       <>
                         <span className="flex items-center gap-3">
                           <span className={`${storefrontBadgeClass} h-9 w-9 justify-center px-0 py-0 text-white/90`}>
-                            <Icon className="size-4" />
+                            <Icon aria-hidden="true" className="size-4" />
                           </span>
                           {item.label}
                         </span>
@@ -251,7 +252,7 @@ export default function HeaderMenuModal({
                     <span className="flex items-center gap-3">
                       {Icon ? (
                         <span className={`${storefrontBadgeClass} h-9 w-9 justify-center px-0 py-0 text-white/90`}>
-                          <Icon className="size-4" />
+                          <Icon aria-hidden="true" className="size-4" />
                         </span>
                       ) : null}
                       {item.label}

@@ -41,6 +41,7 @@ import {
   filterSeriesByType,
   normalizeType,
 } from "./landingUtils";
+import PageShell from "../layout/PageShell";
 
 function coverAlt(series) {
   const title = String(series?.title || "").trim() || "Untitled";
@@ -158,40 +159,16 @@ export function StorefrontPage({
   className = "",
   contentClassName = "",
 }) {
-  if (theme === "home") {
-    return (
-      <main className={cn("gush-home-page pb-12", className)}>
-        <div className={cn("gush-home-page-main", contentClassName)}>{children}</div>
-      </main>
-    );
-  }
+  void accentClass;
 
   return (
-    <main className={cn("relative min-h-screen overflow-hidden pb-12 text-white", className)}>
-      <div
-        className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(180deg,#090b12_0%,#0e1018_28%,#13131d_100%)]"
-      />
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[840px] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.07),transparent_52%)] opacity-70"
-      />
-      <div
-        className={`pointer-events-none absolute inset-x-0 top-0 z-0 h-[620px] bg-gradient-to-b ${accentClass}`}
-      />
-      <div
-        className="pointer-events-none absolute inset-x-0 top-[18%] z-0 h-[560px] bg-[radial-gradient(circle_at_82%_10%,rgba(103,232,249,0.1),transparent_18%),radial-gradient(circle_at_14%_18%,rgba(255,79,154,0.14),transparent_20%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.12),transparent_24%)]"
-      />
-      <div
-        className="pointer-events-none absolute inset-x-0 top-[34%] z-0 h-[620px] bg-[linear-gradient(180deg,transparent_0%,rgba(6,7,12,0.18)_24%,rgba(6,7,12,0.56)_100%)]"
-      />
-      <div
-        className={cn(
-          "relative z-10 mx-auto flex w-full max-w-[1320px] flex-col gap-8 px-4 py-5 sm:gap-10 sm:px-6 sm:py-8 lg:px-8",
-          contentClassName,
-        )}
-      >
-        {children}
-      </div>
-    </main>
+    <PageShell
+      theme={theme}
+      className={cn("pb-12", className)}
+      contentClassName={contentClassName}
+    >
+      {children}
+    </PageShell>
   );
 }
 
@@ -543,7 +520,7 @@ export function RankList({
 
   return (
     <section
-      className={`rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03))] shadow-[var(--gush-shadow-panel)] backdrop-blur-xl ${
+      className={`${storefrontInfoCardClass} ${
         minimal ? "p-3.5" : compact ? "p-4" : "p-4 sm:p-5"
       }`}
     >
@@ -691,7 +668,7 @@ export function EmptyShelf({
   actionHref = "/search",
 }) {
   return (
-    <section className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03))] p-6 shadow-[var(--gush-shadow-panel)] backdrop-blur-xl">
+    <section className={`${storefrontInfoCardClass} p-6`}>
       <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/48">
         Next Up
       </p>

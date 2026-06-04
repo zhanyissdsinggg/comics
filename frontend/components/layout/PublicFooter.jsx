@@ -6,6 +6,7 @@ import { useInteractiveAvailability } from "../../lib/interactiveAvailability";
 
 export default function PublicFooter({ initialShowInteractiveNav = true }) {
   const pathname = usePathname() || "";
+  const isHomeRoute = pathname === "/";
   const { showInteractiveNav } = useInteractiveAvailability();
   const resolvedShowInteractiveNav =
     typeof showInteractiveNav === "boolean"
@@ -30,7 +31,7 @@ export default function PublicFooter({ initialShowInteractiveNav = true }) {
 
   return (
     <SiteFooter
-      tone="light"
+      tone={isHomeRoute ? "home" : "default"}
       variant="compact"
       pathname={footerPathname}
       showTagline={false}

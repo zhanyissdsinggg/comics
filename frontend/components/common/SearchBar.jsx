@@ -13,6 +13,7 @@ import {
 } from "../../lib/searchHistory";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import SearchPill from "@/components/ui/search-pill";
 import {
   storefrontBadgeClass,
   storefrontSecondaryButtonClass,
@@ -54,7 +55,8 @@ const HOME_DISCOVERY_LANES = [
 
 const SearchBar = memo(function SearchBar({
   onSearch,
-  placeholder = "Search titles, creators, or genres",
+  placeholder = "Search stories, creators...",
+  ariaLabel = "Search stories and creators",
   variant = "default",
   showShortcut = true,
   initialValue = "",
@@ -78,9 +80,6 @@ const SearchBar = memo(function SearchBar({
     (lane) => lane.id !== "browse-interactive" || showInteractiveNav,
   );
   const discoveryHeading = "Browse";
-  const shellClass = isFocused
-    ? "border border-[rgba(255,79,154,0.34)] bg-[rgba(255,255,255,0.075)] text-white shadow-[0_0_0_4px_rgba(255,79,154,0.14),0_16px_36px_rgba(8,6,20,0.24)]"
-    : "border border-white/12 bg-[rgba(255,255,255,0.035)] text-white shadow-[0_14px_32px_rgba(8,6,20,0.18)] hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.075)]";
   const searchIconClass = isFocused
     ? isDark
       ? "text-[var(--gush-accent)]"
@@ -232,11 +231,9 @@ const SearchBar = memo(function SearchBar({
 
   return (
     <div ref={containerRef} className="relative w-full">
-      <div
-        className={cn(
-          "relative flex items-center gap-2 rounded-full px-4 py-2.5 transition-all duration-150 touch-manipulation",
-          shellClass,
-        )}
+      <SearchPill
+        focused={isFocused}
+        className="px-4 py-2.5 text-white touch-manipulation"
         style={{ WebkitTapHighlightColor: "transparent" }}
       >
         <Search
@@ -284,7 +281,7 @@ const SearchBar = memo(function SearchBar({
           )}
           aria-expanded={showSuggestions}
           aria-controls={listboxId}
-          aria-label="Find series, creators, or genres"
+          aria-label={ariaLabel}
           data-testid="storefront-search-input"
         />
         {value ? (
@@ -315,7 +312,7 @@ const SearchBar = memo(function SearchBar({
             {shortcutLabel}
           </kbd>
         ) : null}
-      </div>
+      </SearchPill>
 
       {showSuggestions ? (
         <div

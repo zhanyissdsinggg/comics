@@ -246,7 +246,7 @@ export default function ComicsLandingPage({
       />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <section className={`${storefrontInfoCardClass} rounded-[30px] p-5`}>
+        <section className={`${storefrontInfoCardClass} p-5`}>
           <SectionHeading
             eyebrow="Reader Favorites"
             title="Fast starts, new chapters, and complete runs"
@@ -274,7 +274,7 @@ export default function ComicsLandingPage({
               return (
                 <div
                   key={item.title}
-                  className={`${storefrontInfoCardClass} rounded-[22px] p-4 text-white`}
+                  className={`${storefrontInfoCardClass} p-4 text-white`}
                 >
                   <Icon className="size-5 text-[var(--gush-rose)]" />
                   <h3 className="mt-3 text-lg font-semibold text-white">

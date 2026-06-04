@@ -626,7 +626,7 @@ export default function RankingsPage({
                   onClick={(event) =>
                     handleSeriesLinkClick(event, leadEntry.id, "FEATURED_LEAD")
                   }
-                  className="group w-full rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(25,20,34,0.98)_0%,rgba(17,13,24,0.98)_100%)] p-3.5 text-left text-white shadow-[0_26px_68px_rgba(8,6,20,0.3)] transition-all duration-200 hover:-translate-y-1 hover:border-white/16 sm:p-5"
+                  className={`group w-full ${storefrontInfoCardClass} p-3.5 text-left text-white transition-all duration-200 hover:-translate-y-1 hover:border-white/16 hover:shadow-[var(--gush-shadow-panel)] sm:p-5`}
                   aria-label={`View ${leadEntry.title}`}
                 >
                   <div className="grid gap-3.5 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-5">
@@ -684,7 +684,7 @@ export default function RankingsPage({
                             "FEATURED_SUPPORTING",
                           )
                         }
-                        className="group rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(25,20,34,0.98)_0%,rgba(17,13,24,0.98)_100%)] p-3 text-left text-white shadow-[0_20px_52px_rgba(8,6,20,0.24)] transition-all duration-200 hover:-translate-y-1 hover:border-white/16 sm:p-4"
+                        className={`group ${storefrontInfoCardClass} p-3 text-left text-white transition-all duration-200 hover:-translate-y-1 hover:border-white/16 hover:shadow-[var(--gush-shadow-panel)] sm:p-4`}
                         aria-label={`View ${series.title}`}
                       >
                         <h3 className="mt-2 font-display text-[1.35rem] font-semibold tracking-[-0.05em] text-white sm:text-2xl">
@@ -726,7 +726,7 @@ export default function RankingsPage({
               ) : null}
 
               {boardEntries.length > 0 ? (
-                <section className="space-y-4 rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03))] p-3.5 text-white shadow-[0_20px_52px_rgba(8,6,20,0.22)] backdrop-blur-xl sm:space-y-5 sm:p-6">
+                <section className={`${storefrontInfoCardClass} space-y-4 p-3.5 text-white sm:space-y-5 sm:p-6`}>
                   <RankingsSectionHeader
                     eyebrow=""
                     title="More trending stories"

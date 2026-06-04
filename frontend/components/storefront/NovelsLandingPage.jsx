@@ -181,17 +181,17 @@ export default function NovelsLandingPage({
       </section>
 
       {lowInventory ? (
-        <section className={`${storefrontInfoCardClass} rounded-[28px] p-5 text-white shadow-[var(--gush-shadow-panel)]`}>
+        <section className={`${storefrontInfoCardClass} p-5 text-white`}>
           <SectionHeading
             eyebrow="Coming Next"
             title="More novel drops soon"
             description="This shelf is still growing. Fresh late-night reads are on the way."
           />
             <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <div className={`${storefrontInfoCardClass} rounded-[22px] p-4 text-sm leading-6 text-white/74`}>
+            <div className={`${storefrontInfoCardClass} p-4 text-sm leading-6 text-white/74`}>
               Featured Novel, Latest Chapters, and Short Reads stay up front while the catalog fills out.
             </div>
-            <div className={`${storefrontInfoCardClass} rounded-[22px] p-4 text-sm leading-6 text-white/74`}>
+            <div className={`${storefrontInfoCardClass} p-4 text-sm leading-6 text-white/74`}>
               Check back soon for more chapter drops, longer binge runs, and a fuller novel shelf.
             </div>
           </div>
@@ -213,7 +213,7 @@ export default function NovelsLandingPage({
         </div>
       ) : (
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <section className={`${storefrontInfoCardClass} rounded-[30px] p-5 text-white shadow-[var(--gush-shadow-panel)]`}>
+          <section className={`${storefrontInfoCardClass} p-5 text-white`}>
             <SectionHeading
               eyebrow="Late-Night Reads"
               title="Stories built for one more chapter."
@@ -226,7 +226,7 @@ export default function NovelsLandingPage({
               ].map((item) => (
                 <div
                   key={item}
-                  className={`${storefrontInfoCardClass} rounded-[22px] p-4 text-sm leading-6 text-white/72`}
+                  className={`${storefrontInfoCardClass} p-4 text-sm leading-6 text-white/72`}
                 >
                   {item}
                 </div>

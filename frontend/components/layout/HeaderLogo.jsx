@@ -26,17 +26,11 @@ export default function HeaderLogo({ variant = "default" }) {
   return (
     <RootLink
       {...rootLinkProps}
-      aria-label="Go to home"
-      className="group flex shrink-0 items-center gap-3 pr-2 text-left transition-all duration-300"
+      aria-label="Go to Gush home"
+      className="group flex h-11 shrink-0 items-center pr-2 text-left transition-all duration-150"
     >
-      <span className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-[16px] border border-white/12 bg-[linear-gradient(135deg,rgba(255,79,154,0.28)_0%,rgba(167,139,250,0.22)_100%)] shadow-[0_18px_36px_rgba(0,0,0,0.28)] ring-1 ring-white/8 transition-all duration-150 group-hover:-translate-y-0.5 group-hover:shadow-[0_22px_42px_rgba(0,0,0,0.34)]">
-        <span className="relative text-xl font-black tracking-[-0.04em] text-white">
-          {siteConfig.siteName.slice(0, 1)}
-        </span>
-      </span>
-
-      <span className="hidden min-w-0 flex-col sm:flex">
-        <span className="font-display text-[1.08rem] font-semibold leading-none tracking-[-0.04em] text-white">
+      <span className="min-w-0">
+        <span className="bg-[linear-gradient(135deg,#f9a8d4_0%,#ec4899_42%,#8b5cf6_100%)] bg-clip-text font-display text-[1.45rem] font-semibold leading-none tracking-[-0.06em] text-transparent transition-all duration-150 group-hover:brightness-110">
           {siteConfig.siteName}
         </span>
       </span>
