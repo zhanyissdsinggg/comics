@@ -5,6 +5,15 @@ import { HomeDataProvider, useHomeData } from "../home/HomeDataProvider";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useProgressStore } from "../../store/useProgressStore";
+import {
+  HOME_COMPLETED_PRIORITY_TITLES,
+  HOME_FEATURED_TITLE,
+  HOME_PRIORITY_TITLES,
+  HOME_UPDATES_PRIORITY_TITLES,
+  pickSeriesByExactTitle,
+  prioritizeSeriesByTitles,
+  withHomeArtwork,
+} from "../../lib/homeArtwork";
 import { trackEvent } from "../../lib/trackEvent";
 import { EmptyShelf, StorefrontPage } from "./StorefrontScaffold";
 import {
@@ -51,9 +60,7 @@ function HomeLandingContent({ initialHomeData = null }) {
   const { seriesList, hotKeywords, loading } = useHomeData();
   const { isSignedIn } = useAuthStore();
   const { bySeriesId, loadProgress } = useProgressStore();
-  const featuredSeriesId = String(
-    initialHomeData?.canonicalHome?.featuredSeriesId || "",
-  ).trim();
+  void initialHomeData;
 
   useEffect(() => {
     trackEvent("home_view", {
@@ -68,40 +75,51 @@ function HomeLandingContent({ initialHomeData = null }) {
   }, [isSignedIn, loadProgress]);
 
   const homeModel = useMemo(() => {
-    const featured = pickFeaturedSeries(seriesList, featuredSeriesId);
+    const featured =
+      pickSeriesByExactTitle(seriesList, HOME_FEATURED_TITLE) ||
+      pickFeaturedSeries(seriesList);
     const featuredId = String(featured?.id || "").trim();
     const popularPool = buildPopularRail(seriesList, 30).filter(
       (series) => String(series?.id || "").trim() !== featuredId,
     );
-    const readersRightNow = popularPool.slice(0, 4);
-    const readersNowIds = new Set(readersRightNow.map((series) => String(series?.id || "").trim()));
-    const trending = popularPool
-      .filter((series) => !readersNowIds.has(String(series?.id || "").trim()))
-      .slice(0, 6);
-    const updates = uniqueBySeriesId([
-      ...buildUpdatedRail(seriesList, 12).filter(
-        (series) => String(series?.id || "").trim() !== featuredId,
-      ),
-      ...popularPool,
-    ]).slice(0, 3);
+    const readersRightNow = prioritizeSeriesByTitles(
+      popularPool,
+      HOME_PRIORITY_TITLES,
+      4,
+    );
+    const trending = prioritizeSeriesByTitles(popularPool, HOME_PRIORITY_TITLES, 6);
+    const updates = prioritizeSeriesByTitles(
+      uniqueBySeriesId([
+        ...buildUpdatedRail(seriesList, 12).filter(
+          (series) => String(series?.id || "").trim() !== featuredId,
+        ),
+        ...popularPool,
+      ]),
+      HOME_UPDATES_PRIORITY_TITLES,
+      3,
+    );
     const continueItems = buildContinueReadingItems(seriesList, bySeriesId).slice(
       0,
       8,
     );
-    const completed = uniqueBySeriesId([
-      ...buildCompletedRail(seriesList, 12).filter(
-        (series) => String(series?.id || "").trim() !== featuredId,
-      ),
-      ...popularPool.filter(
-        (series) => String(series?.id || "").trim() !== featuredId,
-      ),
-    ]).slice(0, 5);
+    const completed = prioritizeSeriesByTitles(
+      uniqueBySeriesId([
+        ...buildCompletedRail(seriesList, 12).filter(
+          (series) => String(series?.id || "").trim() !== featuredId,
+        ),
+        ...popularPool.filter(
+          (series) => String(series?.id || "").trim() !== featuredId,
+        ),
+      ]),
+      HOME_COMPLETED_PRIORITY_TITLES,
+      5,
+    );
     const interactiveStories = uniqueBySeriesId([
       ...buildPopularRail(filterSeriesByType(seriesList, "interactive"), 6).filter(
         (series) => String(series?.id || "").trim() !== featuredId,
       ),
       ...popularPool,
-    ]).slice(0, 4);
+    ]).slice(0, 5);
     const readTonight = uniqueBySeriesId([
       ...continueItems,
       ...updates,
@@ -114,19 +132,29 @@ function HomeLandingContent({ initialHomeData = null }) {
       .slice(0, 6);
 
     return {
-      featured,
-      readersRightNow,
-      trending,
-      updates,
+      featured: withHomeArtwork(featured, "hero"),
+      readersRightNow: readersRightNow.map((series) =>
+        withHomeArtwork(series, "cover"),
+      ),
+      trending: trending.map((series) => withHomeArtwork(series, "cover")),
+      updates: updates.map((series) => {
+        const title = String(series?.title || "").trim();
+        return withHomeArtwork(
+          series,
+          title === HOME_FEATURED_TITLE ? "hero" : "cover",
+        );
+      }),
       continueItems,
-      completedLead: completed[0] || null,
-      completedItems: completed.slice(1, 5),
+      completedLead: withHomeArtwork(completed[0] || null, "cover"),
+      completedItems: completed
+        .slice(1, 5)
+        .map((series) => withHomeArtwork(series, "cover")),
       interactiveStories,
       readTonight: readTonight.slice(0, 4),
       rankingsPreview,
       searchSuggestions,
     };
-  }, [bySeriesId, featuredSeriesId, hotKeywords, seriesList]);
+  }, [bySeriesId, hotKeywords, seriesList]);
 
   const featuredStats = homeModel.featured
     ? [
@@ -152,10 +180,7 @@ function HomeLandingContent({ initialHomeData = null }) {
           <HomeHeader suggestions={homeModel.searchSuggestions} />
           <FeaturedHero
             series={homeModel.featured}
-            primaryHref={
-              initialHomeData?.canonicalHome?.featuredReadHref ||
-              buildReadHref(homeModel.featured)
-            }
+            primaryHref={buildReadHref(homeModel.featured)}
             secondaryHref={`/series/${homeModel.featured.id}`}
             stats={featuredStats}
             chips={(Array.isArray(homeModel.featured?.genres)

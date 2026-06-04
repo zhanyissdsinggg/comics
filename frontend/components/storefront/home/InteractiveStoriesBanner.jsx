@@ -5,6 +5,7 @@ import {
   storefrontHomeGlassCardClass,
   storefrontHomeSectionEyebrowClass,
 } from "../../common/StorefrontPagePrimitives";
+import { INTERACTIVE_STORIES_HOME_ARTWORK } from "../../../lib/homeArtwork";
 import { trackEvent } from "../../../lib/trackEvent";
 import GradientButton from "./GradientButton";
 import IconButton from "./IconButton";
@@ -77,8 +78,16 @@ export default function InteractiveStoriesBanner({ items = [] }) {
       }}
     >
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(236,72,153,0.30),transparent_32%),radial-gradient(circle_at_60%_80%,rgba(56,189,248,0.15),transparent_30%),linear-gradient(135deg,#181028,#101522)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(124,58,237,0.26),transparent_28%),radial-gradient(circle_at_86%_14%,rgba(236,72,153,0.22),transparent_22%),radial-gradient(circle_at_72%_82%,rgba(56,189,248,0.12),transparent_22%)] opacity-90" />
+        <img
+          src={INTERACTIVE_STORIES_HOME_ARTWORK.src}
+          alt=""
+          aria-hidden="true"
+          role="presentation"
+          className="h-full w-full object-cover opacity-[0.86]"
+          style={{ objectPosition: INTERACTIVE_STORIES_HOME_ARTWORK.position }}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,19,0.94)_0%,rgba(7,10,19,0.86)_34%,rgba(7,10,19,0.48)_64%,rgba(7,10,19,0.42)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(124,58,237,0.24),transparent_28%),radial-gradient(circle_at_86%_14%,rgba(236,72,153,0.16),transparent_22%),radial-gradient(circle_at_72%_82%,rgba(56,189,248,0.14),transparent_22%)] opacity-90" />
       </div>
 
       <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.98fr)] xl:items-center">

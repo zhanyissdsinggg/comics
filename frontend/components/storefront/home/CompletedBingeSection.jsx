@@ -33,6 +33,8 @@ function CompletedCard({ series, position, featured = false }) {
     kind: "cover",
     adult: series?.adult || series?.isAdult,
   });
+  const coverPosition =
+    String(series?.homeCoverArtwork?.position || "").trim() || "center 18%";
   const creator = buildCreatorLabel(series);
 
   return (
@@ -56,6 +58,7 @@ function CompletedCard({ series, position, featured = false }) {
               src={coverUrl}
               alt={`Cover image for ${series.title}`}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              style={{ objectPosition: coverPosition }}
             />
           </div>
         </div>

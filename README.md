@@ -137,6 +137,10 @@ npm run smoke:routes
 
 The storefront is the public product surface. Keep UI experiments inside the existing component system instead of creating parallel one-off components.
 
+Current homepage asset note:
+
+- `frontend/public/images/home/` stores the curated homepage artwork mapped to `The Last Kingdom`, `Crimson Tide`, `Cherry Blossom High`, `Wild Hearts`, `Solar Wind`, and the `Interactive Stories` spotlight so the storefront hero and priority rails use fixed local assets instead of placeholder covers.
+
 Playwright note:
 
 - Browser E2E uses a prebuilt `.next-playwright/` bundle before starting `next start`

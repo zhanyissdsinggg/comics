@@ -77,6 +77,8 @@ export default function CoverRankCard({
     kind: "cover",
     adult: series?.adult || series?.isAdult,
   });
+  const coverPosition =
+    String(series?.homeCoverArtwork?.position || "").trim() || "center 18%";
   const rating = buildRatingLabel(series);
   const creator = buildCreatorLabel(series);
   const genreLabel = buildGenreLabel(series, 1);
@@ -114,6 +116,7 @@ export default function CoverRankCard({
               src={coverUrl}
               alt={buildCoverAlt(series)}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              style={{ objectPosition: coverPosition }}
             />
           </div>
           <div className="min-w-0">
@@ -157,6 +160,7 @@ export default function CoverRankCard({
             src={coverUrl}
             alt={buildCoverAlt(series)}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.045]"
+            style={{ objectPosition: coverPosition }}
           />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,8,15,0.04)_0%,rgba(7,8,17,0.08)_34%,rgba(7,8,17,0.28)_100%)]" />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[34%] bg-[linear-gradient(180deg,rgba(7,10,19,0)_0%,rgba(7,10,19,0.18)_42%,rgba(7,10,19,0.82)_100%)]" />

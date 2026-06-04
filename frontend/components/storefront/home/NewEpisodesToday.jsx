@@ -27,6 +27,10 @@ function EpisodeCard({ series, position }) {
     kind: "cover",
     adult: series?.adult || series?.isAdult,
   });
+  const coverPosition =
+    String(
+      series?.homeHeroArtwork?.position || series?.homeCoverArtwork?.position || "",
+    ).trim() || "center 18%";
 
   return (
     <Link
@@ -48,6 +52,7 @@ function EpisodeCard({ series, position }) {
             src={coverUrl}
             alt={`Cover image for ${series.title}`}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            style={{ objectPosition: coverPosition }}
           />
         </div>
 

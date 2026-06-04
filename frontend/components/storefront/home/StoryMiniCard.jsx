@@ -47,6 +47,8 @@ export default function StoryMiniCard({
     kind: "cover",
     adult: series?.adult || series?.isAdult,
   });
+  const coverPosition =
+    String(series?.homeCoverArtwork?.position || "").trim() || "center 18%";
   const genreLine = eyebrow || buildGenreLabel(series, compact ? 1 : 2) || "Reader pick";
   const footerItems =
     Array.isArray(metaItems) && metaItems.length > 0
@@ -80,15 +82,16 @@ export default function StoryMiniCard({
         <article
           className={cn(
             storefrontHomeInteractiveCardClass,
-            "flex h-[120px] min-h-[120px] gap-3 rounded-[20px] p-3",
+            "flex h-[132px] min-h-[132px] gap-3 rounded-[20px] p-3",
             className,
           )}
         >
-          <div className="relative h-[96px] w-[76px] shrink-0 overflow-hidden rounded-[15px] border border-[rgba(255,255,255,0.08)]">
+          <div className="relative h-[102px] w-[76px] shrink-0 overflow-hidden rounded-[15px] border border-[rgba(255,255,255,0.08)]">
             <img
               src={coverUrl}
               alt={buildCoverAlt(series)}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              style={{ objectPosition: coverPosition }}
             />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02)_0%,transparent_36%,rgba(0,0,0,0.34)_100%)]" />
           </div>
@@ -150,6 +153,7 @@ export default function StoryMiniCard({
             src={coverUrl}
             alt={buildCoverAlt(series)}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            style={{ objectPosition: coverPosition }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           {badge ? (
