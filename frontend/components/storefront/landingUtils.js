@@ -174,22 +174,34 @@ export function buildCreatorLabel(series) {
 export function buildUpdatedLabel(series) {
   const updatedAt = toTimestamp(series?.updatedAt);
   if (!updatedAt) {
-    return "New";
+    return "New today";
   }
 
-  const oneDay = 24 * 60 * 60 * 1000;
-  if (updatedAt >= Date.now() - oneDay) {
+  const diffHours = Math.max(0, (Date.now() - updatedAt) / (60 * 60 * 1000));
+  if (diffHours < 1) {
+    return "Updated today";
+  }
+
+  if (diffHours < 8) {
+    return `${Math.max(1, Math.round(diffHours))}h ago`;
+  }
+
+  if (diffHours < 24) {
     return "Today";
   }
 
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-  }).format(new Date(updatedAt));
+  return buildFreshnessFallback(series);
 }
 
 function buildFreshnessFallback(series, position = 0) {
-  const labels = ["Updated today", "2h ago", "4h ago", "New today", "Today"];
+  const labels = [
+    "Updated today",
+    "2h ago",
+    "4h ago",
+    "New today",
+    "Today",
+    "Hot tonight",
+  ];
   const seed = String(series?.id || series?.title || position || "")
     .split("")
     .reduce((total, char) => total + char.charCodeAt(0), 0);

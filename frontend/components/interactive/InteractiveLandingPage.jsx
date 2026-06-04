@@ -523,8 +523,9 @@ export default function InteractiveLandingPage({
               </h2>
             </div>
             <p className="text-sm text-white/54">
-              {filteredStories.length} story
-              {filteredStories.length === 1 ? "" : "ies"} in the current shelf.
+              {filteredStories.length}{" "}
+              {filteredStories.length === 1 ? "story" : "stories"} in the
+              current shelf.
             </p>
           </div>
 

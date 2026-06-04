@@ -234,7 +234,9 @@ export function StoryHero({
       <div className="absolute inset-0">
         <img
           src={coverUrl}
-          alt={coverAlt(series)}
+          alt=""
+          aria-hidden="true"
+          role="presentation"
           className="h-full w-full scale-110 object-cover opacity-34 blur-2xl"
         />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(255,79,154,0.26),transparent_22%),radial-gradient(circle_at_84%_16%,rgba(103,232,249,0.18),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(8,7,14,0.18)_16%,rgba(8,7,14,0.76)_55%,rgba(8,7,14,0.96)_100%)]" />

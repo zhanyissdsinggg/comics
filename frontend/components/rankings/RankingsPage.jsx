@@ -358,25 +358,35 @@ export default function RankingsPage({
     () => filterSeriesForView(seriesList, activeView.id),
     [activeView.id, seriesList],
   );
-  const leadEntry = curatedSeries[0] || null;
+  const fallbackPreviewSeries = useMemo(
+    () => sortFeaturedSeries(seriesList),
+    [seriesList],
+  );
+  const rankingPreviewSeries =
+    curatedSeries.length > 0 ? curatedSeries : fallbackPreviewSeries;
+  const isUsingModeFallback =
+    curatedSeries.length === 0 && fallbackPreviewSeries.length > 0;
+  const hasPreviewSeries = rankingPreviewSeries.length > 0;
+  const isPendingPreview = loading && !hasPreviewSeries;
+  const leadEntry = rankingPreviewSeries[0] || null;
   const leadMeta = leadEntry ? getSeriesMeta(leadEntry) : null;
-  const supportingEntries = curatedSeries.slice(1, 3);
-  const boardEntries = curatedSeries.slice(3, 12);
+  const supportingEntries = rankingPreviewSeries.slice(1, 3);
+  const boardEntries = rankingPreviewSeries.slice(3, 12);
   const completedCount = useMemo(
     () =>
-      curatedSeries.filter(
+      seriesList.filter(
         (series) => normalizeStatus(series?.status) === "completed",
       ).length,
-    [curatedSeries],
+    [seriesList],
   );
   const comicCount = useMemo(
     () =>
-      curatedSeries.filter(
+      seriesList.filter(
         (series) => String(series?.type || "").trim().toLowerCase() === "comic",
       ).length,
-    [curatedSeries],
+    [seriesList],
   );
-  const novelCount = Math.max(0, curatedSeries.length - comicCount);
+  const novelCount = Math.max(0, seriesList.length - comicCount);
   const handleSeriesClick = useCallback(
     (seriesId, entryPoint = "FEATURED_SERIES") => {
       const targetPath = `/series/${seriesId}`;
@@ -423,38 +433,45 @@ export default function RankingsPage({
     : activeView.description;
   const heroSecondary = leadEntry
     ? `${leadEntry.title} is leading this view right now.`
-    : curatedSeries.length > 0
-      ? `${curatedSeries.length} titles in this view.`
-      : "";
+    : isUsingModeFallback
+      ? "No direct matches in this view yet, so the live board is pulling from the current mode."
+      : seriesList.length > 0
+        ? `${seriesList.length} titles in the current mode.`
+        : "";
   const heroStats = [
     {
       label: "Live Board",
-      value: `${curatedSeries.length}`,
-      hint: curatedSeries.length > 0 ? "Titles in this rotation" : "No titles yet",
+      value: isPendingPreview ? "Loading" : `${seriesList.length}`,
+      hint:
+        seriesList.length > 0
+          ? "Titles in the current mode rotation"
+          : "No titles yet",
     },
     {
       label: "Comics",
-      value: `${comicCount}`,
+      value: isPendingPreview ? "Loading" : `${comicCount}`,
       hint: comicCount > 0 ? "Fast reads and big panels" : "No comic titles",
     },
     {
       label: "Novels",
-      value: `${novelCount}`,
+      value: isPendingPreview ? "Loading" : `${novelCount}`,
       hint: novelCount > 0 ? "Longer reads with late-night pull" : "No novel titles",
     },
     {
       label: "Completed",
-      value: `${completedCount}`,
+      value: isPendingPreview ? "Loading" : `${completedCount}`,
       hint: completedCount > 0 ? "Whole stories, zero waiting" : "No finished runs",
     },
   ];
   const pulseCards = [
     {
       label: "Leading Now",
-      value: leadEntry?.title || "No lead yet",
+      value: isPendingPreview ? "Loading titles" : leadEntry?.title || "No lead yet",
       detail:
         leadMeta?.genres ||
-        "The title readers are opening first in this ranking view.",
+        (isUsingModeFallback
+          ? "This view is borrowing the strongest titles from the current mode until a direct match lands."
+          : "The title readers are opening first in this ranking view."),
       icon: Crown,
       tone: "rose",
     },
@@ -572,7 +589,7 @@ export default function RankingsPage({
 
         {loading ? (
           <RankingsLoadingState />
-        ) : curatedSeries.length === 0 ? (
+        ) : seriesList.length === 0 ? (
           <div className="grid gap-5 xl:grid-cols-[minmax(0,1.28fr)_360px]">
             <SurfacePanel className="space-y-4" appearance="dark" accent="rose">
               <div>
