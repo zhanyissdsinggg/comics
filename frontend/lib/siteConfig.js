@@ -2,6 +2,20 @@ function clean(value) {
   return String(value || "").trim();
 }
 
+function normalizeCompanyName(value) {
+  const raw = clean(value);
+  if (!raw) {
+    return "Targaryen Technology Co., Limited.";
+  }
+
+  const normalized = raw.toLowerCase().replace(/\.+$/, "");
+  if (normalized === "targaryen technology co., limited") {
+    return "Targaryen Technology Co., Limited.";
+  }
+
+  return raw;
+}
+
 function parseEnvFlag(keysOrKey, ...restKeys) {
   const keys = Array.isArray(keysOrKey) ? keysOrKey : [keysOrKey, ...restKeys];
   let defaultValue = false;
@@ -49,9 +63,7 @@ function normalizeSiteUrl(value) {
 
 export const siteConfig = {
   siteName: clean(process.env.NEXT_PUBLIC_SITE_NAME) || "Gush",
-  companyName:
-    clean(process.env.NEXT_PUBLIC_COMPANY_NAME) ||
-    "Targaryen technology Co., Limited",
+  companyName: normalizeCompanyName(process.env.NEXT_PUBLIC_COMPANY_NAME),
   siteUrl: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
   defaultDescription:
     clean(process.env.NEXT_PUBLIC_SITE_DESCRIPTION) ||

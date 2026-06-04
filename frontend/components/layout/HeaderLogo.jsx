@@ -8,9 +8,8 @@ import {
 } from "../../lib/adultRouteNavigation";
 import { siteConfig } from "../../lib/siteConfig";
 
-const BRAND_SUBNOTE = "Comics & novels";
-
 export default function HeaderLogo({ variant = "default" }) {
+  void variant;
   const pathname = usePathname() || "/";
   const forceDocumentNavigation = shouldUseDocumentNavigation(pathname, "/");
   const RootLink = forceDocumentNavigation ? "a" : Link;
@@ -39,9 +38,6 @@ export default function HeaderLogo({ variant = "default" }) {
       <span className="hidden min-w-0 flex-col sm:flex">
         <span className="font-display text-[1.08rem] font-semibold leading-none tracking-[-0.04em] text-white">
           {siteConfig.siteName}
-        </span>
-        <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-white/52">
-          {BRAND_SUBNOTE}
         </span>
       </span>
     </RootLink>
