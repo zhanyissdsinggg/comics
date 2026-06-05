@@ -494,7 +494,7 @@ export const loadHomepageSeoPayload = cache(async (options = {}) => {
             : `/series/${canonicalHeroSeriesId}`,
         }
       : null,
-    ready: Boolean(seriesPayload || hotPayload || recommendationsPayload),
+    ready: seriesList.length > 0,
   };
 });
 
@@ -553,13 +553,14 @@ export const loadRankingsSeoPayload = cache(
       `/api/rankings?type=${encodeURIComponent(type)}&window=${encodeURIComponent(window)}&adult=${getContentModeQueryParam(contentMode)}`,
       "rankings-page",
     );
+    const rankings = filterContentByMode(
+      Array.isArray(payload?.rankings) ? payload.rankings : [],
+      contentMode,
+    );
 
     return {
-      rankings: filterContentByMode(
-        Array.isArray(payload?.rankings) ? payload.rankings : [],
-        contentMode,
-      ),
-      ready: Boolean(payload),
+      rankings,
+      ready: rankings.length > 0,
     };
   },
 );

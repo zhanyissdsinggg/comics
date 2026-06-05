@@ -1,7 +1,10 @@
 import RankingsPage from "../../components/rankings/RankingsPage";
 import { buildNoIndexRobots, createPageMetadata } from "../../lib/seo";
 import { isServerAdultModeEnabled } from "../../lib/serverAdultGate";
-import { loadRankingsSeoPayload } from "../../lib/storefrontSeo";
+import {
+  loadRankingsSeoPayload,
+  loadSeriesCatalogSeoPayload,
+} from "../../lib/storefrontSeo";
 
 export async function generateMetadata() {
   const includeAdult = await isServerAdultModeEnabled();
@@ -17,15 +20,25 @@ export async function generateMetadata() {
 export default async function Page({ searchParams }) {
   const params = (await searchParams) || {};
   const includeAdult = await isServerAdultModeEnabled();
-  const payload = await loadRankingsSeoPayload("popular", "all", {
+  const rankingsPayload = await loadRankingsSeoPayload("popular", "all", {
     includeAdult,
   });
+  const catalogPayload =
+    Array.isArray(rankingsPayload?.rankings) && rankingsPayload.rankings.length > 0
+      ? null
+      : await loadSeriesCatalogSeoPayload({ includeAdult });
+  const initialSeries =
+    Array.isArray(rankingsPayload?.rankings) && rankingsPayload.rankings.length > 0
+      ? rankingsPayload.rankings
+      : Array.isArray(catalogPayload?.series)
+        ? catalogPayload.series
+        : [];
 
   return (
     <RankingsPage
       initialSearchParams={params}
-      initialSeries={payload?.rankings || []}
-      hasInitialSeries={payload?.ready}
+      initialSeries={initialSeries}
+      hasInitialSeries={initialSeries.length > 0}
     />
   );
 }

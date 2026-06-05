@@ -223,7 +223,7 @@ export default function ComicsLandingPage({
 
       <section className="space-y-4">
         <SectionHeading
-          eyebrow="Fresh Drops"
+          eyebrow=""
           title="Fresh Drops"
           description="New chapters and quick catch-ups."
           tone="channel"

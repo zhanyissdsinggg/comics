@@ -35,7 +35,8 @@ export function HomeDataProvider({ children, initialData = null }) {
   const initialHomepageSlots = Array.isArray(initialData?.homepageSlots)
     ? initialData.homepageSlots
     : [];
-  const hasInitialData = Boolean(initialData?.ready);
+  const hasInitialData =
+    Boolean(initialData?.ready) && initialSeriesList.length > 0;
 
   const [seriesList, setSeriesList] = useState(initialSeriesList);
   const [seriesResponse, setSeriesResponse] = useState(null);
