@@ -36,6 +36,14 @@ const FEATURED_COMIC_HOOKS = {
     "A blood-red moon, a ruined harbor, and a hunter already too deep to walk away.",
 };
 const COMIC_GENRE_PRIORITY = ["Action", "Romance", "Fantasy"];
+const POPULAR_COMIC_PRIORITY_TITLES = [
+  "Cherry Blossom High",
+  "Wild Hearts",
+  "Starfall Academy",
+  "Apex Predator",
+  "The Quiet Storm",
+  "Dragon's Oath",
+];
 
 function normalizeValue(value) {
   return String(value || "").trim().toLowerCase();
@@ -66,6 +74,42 @@ function excludeSeries(seriesList = [], excludedIds = new Set()) {
   });
 }
 
+function pickPrioritySeriesList(seriesList = [], titles = [], limit = titles.length) {
+  const safeList = Array.isArray(seriesList) ? seriesList : [];
+  const selected = [];
+  const selectedIds = new Set();
+
+  titles.forEach((title) => {
+    const match = safeList.find(
+      (series) => normalizeValue(series?.title) === normalizeValue(title),
+    );
+    const seriesId = getSeriesId(match);
+    if (!match || !seriesId || selectedIds.has(seriesId)) {
+      return;
+    }
+    selectedIds.add(seriesId);
+    selected.push(match);
+  });
+
+  if (selected.length >= limit) {
+    return selected.slice(0, limit);
+  }
+
+  safeList.forEach((series) => {
+    if (selected.length >= limit) {
+      return;
+    }
+    const seriesId = getSeriesId(series);
+    if (!seriesId || selectedIds.has(seriesId)) {
+      return;
+    }
+    selectedIds.add(seriesId);
+    selected.push(series);
+  });
+
+  return selected.slice(0, limit);
+}
+
 export default function ComicsLandingPage({
   initialSeries = [],
   initialReady = false,
@@ -94,6 +138,11 @@ export default function ComicsLandingPage({
     const excludedIds = new Set(featuredId ? [featuredId] : []);
     const updatePool = excludeSeries(buildUpdatedRail(seriesList, 18), excludedIds);
     const popularPool = excludeSeries(buildPopularRail(seriesList, 18), excludedIds);
+    const popular = pickPrioritySeriesList(
+      popularPool,
+      POPULAR_COMIC_PRIORITY_TITLES,
+      6,
+    );
     const completedPool = excludeSeries(
       buildCompletedRail(seriesList, 12),
       excludedIds,
@@ -123,7 +172,7 @@ export default function ComicsLandingPage({
       featuredHook:
         FEATURED_COMIC_HOOKS[String(featuredBase?.title || "").trim()] || "",
       freshDrops: updatePool.slice(0, 6),
-      popular: popularPool.slice(0, 8),
+      popular,
       completed: completedPool.slice(0, 6),
       genres: genreShelves,
       rankings: excludeSeries(buildTopTen(seriesList), excludedIds).slice(0, 6),
@@ -176,7 +225,7 @@ export default function ComicsLandingPage({
         <SectionHeading
           eyebrow="Fresh Drops"
           title="Fresh Drops"
-          description="Updated today, sharp hooks, and fast-open comics built to keep your thumb moving."
+          description="New chapters and quick catch-ups."
           tone="channel"
           action={
             <Link
