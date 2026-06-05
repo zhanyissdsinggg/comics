@@ -222,12 +222,16 @@ export default function ComicsLandingPage({
       )}
 
       <section className="space-y-4">
-        <SectionHeading
-          eyebrow=""
-          title="Fresh Drops"
-          description="New chapters and quick catch-ups."
-          tone="channel"
-          action={
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-[44rem]">
+            <h2 className="mt-3 font-display text-[2.1rem] font-semibold leading-[0.92] tracking-[-0.065em] text-white sm:text-[2.9rem]">
+              Fresh Drops
+            </h2>
+            <p className="mt-2.5 max-w-[44rem] text-[0.95rem] leading-[1.72] text-white/66">
+              New chapters and quick catch-ups.
+            </p>
+          </div>
+          <div className="self-start sm:self-auto">
             <Link
               href="/search?type=comic&sort=latest"
               className={`inline-flex min-h-[44px] items-center gap-2 px-4 text-sm font-medium text-white/78 ${storefrontSecondaryButtonClass}`}
@@ -235,8 +239,8 @@ export default function ComicsLandingPage({
               <Sparkles className="size-4" />
               Latest drops
             </Link>
-          }
-        />
+          </div>
+        </div>
         <UpdateList
           items={model.freshDrops}
           sectionName="comics_fresh_drops"
