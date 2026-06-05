@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo } from "react";
 import Link from "next/link";
-import { Flame, Trophy } from "lucide-react";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import { trackEvent } from "../../lib/trackEvent";
+import { withHomeArtwork } from "../../lib/homeArtwork";
 import {
   CoverCard,
   EmptyShelf,
@@ -16,10 +17,7 @@ import {
   UpdateList,
   useCatalogFeed,
 } from "./StorefrontScaffold";
-import {
-  storefrontInfoCardClass,
-  storefrontSecondaryButtonClass,
-} from "../common/StorefrontPagePrimitives";
+import { storefrontSecondaryButtonClass } from "../common/StorefrontPagePrimitives";
 import {
   buildCompletedRail,
   buildGenreLabel,
@@ -30,8 +28,43 @@ import {
   buildTopTen,
   buildUpdatedRail,
   pickFeaturedSeries,
-  uniqueBySeriesId,
 } from "./landingUtils";
+
+const FEATURED_COMIC_TITLES = ["Crimson Tide"];
+const FEATURED_COMIC_HOOKS = {
+  "Crimson Tide":
+    "A blood-red moon, a ruined harbor, and a hunter already too deep to walk away.",
+};
+const COMIC_GENRE_PRIORITY = ["Action", "Romance", "Fantasy"];
+
+function normalizeValue(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function getSeriesId(series) {
+  return String(series?.id || "").trim();
+}
+
+function pickPrioritySeries(seriesList = [], titles = []) {
+  const safeList = Array.isArray(seriesList) ? seriesList : [];
+  for (const title of titles) {
+    const match = safeList.find(
+      (series) => normalizeValue(series?.title) === normalizeValue(title),
+    );
+    if (match) {
+      return match;
+    }
+  }
+  return null;
+}
+
+function excludeSeries(seriesList = [], excludedIds = new Set()) {
+  const safeIds = excludedIds instanceof Set ? excludedIds : new Set();
+  return (Array.isArray(seriesList) ? seriesList : []).filter((series) => {
+    const seriesId = getSeriesId(series);
+    return seriesId && !safeIds.has(seriesId);
+  });
+}
 
 export default function ComicsLandingPage({
   initialSeries = [],
@@ -53,69 +86,70 @@ export default function ComicsLandingPage({
   }, []);
 
   const model = useMemo(() => {
-    const genrePriority = ["Action", "Romance", "Adventure", "Fantasy"];
-    const featured = pickFeaturedSeries(seriesList);
-    const featuredId = String(featured?.id || "").trim();
-    const updated = buildUpdatedRail(seriesList, 14).filter(
-      (series) => String(series?.id || "").trim() !== featuredId,
+    const featuredBase =
+      pickPrioritySeries(seriesList, FEATURED_COMIC_TITLES) ||
+      pickFeaturedSeries(seriesList);
+    const featured = featuredBase ? withHomeArtwork(featuredBase, "cover") : null;
+    const featuredId = getSeriesId(featuredBase);
+    const excludedIds = new Set(featuredId ? [featuredId] : []);
+    const updatePool = excludeSeries(buildUpdatedRail(seriesList, 18), excludedIds);
+    const popularPool = excludeSeries(buildPopularRail(seriesList, 18), excludedIds);
+    const completedPool = excludeSeries(
+      buildCompletedRail(seriesList, 12),
+      excludedIds,
     );
-    const popular = buildPopularRail(seriesList, 16).filter(
-      (series) => String(series?.id || "").trim() !== featuredId,
+    const allGenreShelves = buildGenreShelves(
+      excludeSeries(seriesList, excludedIds),
+      {
+        maxGenres: 12,
+        perGenre: 4,
+      },
     );
-    const fresh = updated.filter(
-      (series) =>
-        !popular.some(
-          (candidate) =>
-            String(candidate?.id || "").trim() === String(series?.id || "").trim(),
-        ),
-    );
-    const completed = buildCompletedRail(seriesList, 12).filter(
-      (series) => String(series?.id || "").trim() !== featuredId,
-    );
-    const allGenreShelves = buildGenreShelves(seriesList, {
-      maxGenres: 12,
-      perGenre: 8,
-    });
-    const genres = genrePriority
-      .map((genre) =>
-        allGenreShelves.find(
-          (entry) => String(entry?.genre || "").toLowerCase() === genre.toLowerCase(),
-        ),
-      )
-      .filter(Boolean);
-    const recentArrivals = uniqueBySeriesId([...fresh, ...updated]).filter(
-      (series) => String(series?.id || "").trim() !== featuredId,
-    );
+    const genreShelves = COMIC_GENRE_PRIORITY.map((genre) => {
+      const match = allGenreShelves.find(
+        (entry) => normalizeValue(entry?.genre) === normalizeValue(genre),
+      );
+      if (!match) {
+        return null;
+      }
+      return {
+        ...match,
+        items: (Array.isArray(match.items) ? match.items : []).slice(0, 4),
+      };
+    }).filter(Boolean);
 
     return {
       featured,
-      updated: updated.slice(0, 8),
-      popular: popular.slice(0, 10),
-      fresh: fresh.slice(0, 10),
-      recentArrivals: recentArrivals.slice(0, 10),
-      completed: completed.slice(0, 10),
-      genres,
-      topTen: buildTopTen(seriesList),
+      featuredHook:
+        FEATURED_COMIC_HOOKS[String(featuredBase?.title || "").trim()] || "",
+      freshDrops: updatePool.slice(0, 6),
+      popular: popularPool.slice(0, 8),
+      completed: completedPool.slice(0, 6),
+      genres: genreShelves,
+      rankings: excludeSeries(buildTopTen(seriesList), excludedIds).slice(0, 6),
     };
   }, [seriesList]);
 
-  const showNewShelf = model.fresh.length >= 4;
-  const showRecentArrivalsShelf = !showNewShelf && model.recentArrivals.length >= 4;
-
   return (
-    <StorefrontPage accentClass="from-[rgba(255,93,136,0.15)] via-[rgba(255,178,92,0.08)] to-[rgba(103,232,249,0.08)]">
+    <StorefrontPage
+      accentClass="from-[rgba(255,93,136,0.15)] via-[rgba(255,178,92,0.08)] to-[rgba(103,232,249,0.08)]"
+      contentClassName="space-y-10 lg:space-y-12"
+    >
       {model.featured ? (
         <StoryHero
           series={model.featured}
           eyebrow="Featured Comic"
+          hook={model.featuredHook}
           primaryLabel="Start Reading"
           secondaryLabel="View Series"
-          chips={(Array.isArray(model.featured?.genres) ? model.featured.genres : []).slice(0, 3)}
+          statsVariant="chips"
+          theme="comic"
+          featureLabel="Dark fantasy heat, large covers, and a cliffhanger worth the tap"
+          chips={(Array.isArray(model.featured?.genres) ? model.featured.genres : []).slice(
+            0,
+            3,
+          )}
           stats={[
-            {
-              label: "Genre",
-              value: buildGenreLabel(model.featured, 2) || "Comic",
-            },
             {
               label: "Latest",
               value: buildLatestInstallmentLabel(model.featured),
@@ -124,26 +158,58 @@ export default function ComicsLandingPage({
               label: "Status",
               value: buildStatusLabel(model.featured),
             },
+            {
+              label: "Genre",
+              value: buildGenreLabel(model.featured, 2) || "Comic",
+            },
           ]}
         />
       ) : loading ? null : (
-        <EmptyShelf title="No comics here yet" description="Comic picks will show up here as soon as they go live in this mode." actionHref="/search?type=comic" />
+        <EmptyShelf
+          title="No comics here yet"
+          description="Comic picks will show up here as soon as they go live in this mode."
+          actionHref="/search?type=comic"
+        />
       )}
 
       <section className="space-y-4">
         <SectionHeading
-          eyebrow="Today's Updates"
-          title="Fresh panels and new chapter drops"
-          description="New chapters and quick catch-ups."
+          eyebrow="Fresh Drops"
+          title="Fresh Drops"
+          description="Updated today, sharp hooks, and fast-open comics built to keep your thumb moving."
+          tone="channel"
+          action={
+            <Link
+              href="/search?type=comic&sort=latest"
+              className={`inline-flex min-h-[44px] items-center gap-2 px-4 text-sm font-medium text-white/78 ${storefrontSecondaryButtonClass}`}
+            >
+              <Sparkles className="size-4" />
+              Latest drops
+            </Link>
+          }
         />
-        <UpdateList items={model.updated} sectionName="comics_updates" />
+        <UpdateList
+          items={model.freshDrops}
+          sectionName="comics_fresh_drops"
+          visual="channel"
+        />
       </section>
 
       <section className="space-y-4">
         <SectionHeading
           eyebrow="Popular Comics"
-          title="The covers readers keep tapping"
-          description="The comics everyone keeps opening."
+          title="Popular Comics"
+          description="Big covers, immediate mood, and the titles readers are most likely to open right now."
+          tone="channel"
+          action={
+            <Link
+              href="/search?type=comic&sort=popular"
+              className={`inline-flex min-h-[44px] items-center gap-2 px-4 text-sm font-medium text-white/78 ${storefrontSecondaryButtonClass}`}
+            >
+              Browse all
+              <ArrowUpRight className="size-4" />
+            </Link>
+          }
         />
         <ShelfScroller>
           {model.popular.map((series, index) => (
@@ -152,6 +218,7 @@ export default function ComicsLandingPage({
               series={series}
               href={`/series/${series.id}`}
               variant="comic"
+              visual="channel"
               badge={`#${index + 1}`}
               actionLabel={buildLatestInstallmentLabel(series)}
               onClick={() =>
@@ -166,42 +233,39 @@ export default function ComicsLandingPage({
         </ShelfScroller>
       </section>
 
-      {showNewShelf || showRecentArrivalsShelf ? (
+      {model.genres.length > 0 ? (
+        <GenreShelfSection
+          shelves={model.genres}
+          variant="comic"
+          visual="channel"
+          eyebrow="Genre Shelves"
+          title="Genre Shelves"
+          description="Action, romance, and fantasy shelves trimmed down to quick, high-click picks."
+        />
+      ) : null}
+
+      {model.completed.length > 0 ? (
         <section className="space-y-4">
           <SectionHeading
-            eyebrow={showNewShelf ? "New Comics" : "Recent Arrivals"}
-            title={
-              showNewShelf
-                ? "Recent arrivals and rising launches"
-                : "Fresh arrivals worth opening first"
-            }
-            description={
-              showNewShelf
-                ? "Fresh launches and early favorites."
-                : "New drops and recent updates landing now."
-            }
-            action={
-              <Link
-                href="/search?type=comic&sort=latest"
-                className={`inline-flex min-h-[44px] items-center px-4 text-sm font-medium text-white/76 ${storefrontSecondaryButtonClass}`}
-              >
-                Latest drops
-              </Link>
-            }
+            eyebrow="Completed Comics"
+            title="Completed Comics"
+            description="Finished runs when you want the payoff tonight, not next week."
+            tone="channel"
           />
           <ShelfScroller>
-            {(showNewShelf ? model.fresh : model.recentArrivals).map((series, index) => (
+            {model.completed.map((series, index) => (
               <CoverCard
                 key={series.id}
                 series={series}
                 href={`/series/${series.id}`}
                 variant="comic"
-                badge={showNewShelf ? "New" : "Fresh"}
-                actionLabel={buildLatestInstallmentLabel(series)}
+                visual="channel"
+                badge="Completed"
+                actionLabel="Read Full Series"
                 onClick={() =>
                   trackEvent("story_click", {
                     seriesId: series?.id,
-                    sourceSection: showNewShelf ? "comics_new" : "comics_recent_arrivals",
+                    sourceSection: "comics_completed",
                     position: index + 1,
                   })
                 }
@@ -211,91 +275,15 @@ export default function ComicsLandingPage({
         </section>
       ) : null}
 
-      <section className="space-y-4">
-        <SectionHeading
-          eyebrow="Completed Comics"
-          title="Binge the whole run"
-          description="Finished runs when you want the whole story now."
-        />
-        <ShelfScroller>
-          {model.completed.map((series, index) => (
-            <CoverCard
-              key={series.id}
-              series={series}
-              href={`/series/${series.id}`}
-              variant="comic"
-              badge="Completed"
-              actionLabel="Read Full Series"
-              onClick={() =>
-                trackEvent("story_click", {
-                  seriesId: series?.id,
-                  sourceSection: "comics_completed",
-                  position: index + 1,
-                })
-              }
-            />
-          ))}
-        </ShelfScroller>
-      </section>
-
-      <GenreShelfSection
-        shelves={model.genres}
-        variant="comic"
-        title="Genre Shelves"
-        description="Action, romance, adventure, and fantasy picks."
-      />
-
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <section className={`${storefrontInfoCardClass} p-5`}>
-          <SectionHeading
-            eyebrow="Reader Favorites"
-            title="Fast starts, new chapters, and complete runs"
-            description="Fast starts, new chapters, and complete runs readers keep opening."
-          />
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            {[
-              {
-                icon: Flame,
-                title: "Cliffhanger rush",
-                body: "Hard stops and wild reveals that make one more tap automatic.",
-              },
-              {
-                icon: Trophy,
-                title: "Weekend catch-up",
-                body: "A stack of fresh chapters when you want easy momentum.",
-              },
-              {
-                icon: Flame,
-                title: "Full-run binge",
-                body: "Completed favorites when waiting a week is not happening.",
-              },
-            ].map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.title}
-                  className={`${storefrontInfoCardClass} p-4 text-white`}
-                >
-                  <Icon className="size-5 text-[var(--gush-rose)]" />
-                  <h3 className="mt-3 text-lg font-semibold text-white">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-white/64">
-                    {item.body}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
+      {model.rankings.length > 0 ? (
         <RankList
-          items={model.topTen}
-          label="Top 10 Comics"
-          eyebrow="Reader Rankings"
-          description="The comic titles readers keep opening first."
+          items={model.rankings}
+          label="Reader Rankings"
+          eyebrow="Tonight's Leaders"
+          description="The covers climbing fastest with comic readers right now."
+          visual="channel"
         />
-      </div>
+      ) : null}
     </StorefrontPage>
   );
 }

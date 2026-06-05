@@ -181,11 +181,13 @@ html.light {
 
 html {
   background: #070a13;
+  overflow-x: clip;
 }
 
 body {
   min-height: 100vh;
   background: #070a13;
+  overflow-x: clip;
   color: var(--gush-ink-strong);
   font-family: var(--font-body);
   font-size: var(--gush-text-body);
