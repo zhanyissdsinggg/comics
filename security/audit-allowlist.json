@@ -114,10 +114,6 @@
       "expiresOn": "2026-10-31",
       "reason": "Framework-level transitive advisory tracked for major framework upgrade."
     },
-    "@nestjs/schedule": {
-      "expiresOn": "2026-10-31",
-      "reason": "Framework-level transitive advisory tracked for major framework upgrade."
-    },
     "@nestjs/swagger": {
       "expiresOn": "2026-10-31",
       "reason": "Framework-level transitive advisory tracked for major framework upgrade."
