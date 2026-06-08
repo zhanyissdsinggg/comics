@@ -93,7 +93,9 @@ test.describe("Billing prelaunch states", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: "Coming soon." }).first(),
+      page.getByRole("heading", {
+        name: "Points are warming up for launch.",
+      }).first(),
     ).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
@@ -127,22 +129,22 @@ test.describe("Billing prelaunch states", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: "Coming soon." }).first(),
+      page.getByRole("heading", { name: "Plans" }).first(),
     ).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByText("Preview only. Checkout is disabled."),
+      page.getByRole("heading", { name: "Plans unavailable" }),
     ).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("link", { name: "Contact Support" }).first(),
+      page.getByRole("button", { name: "Support" }).first(),
     ).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("button", { name: "Pick this plan" }),
+      page.getByRole("button", { name: "Get plan" }),
     ).toHaveCount(0);
 
     await page.waitForTimeout(300);

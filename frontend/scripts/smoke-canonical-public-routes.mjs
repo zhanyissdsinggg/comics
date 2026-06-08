@@ -14,17 +14,17 @@ const ROUTE_SPECS = [
   { path: "/", expectedTitle: "Trending Comics, Novels, and Interactive Stories | Gush", expectedHeading: "" },
   { path: "/comics", expectedTitle: "Comics", expectedHeading: "Crimson Tide" },
   { path: "/novels", expectedTitle: "Novels", expectedHeading: "Solar Wind" },
-  { path: "/creators", expectedTitle: "Creators", expectedHeading: "Creators" },
-  { path: "/search", expectedTitle: "Search Comics & Novels", expectedHeading: "Browse by mood, genre, and format" },
-  { path: "/rankings", expectedTitle: "Trending Stories", expectedHeading: "Trending" },
+  { path: "/creators", expectedTitle: "Creators", expectedHeading: "Find the shelf behind the story you keep opening." },
+  { path: "/search", expectedTitle: "Search Comics & Novels", expectedHeading: "Find your next read" },
+  { path: "/rankings", expectedTitle: "Trending Stories", expectedHeading: "Live Board" },
   { path: "/series/series-001", expectedTitle: "The Last Kingdom", expectedHeading: "The Last Kingdom" },
   { path: "/series/series-004", expectedTitle: "Cherry Blossom High", expectedHeading: "Cherry Blossom High" },
   { path: "/series/series-005", expectedTitle: "Dragon's Oath", expectedHeading: "Dragon's Oath" },
   { path: "/series/series-009", expectedTitle: "Starfall Academy", expectedHeading: "Starfall Academy" },
   { path: "/series/series-010", expectedTitle: "Crimson Tide", expectedHeading: "Crimson Tide" },
   { path: "/series/series-011", expectedTitle: "Solar Wind", expectedHeading: "Solar Wind" },
-  { path: "/store", expectedTitle: "Points are coming soon", expectedHeading: "Points are coming soon" },
-  { path: "/subscribe", expectedTitle: "Membership is coming soon", expectedHeading: "Coming soon." },
+  { path: "/store", expectedTitle: "Store", expectedHeading: "Store" },
+  { path: "/subscribe", expectedTitle: "Plans", expectedHeading: "Plans" },
   { path: "/support", expectedTitle: "Support", expectedHeading: "Support" },
   { path: "/account", expectedTitle: "Account", expectedHeading: "Account" },
   { path: "/library", expectedTitle: "Library", expectedHeading: "Your library" },
@@ -297,6 +297,69 @@ const SERIES_EPISODES = {
   ],
 };
 
+const BILLING_AVAILABILITY = {
+  billingMode: "demo",
+  purchaseActionsEnabled: true,
+  subscriptionActionsEnabled: true,
+  refundActionsEnabled: true,
+};
+
+const TOPUP_PACKAGES = [
+  {
+    packageId: "starter",
+    paidPts: 50,
+    bonusPts: 5,
+    price: 3.99,
+    currency: "USD",
+    active: true,
+    label: "Starter",
+    tags: [],
+  },
+  {
+    packageId: "value",
+    paidPts: 200,
+    bonusPts: 40,
+    price: 14.99,
+    currency: "USD",
+    active: true,
+    label: "Value",
+    tags: ["best"],
+  },
+];
+
+const SUBSCRIPTION_PLANS = [
+  {
+    id: "basic",
+    title: "Basic",
+    discountPct: 10,
+    dailyFreeUnlocks: 1,
+    ttfMultiplier: 0.8,
+    voucherPts: 2,
+    price: 4.99,
+    currency: "USD",
+  },
+  {
+    id: "pro",
+    title: "Pro",
+    discountPct: 20,
+    dailyFreeUnlocks: 2,
+    ttfMultiplier: 0.6,
+    voucherPts: 3,
+    price: 7.99,
+    currency: "USD",
+  },
+  {
+    id: "vip",
+    title: "VIP",
+    discountPct: 30,
+    dailyFreeUnlocks: 3,
+    ttfMultiplier: 0.5,
+    voucherPts: 5,
+    price: 12.99,
+    currency: "USD",
+  },
+];
+
 function buildSeriesPayload(seriesId) {
   if (seriesId === "demo-series" || seriesId === "fixture-series") {
     return null;
@@ -374,6 +437,22 @@ function createMockBackendServer() {
           { id: "slot-home-free-start", slot: "home-free-start", seriesIds: ["series-011"] },
           { id: "slot-home-binge-ready", slot: "home-binge-ready", seriesIds: ["series-009"] },
         ],
+      });
+      return;
+    }
+
+    if (pathname === "/api/billing/topups") {
+      jsonResponse(response, 200, {
+        packages: TOPUP_PACKAGES,
+        billing: BILLING_AVAILABILITY,
+      });
+      return;
+    }
+
+    if (pathname === "/api/billing/plans") {
+      jsonResponse(response, 200, {
+        plans: SUBSCRIPTION_PLANS,
+        billing: BILLING_AVAILABILITY,
       });
       return;
     }
@@ -555,46 +634,23 @@ function assertSeriesMainContentOrder(html, pathname, format) {
   }
 }
 
-function assertSubscribePrelaunch(html) {
-  const bannedPricingCopy = [
-    "$4.99",
-    "$7.99",
-    "$12.99",
-    "30% off",
-    "Best savings",
-    "Compare plans",
-  ];
+function assertSubscribeCommerce(html) {
+  const requiredCopy = ["Monthly plans", "$4.99", "$7.99", "$12.99"];
 
-  for (const phrase of bannedPricingCopy) {
-    if (html.toLowerCase().includes(phrase.toLowerCase())) {
-      throw new Error(`/subscribe should stay in prelaunch preview mode, found pricing copy "${phrase}"`);
+  for (const phrase of requiredCopy) {
+    if (!html.includes(phrase)) {
+      throw new Error(`/subscribe commercial page is missing "${phrase}"`);
     }
   }
 }
 
-function assertStorePrelaunch(html) {
-  const requiredCopy = [
-    "Point packs are not available",
-    "Store",
-    "Browse",
-    "Support",
-  ];
-  const bannedCopy = ["Plans", "Orders", "VISA", "MC"];
-
-  for (const phrase of requiredCopy) {
-    if (!html.includes(phrase)) {
-      throw new Error(`/store prelaunch page is missing "${phrase}"`);
-    }
+function assertStoreCommerce(html) {
+  if (/name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(html)) {
+    throw new Error(`/store commercial page should not publish a noindex robots tag`);
   }
 
-  for (const phrase of bannedCopy) {
-    if (html.includes(phrase)) {
-      throw new Error(`/store prelaunch page should not expose "${phrase}"`);
-    }
-  }
-
-  if (!/name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(html)) {
-    throw new Error(`/store prelaunch page should publish a noindex robots tag`);
+  if (html.includes("Points are coming soon")) {
+    throw new Error(`/store commercial page should not render coming-soon copy`);
   }
 }
 
@@ -853,13 +909,13 @@ async function run() {
       }
 
       if (spec.path === "/subscribe") {
-        assertSubscribePrelaunch(direct.html);
-        assertSubscribePrelaunch(variant.html);
+        assertSubscribeCommerce(direct.html);
+        assertSubscribeCommerce(variant.html);
       }
 
       if (spec.path === "/store") {
-        assertStorePrelaunch(direct.html);
-        assertStorePrelaunch(variant.html);
+        assertStoreCommerce(direct.html);
+        assertStoreCommerce(variant.html);
       }
 
       for (const phrase of BANNED_COPY) {

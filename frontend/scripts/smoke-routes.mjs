@@ -84,6 +84,69 @@ const SERIES_EPISODES = {
   ],
 };
 
+const BILLING_AVAILABILITY = {
+  billingMode: "demo",
+  purchaseActionsEnabled: true,
+  subscriptionActionsEnabled: true,
+  refundActionsEnabled: true,
+};
+
+const TOPUP_PACKAGES = [
+  {
+    packageId: "starter",
+    paidPts: 50,
+    bonusPts: 5,
+    price: 3.99,
+    currency: "USD",
+    active: true,
+    label: "Starter",
+    tags: [],
+  },
+  {
+    packageId: "value",
+    paidPts: 200,
+    bonusPts: 40,
+    price: 14.99,
+    currency: "USD",
+    active: true,
+    label: "Value",
+    tags: ["best"],
+  },
+];
+
+const SUBSCRIPTION_PLANS = [
+  {
+    id: "basic",
+    title: "Basic",
+    discountPct: 10,
+    dailyFreeUnlocks: 1,
+    ttfMultiplier: 0.8,
+    voucherPts: 2,
+    price: 4.99,
+    currency: "USD",
+  },
+  {
+    id: "pro",
+    title: "Pro",
+    discountPct: 20,
+    dailyFreeUnlocks: 2,
+    ttfMultiplier: 0.6,
+    voucherPts: 3,
+    price: 7.99,
+    currency: "USD",
+  },
+  {
+    id: "vip",
+    title: "VIP",
+    discountPct: 30,
+    dailyFreeUnlocks: 3,
+    ttfMultiplier: 0.5,
+    voucherPts: 5,
+    price: 12.99,
+    currency: "USD",
+  },
+];
+
 function jsonResponse(response, status, body) {
   response.statusCode = status;
   response.setHeader("Content-Type", "application/json");
@@ -139,6 +202,22 @@ function createMockBackendServer() {
         return;
       }
       jsonResponse(response, 200, { episode });
+      return;
+    }
+
+    if (pathname === "/api/billing/topups") {
+      jsonResponse(response, 200, {
+        packages: TOPUP_PACKAGES,
+        billing: BILLING_AVAILABILITY,
+      });
+      return;
+    }
+
+    if (pathname === "/api/billing/plans") {
+      jsonResponse(response, 200, {
+        plans: SUBSCRIPTION_PLANS,
+        billing: BILLING_AVAILABILITY,
+      });
       return;
     }
 

@@ -16,6 +16,26 @@ function normalizeCompanyName(value) {
   return raw;
 }
 
+const publicEnvFlags = {
+  NEXT_PUBLIC_ENABLE_CHECKOUT: process.env.NEXT_PUBLIC_ENABLE_CHECKOUT,
+  NEXT_PUBLIC_ENABLE_MEMBERSHIP: process.env.NEXT_PUBLIC_ENABLE_MEMBERSHIP,
+  NEXT_PUBLIC_ENABLE_POINT_PACKS: process.env.NEXT_PUBLIC_ENABLE_POINT_PACKS,
+  NEXT_PUBLIC_SHOW_CREATORS_IN_NAV: process.env.NEXT_PUBLIC_SHOW_CREATORS_IN_NAV,
+  NEXT_PUBLIC_SHOW_RANKINGS_IN_NAV: process.env.NEXT_PUBLIC_SHOW_RANKINGS_IN_NAV,
+  NEXT_PUBLIC_ENABLE_MONETIZATION_NAV:
+    process.env.NEXT_PUBLIC_ENABLE_MONETIZATION_NAV,
+  NEXT_PUBLIC_ENABLE_MATURE_CONTENT:
+    process.env.NEXT_PUBLIC_ENABLE_MATURE_CONTENT,
+};
+
+function readEnvFlag(key) {
+  if (Object.prototype.hasOwnProperty.call(publicEnvFlags, key)) {
+    return publicEnvFlags[key];
+  }
+
+  return process.env[key];
+}
+
 function parseEnvFlag(keysOrKey, ...restKeys) {
   const keys = Array.isArray(keysOrKey) ? keysOrKey : [keysOrKey, ...restKeys];
   let defaultValue = false;
@@ -31,7 +51,7 @@ function parseEnvFlag(keysOrKey, ...restKeys) {
   }
 
   for (const key of keys) {
-    const raw = clean(process.env[key]);
+    const raw = clean(readEnvFlag(key));
     if (!raw) {
       continue;
     }
