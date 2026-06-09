@@ -51,6 +51,7 @@ const DEFAULT_TEST_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432
 const DEFAULT_TEST_JWT_SECRET = "test-jwt-secret-keep-it-long-enough-for-validation";
 const DEFAULT_TEST_ADMIN_KEY = "TestAdminKey123!Secure";
 const DEFAULT_LOG_LEVEL = "info";
+const DEFAULT_BILLING_MODE = "demo";
 
 function isJestCliProcess(): boolean {
   return (
@@ -335,7 +336,7 @@ export function getBillingModeConfig(): "demo" | "provider" {
   if (config.billing.mode) {
     return config.billing.mode;
   }
-  return config.environment === "production" ? "provider" : "demo";
+  return DEFAULT_BILLING_MODE;
 }
 
 export function getCookieSecureDefault(sameSite?: "lax" | "strict" | "none"): boolean {
