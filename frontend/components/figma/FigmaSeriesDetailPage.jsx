@@ -7,7 +7,6 @@ import {
   BookmarkPlus,
   Eye,
   Heart,
-  List,
   Lock,
   PlayCircle,
   Share2,
@@ -24,8 +23,6 @@ import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import { getEpisodeAccessState } from "../../lib/episodeAccessState";
 import { openAuthPrompt } from "../../lib/openAuthPrompt";
-import { readPaymentAttributionFromSearchParams } from "../../lib/paymentAttribution";
-import { buildReaderPath } from "../../lib/readerRoutes";
 import { siteConfig } from "../../lib/siteConfig";
 import {
   getInstallmentLabel,
@@ -35,17 +32,14 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useEntitlementStore } from "../../store/useEntitlementStore";
 import { useFollowStore } from "../../store/useFollowStore";
 import { useWalletStore } from "../../store/useWalletStore";
-import SeriesArrivalPanel from "../series/SeriesArrivalPanel";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import FigmaChrome from "./FigmaChrome";
-import FigmaCommentsSection from "./FigmaCommentsSection";
 import UnlockChapterModal from "../series/UnlockChapterModal";
 import {
   storefrontBadgeClass,
   storefrontInfoCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
-  storefrontSoftCardClass,
   StorefrontSectionHeading,
 } from "../common/StorefrontPagePrimitives";
 import {
@@ -101,7 +95,7 @@ function buildSeriesStatusCopy(series) {
   const updatedAt = new Date(series?.updatedAt || 0).getTime() || 0;
   const weeklyWindowMs = 10 * 24 * 60 * 60 * 1000;
   if (updatedAt && Date.now() - updatedAt <= weeklyWindowMs) {
-    return "Ongoing · New episodes weekly";
+    return "Ongoing";
   }
 
   return "Ongoing";
@@ -123,6 +117,33 @@ function resolveEpisodeReadsValue(episode) {
   }
 
   return 0;
+}
+
+function buildEpisodePlatformLabel(episode, index, seriesType) {
+  const normalizedStatus = String(episode?.status || "")
+    .trim()
+    .toLowerCase();
+  const installmentName = getInstallmentLabel(seriesType || "comic");
+
+  if (normalizedStatus === "completed" || normalizedStatus === "free") {
+    return `Full ${installmentName.toLowerCase()} ready`;
+  }
+
+  if (index === 0) {
+    return `Latest ${installmentName.toLowerCase()}`;
+  }
+
+  return `${installmentName} ready`;
+}
+
+function getSeriesFormatLabel(item) {
+  if (item?.kind === FIGMA_CONTENT_TYPES.INTERACTIVE) {
+    return "Interactive";
+  }
+  if (item?.kind === FIGMA_CONTENT_TYPES.NOVELS) {
+    return "Novel";
+  }
+  return "Comic";
 }
 
 function ModeBlockedState({
@@ -250,10 +271,7 @@ function SeriesDetailContent({
   const requestRef = useRef(0);
   const isFollowing = followedSeriesIds.includes(seriesId);
   const [unlockModalState, setUnlockModalState] = useState(null);
-  const discoveryAttribution = useMemo(
-    () => readPaymentAttributionFromSearchParams(initialSearchParams),
-    [initialSearchParams],
-  );
+  void initialSearchParams;
   const entitlement = bySeriesId[seriesId] || {
     seriesId,
     unlockedEpisodeIds: [],
@@ -315,6 +333,7 @@ function SeriesDetailContent({
         }
 
         setPayload({
+          ...response.data,
           series: response.data.series,
           episodes: Array.isArray(response.data?.episodes)
             ? response.data.episodes
@@ -365,18 +384,17 @@ function SeriesDetailContent({
         const leftTime = new Date(left?.releasedAt || 0).getTime() || 0;
         return rightTime - leftTime;
       })
-      .map((episode) => ({
+      .map((episode, index) => ({
         id: String(episode?.id || "").trim(),
         title:
           String(episode?.title || "").trim() ||
           getInstallmentLabel(payload?.series?.type || payload?.series) +
             ` ${episode?.number || 1}`,
-        date: episode?.releasedAt
-          ? new Intl.DateTimeFormat("en-US", {
-              month: "short",
-              day: "numeric",
-            }).format(new Date(episode.releasedAt))
-          : "Today",
+        metaLabel: buildEpisodePlatformLabel(
+          episode,
+          index,
+          payload?.series?.type || payload?.series,
+        ),
         readsValue: resolveEpisodeReadsValue(episode),
         number: Number(episode?.number || 0) || 1,
         rawEpisode: episode,
@@ -446,12 +464,51 @@ function SeriesDetailContent({
   });
   const publicStatusLabel = useMemo(
     () =>
-      buildSeriesStatusCopy(payload?.series || detailItem?.raw || null)
-        .replace(/\s+[^\w\s]+\s+New episodes weekly$/u, " · New episodes weekly")
-        .replace(/\s{2,}/g, " ")
-        .trim(),
+      buildSeriesStatusCopy(payload?.series || detailItem?.raw || null),
     [detailItem?.raw, payload?.series],
   );
+  const formatLabel = getSeriesFormatLabel(detailItem);
+  const primaryGenreLabel =
+    detailItem?.genres?.[0] || detailItem?.tags?.[0] || "Drama";
+  const quickStats = [
+    {
+      label: chapterPrefix,
+      value:
+        chapterItems.length > 0
+          ? `${chapterItems.length}`
+          : "Opening soon",
+    },
+    {
+      label: "Status",
+      value: publicStatusLabel,
+    },
+    {
+      label: "Format",
+      value: formatLabel,
+    },
+    {
+      label: "Genre",
+      value: primaryGenreLabel,
+    },
+  ];
+  const relatedItems = useMemo(() => {
+    const candidates = [
+      payload?.relatedSeries,
+      payload?.related,
+      payload?.recommendations,
+      payload?.series?.relatedSeries,
+      payload?.series?.related,
+    ]
+      .flat()
+      .filter(Boolean);
+
+    return buildFigmaCatalog(candidates)
+      .items.filter(
+        (item) =>
+          item.id !== detailItem?.id && matchesContentMode(item, contentMode),
+      )
+      .slice(0, 3);
+  }, [contentMode, detailItem?.id, payload]);
 
   if (loading && !detailItem) {
     return (
@@ -580,11 +637,14 @@ function SeriesDetailContent({
   return (
     <main className={cn("min-h-screen", palette.rootBg)}>
       <FigmaChrome>
-        <div className="relative min-h-[420px] w-full overflow-hidden bg-black sm:min-h-[520px] md:min-h-[620px]">
-          <div className="absolute inset-0 overflow-hidden">
+        <section className="relative w-full overflow-hidden bg-black">
+          <div
+            aria-hidden="true"
+            role="presentation"
+            className="absolute inset-0 overflow-hidden"
+          >
             <div
-              aria-hidden="true"
-              className="absolute inset-0 opacity-20 blur-xl"
+              className="absolute inset-0 opacity-24 blur-2xl"
               style={{
                 backgroundImage: `url("${coverImageUrl}")`,
                 backgroundPosition: "center",
@@ -600,18 +660,19 @@ function SeriesDetailContent({
                 palette.heroOverlay,
               )}
             />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,79,154,0.2),transparent_28%),radial-gradient(circle_at_84%_16%,rgba(103,232,249,0.12),transparent_24%),linear-gradient(180deg,rgba(5,6,10,0.18)_0%,rgba(5,6,10,0.86)_72%,#05060a_100%)]" />
           </div>
 
-          <div className="relative mx-auto flex h-full max-w-[1240px] flex-col justify-end px-4 pb-6 md:px-8 md:pb-12">
-            <div className="flex w-full flex-col items-start gap-4 md:flex-row md:items-end md:gap-10">
+          <div className="relative mx-auto max-w-[1240px] px-4 pb-8 pt-10 md:px-8 md:pb-12 md:pt-16">
+            <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-end lg:gap-10">
               <img
                 src={coverImageUrl}
                 alt={coverAltText}
-                className="w-36 shrink-0 self-end translate-y-6 rounded-[22px] object-cover shadow-2xl ring-2 ring-white/10 min-[420px]:w-40 md:w-72 md:self-auto md:translate-y-20"
+                className="aspect-[3/4] w-40 max-w-full shrink-0 rounded-[26px] object-cover shadow-[0_30px_90px_rgba(0,0,0,0.48)] ring-2 ring-white/10 sm:w-52 lg:w-full"
               />
 
-              <div className="w-full flex-1 rounded-[28px] border border-white/10 bg-black/24 px-4 py-4 backdrop-blur-md md:border-0 md:bg-transparent md:px-0 md:py-0">
-                <div className="mb-3 flex flex-wrap gap-2">
+              <div className="min-w-0 rounded-[30px] border border-white/10 bg-black/28 p-4 shadow-[0_28px_90px_rgba(0,0,0,0.28)] backdrop-blur-xl md:p-6 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-0">
+                <div className="mb-4 flex flex-wrap gap-2">
                   {detailItem.tags.map((tag) => (
                     <span
                       key={tag}
@@ -625,10 +686,10 @@ function SeriesDetailContent({
                     </span>
                   ))}
                 </div>
-                <h1 className="mb-2 max-w-[10ch] bg-gradient-to-r from-white to-gray-300 bg-clip-text text-[2rem] font-black leading-[0.9] tracking-tight text-transparent drop-shadow-sm md:text-[4.5rem]">
+                <h1 className="mb-3 max-w-[12ch] bg-gradient-to-r from-white via-white to-gray-300 bg-clip-text text-[2.3rem] font-black leading-[0.9] tracking-tight text-transparent drop-shadow-sm sm:text-[3rem] md:text-[4.6rem]">
                   {detailItem.title}
                 </h1>
-                <div className="mb-3 text-sm font-medium text-gray-300 md:mb-4 md:text-lg">
+                <div className="mb-4 text-sm font-medium text-gray-300 md:text-lg">
                   {creatorHref ? (
                     <Link
                       href={creatorHref}
@@ -641,11 +702,11 @@ function SeriesDetailContent({
                     <p>{creatorLabel}</p>
                   )}
                 </div>
-                <p className="mb-4 max-w-[42rem] text-sm leading-7 text-gray-200/78 md:mb-5 md:text-base">
+                <p className="mb-5 max-w-[44rem] text-sm leading-7 text-gray-200/78 md:text-base">
                   {detailItem.description}
                 </p>
 
-                <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-bold text-gray-400 md:mb-7 md:gap-6 md:text-sm">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-bold text-gray-400 md:gap-5 md:text-sm">
                   <div
                     data-testid="series-hero-metadata"
                     className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-medium uppercase tracking-[0.12em] text-gray-400 md:text-sm"
@@ -675,168 +736,106 @@ function SeriesDetailContent({
                     {detailItem.likesText} Likes
                   </span>
                 </div>
-
-                <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center md:gap-4">
-                  <Link
-                    href={detailItem.readHref}
-                    data-testid="series-primary-action"
-                    className={cn(
-                      storefrontPrimaryButtonClass,
-                      "min-h-[46px] w-full justify-center sm:min-h-[48px] sm:w-auto sm:justify-start sm:whitespace-nowrap md:min-h-[52px] md:px-8 md:py-3.5 md:text-base",
-                    )}
-                  >
-                    <PlayCircle className="h-5 w-5" />
-                    {readLabel}
-                  </Link>
-                  <div className="flex items-center gap-2.5">
-                    <button
-                      type="button"
-                      onClick={handleLibraryToggle}
-                      aria-label={
-                        isFollowing ? "Remove from saved" : "Save series"
-                      }
-                      className={cn(
-                        storefrontSecondaryButtonClass,
-                        "min-h-[46px] rounded-full px-4 md:min-h-[48px] md:px-5",
-                      )}
-                    >
-                      <BookmarkPlus className="h-5 w-5" />
-                      <span>{isFollowing ? "Saved" : "Save Series"}</span>
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={`Share ${detailItem.title}`}
-                      className={cn(
-                        storefrontSecondaryButtonClass,
-                        "h-10 w-10 rounded-full p-0 md:h-12 md:w-12",
-                      )}
-                    >
-                      <Share2 className="h-5 w-5" />
-                    </button>
-                  </div>
-                </div>
-                <p className="mt-4 text-xs uppercase tracking-[0.18em] text-gray-400 md:text-sm">
-                  Start with {chapterItems[chapterItems.length - 1]?.title || "the first chapter"} and keep going from there.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 grid gap-3 md:grid-cols-3">
-              <div className={storefrontInfoCardClass}>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46">
-                  Story Snapshot
-                </p>
-                <p className="mt-3 text-base font-semibold text-white">
-                  {isInteractive
-                    ? "Interactive route"
-                    : isNovel
-                      ? "Novel serial"
-                      : "Comic series"}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-white/62">
-                  Start from the first installment or open the latest live drop from the shelf.
-                </p>
-              </div>
-              <div className={storefrontInfoCardClass}>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46">
-                  Catalog mode
-                </p>
-                <p className="mt-3 text-base font-semibold text-white">
-                  {isAdultContent(detailItem) ? "18+ only" : "Standard catalog"}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-white/62">
-                  The page stays aligned with the current normal or adult mode without changing route structure.
-                </p>
-              </div>
-              <div className={storefrontInfoCardClass}>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46">
-                  Episode access
-                </p>
-                <p className="mt-3 text-base font-semibold text-white">
-                  {chapterItems.length > 0
-                    ? `${chapterItems.length} listed`
-                    : "Release pending"}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-white/62">
-                  Read, unlock, and preview states stay inside the chapter rail.
-                </p>
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="mx-auto flex max-w-[1200px] flex-col gap-8 px-4 py-10 md:flex-row md:gap-12 md:px-8 md:py-20">
-          <div className="order-2 w-full shrink-0 pt-2 md:order-1 md:w-72 md:pt-0">
+        <div className="mx-auto max-w-[1200px] px-4 py-8 md:px-8 md:py-12">
+          <section aria-label="Quick Stats" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {quickStats.map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.045)] px-4 py-4 shadow-[0_18px_48px_rgba(0,0,0,0.22)] backdrop-blur-xl"
+              >
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/42">
+                  {stat.label}
+                </p>
+                <p className="mt-3 truncate text-base font-black text-white">
+                  {stat.value}
+                </p>
+              </div>
+            ))}
+          </section>
+
+          <section aria-label="Primary actions" className="mt-5 rounded-[28px] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.065)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_22px_70px_rgba(0,0,0,0.24)] backdrop-blur-xl md:p-5">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <p className="text-sm leading-6 text-white/62">
+                {chapterItems.length > 0
+                  ? `${chapterItems.length} ${chapterPrefix.toLowerCase()} ready in this run.`
+                  : `${chapterPrefix} will open on this shelf.`}
+              </p>
+              <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
+                <Link
+                  href={detailItem.readHref}
+                  data-testid="series-primary-action"
+                  className={cn(
+                    storefrontPrimaryButtonClass,
+                    "min-h-[48px] w-full justify-center sm:w-auto sm:whitespace-nowrap md:px-8",
+                  )}
+                >
+                  <PlayCircle className="h-5 w-5" />
+                  {readLabel}
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLibraryToggle}
+                  aria-label={isFollowing ? "Remove from saved" : "Save series"}
+                  className={cn(
+                    storefrontSecondaryButtonClass,
+                    "min-h-[48px] justify-center rounded-full px-5",
+                  )}
+                >
+                  <BookmarkPlus className="h-5 w-5" />
+                  <span>{isFollowing ? "Saved" : "Save Series"}</span>
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Share ${detailItem.title}`}
+                  className={cn(
+                    storefrontSecondaryButtonClass,
+                    "h-12 w-12 justify-center rounded-full p-0",
+                  )}
+                >
+                  <Share2 className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
             <div
               className={cn(
                 storefrontInfoCardClass,
-                "rounded-[24px] p-4 md:rounded-[28px] md:p-6",
+                "rounded-[28px] p-5 md:p-6",
               )}
             >
               <StorefrontSectionHeading
-                eyebrow="Why Start"
-                title="Open this if you want"
+                eyebrow="About"
+                title="Synopsis"
                 className="space-y-0"
               />
-              <p className="mt-3 text-sm leading-6 text-gray-400 md:leading-relaxed">
+              <p className="mt-4 text-sm leading-7 text-gray-300 md:text-base">
                 {detailItem.description}
               </p>
-              <div className="mt-5 space-y-3">
-                <div className={storefrontSoftCardClass}>
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
-                    Format
-                  </p>
-                  <p className="mt-2 text-sm font-bold text-white">
-                    {isInteractive
-                      ? "Interactive story"
-                      : isNovel
-                        ? "Novel serial"
-                        : "Comic series"}
-                  </p>
-                </div>
-                <div className={storefrontSoftCardClass}>
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
-                    Status
-                  </p>
-                  <p className="mt-2 text-sm font-bold text-white">
-                    {publicStatusLabel}
-                  </p>
-                </div>
-              </div>
             </div>
-          </div>
 
-          <div className="order-1 flex-1 md:order-2">
-            <SeriesArrivalPanel
-              series={payload?.series || detailItem?.raw || null}
-              attribution={discoveryAttribution}
-              className="mt-0"
-            />
             <div
               className={cn(
                 storefrontInfoCardClass,
-                "rounded-[26px] p-4 md:rounded-[30px] md:p-6",
+                "rounded-[28px] p-4 md:p-6",
               )}
             >
-              <div className="mb-5 flex flex-col items-start gap-2.5 border-b border-gray-800 pb-3 sm:flex-row sm:items-center sm:justify-between md:mb-6 md:pb-4">
-                <div>
-                  <StorefrontSectionHeading
-                    eyebrow="Start Reading"
-                    title={
-                      <span className="flex items-center gap-2 text-lg font-bold tracking-tight text-white md:text-xl">
-                        <List className={cn("h-5 w-5", palette.primaryText)} />
-                        {chapterPrefix} ({chapterItems.length})
-                      </span>
-                    }
-                    description={
-                      chapterItems.length > 0
-                        ? "Begin at chapter one or jump into the newest drop."
-                        : "The next drop will appear in this shelf."
-                    }
-                    className="space-y-0"
-                  />
-                </div>
-              </div>
+              <StorefrontSectionHeading
+                eyebrow="Read"
+                title={`${chapterPrefix} (${chapterItems.length})`}
+                description={
+                  chapterItems.length > 0
+                    ? "Open a ready installment or unlock the next part."
+                    : `${chapterPrefix} will appear here when this story opens.`
+                }
+                className="mb-5 space-y-0 border-b border-white/10 pb-4"
+              />
 
               <div className="space-y-3">
                 {chapterItems.length === 0 ? (
@@ -851,7 +850,7 @@ function SeriesDetailContent({
                           Release window pending
                         </h3>
                         <p className="mt-2 max-w-xl text-sm leading-6 text-white/60">
-                          Save the series and the shelf will update when this title opens.
+                          {chapterPrefix} will appear here when this story opens.
                         </p>
                       </div>
                       <button
@@ -915,7 +914,7 @@ function SeriesDetailContent({
                             {chapter.title}
                           </h4>
                           <p className="mt-1 text-xs uppercase tracking-[0.18em] text-gray-500">
-                            {chapter.date}
+                            {chapter.metaLabel}
                           </p>
                         </div>
                       </div>
@@ -981,7 +980,7 @@ function SeriesDetailContent({
                             {chapter.title}
                           </h4>
                           <p className="mt-1 text-xs uppercase tracking-[0.18em] text-gray-500">
-                            {chapter.date}
+                            {chapter.metaLabel}
                           </p>
                         </div>
                       </div>
@@ -999,9 +998,44 @@ function SeriesDetailContent({
                 })}
               </div>
             </div>
+          </section>
 
-            <FigmaCommentsSection seriesTitle={detailItem.title} />
-          </div>
+          {relatedItems.length > 0 ? (
+            <section className="mt-8">
+              <StorefrontSectionHeading
+                eyebrow="Keep Going"
+                title="Related Stories"
+                description="More filtered titles from the same shelf."
+              />
+              <div className="mt-5 grid gap-3 md:grid-cols-3">
+                {relatedItems.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={item.detailHref}
+                    className="group overflow-hidden rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.045)] p-3 shadow-[0_18px_50px_rgba(0,0,0,0.22)] transition-all hover:border-white/20 hover:bg-white/[0.07]"
+                  >
+                    <div
+                      aria-hidden="true"
+                      role="presentation"
+                      className="aspect-[16/9] rounded-[20px] bg-cover bg-center opacity-82 transition-transform duration-500 group-hover:scale-[1.02]"
+                      style={{ backgroundImage: `url("${item.coverUrl}")` }}
+                    />
+                    <div className="p-2">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/42">
+                        {getSeriesFormatLabel(item)}
+                      </p>
+                      <h3 className="mt-2 line-clamp-2 text-base font-black text-white">
+                        {item.title}
+                      </h3>
+                      <p className="mt-2 text-sm text-white/58">
+                        {item.tags?.[0] || "Story"}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </div>
       </FigmaChrome>
       <UnlockChapterModal

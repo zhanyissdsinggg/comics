@@ -59,20 +59,11 @@ function createIdempotencyKey() {
   return `reader_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function formatMetaDate(value) {
-  if (!value) {
-    return "Today";
-  }
-
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return "Today";
-  }
-
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-  }).format(parsed);
+function formatMetaDate(value, seriesType = "comic") {
+  void value;
+  const installmentName = getInstallmentLabel(seriesType || "comic")
+    .toLowerCase();
+  return `Full ${installmentName} ready`;
 }
 
 function formatPriceLabel(value) {
@@ -1635,6 +1626,7 @@ function ReaderContent({
                       currentEpisode?.releasedAt ||
                         episodeData?.releasedAt ||
                         seriesData.series.updatedAt,
+                      seriesType,
                     )}{" / "}
                     {unlocked
                       ? `Full ${installmentLabel.toLowerCase()} unlocked.`
