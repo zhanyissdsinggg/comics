@@ -51,7 +51,7 @@ export default function ReaderTopBar({
           "fixed top-0 z-50 w-full backdrop-blur-xl transition-transform duration-300",
           isComic
             ? "border-b border-white/5 bg-[#0b0f16]/88 text-white"
-            : "border-b border-black/8 bg-[rgba(250,250,250,0.94)] text-[#1f2933]",
+            : "border-b border-white/10 bg-[rgba(7,9,15,0.88)] text-white shadow-[0_18px_50px_rgba(0,0,0,0.3)]",
         )}
       >
         <div
@@ -69,7 +69,7 @@ export default function ReaderTopBar({
                 "flex h-11 w-11 items-center justify-center transition-all active:scale-[0.97]",
                 isComic
                   ? `${storefrontSecondaryButtonClass} h-11 w-11 px-0 text-white`
-                  : "border-[#d8dde6] bg-white/90 text-[#1f2933] hover:bg-white",
+                  : "rounded-full border border-white/10 bg-white/5 text-white hover:bg-white/10",
               )}
             >
               <ChevronLeft className="h-5 w-5" />
@@ -79,7 +79,7 @@ export default function ReaderTopBar({
                 <p
                   className={cn(
                     "mb-1 truncate text-[10px] font-semibold uppercase tracking-[0.18em]",
-                    isComic ? "text-white/72" : "text-[#667085]",
+                    isComic ? "text-white/72" : "text-white/58",
                   )}
                 >
                   {contextLabel}
@@ -96,7 +96,7 @@ export default function ReaderTopBar({
               <p
                 className={cn(
                   "truncate text-xs md:text-sm",
-                  isComic ? "text-white/58" : "text-[#667085]",
+                  isComic ? "text-white/58" : "text-white/58",
                 )}
               >
                 {episodeLabel}
@@ -109,7 +109,7 @@ export default function ReaderTopBar({
               "inline-flex min-h-[44px] items-center px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em]",
               isComic
                 ? `${storefrontBadgeClass} text-white/72`
-                : "border-[#d8dde6] bg-white/90 text-[#667085]",
+                : "rounded-full border border-white/10 bg-white/5 text-white/62",
             )}
           >
             {typeof progress === "number"

@@ -190,16 +190,10 @@ export default function PageStream({
   const isVerticalComicFlow = !isHorizontal && visiblePages.length > 0;
   const proseThemeClass =
     textTheme === "sepia"
-      ? "bg-[#fbf7ef] text-[#2f261f]"
+      ? "bg-[rgba(36,27,18,0.72)] text-[#f4e8d6]"
       : textTheme === "dark"
         ? "bg-[#0f1115] text-[#e5e7eb]"
-        : "bg-[#fafafa] text-[#1f2933]";
-  const proseMutedClass =
-    textTheme === "sepia"
-      ? "text-[#6d5b48]"
-      : textTheme === "dark"
-        ? "text-[#9ca3af]"
-        : "text-[#667085]";
+        : "bg-[rgba(255,255,255,0.045)] text-white";
   const initialReadyCount = useMemo(
     () => Math.max(1, Math.min(visiblePages.length, prefetchCount || 1)),
     [prefetchCount, visiblePages.length],
@@ -409,9 +403,11 @@ export default function PageStream({
     >
       {visiblePages.length === 0 && visibleParagraphs.length === 0 ? (
         <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045)_0%,rgba(255,255,255,0.025)_100%)] p-6 text-sm text-white/66 shadow-[0_18px_38px_rgba(8,6,20,0.22)] backdrop-blur-xl">
-          <p className="text-base font-semibold text-white">No content</p>
+          <p className="text-base font-semibold text-white">
+            Preview unavailable
+          </p>
           <p className="mt-2 text-xs text-white/46">
-            Pages are not live yet.
+            Open the series shelf and try this chapter again.
           </p>
         </div>
       ) : visiblePages.length > 0 ? (

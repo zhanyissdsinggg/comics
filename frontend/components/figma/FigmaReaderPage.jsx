@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Lock } from "lucide-react";
 import { apiGet } from "../../lib/apiClient";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import {
@@ -675,7 +674,6 @@ function ReaderContent({
       : null;
   const seriesType = seriesData?.series?.type || episodeData?.type || "comic";
   const installmentLabel = getInstallmentLabel(seriesType);
-  const installmentPlural = getInstallmentLabel(seriesType, { plural: true });
   const currentNumber = currentEpisode?.number || episodeData?.number || 1;
   const currentInstallmentLabel = formatInstallmentLabel(
     seriesType,
@@ -788,47 +786,15 @@ function ReaderContent({
     "Preparing chapter";
   const novelTheme = nightMode ? "dark" : theme || "light";
   const novelShellClass =
-    novelTheme === "sepia"
-      ? "bg-[#fbf7ef] text-[#2f261f]"
-      : novelTheme === "dark"
-        ? "bg-[#0f1115] text-[#e5e7eb]"
-        : "bg-[#fafafa] text-[#1f2933]";
-  const novelMutedClass =
-    novelTheme === "sepia"
-      ? "text-[#6d5b48]"
-      : novelTheme === "dark"
-        ? "text-[#9ca3af]"
-        : "text-[#667085]";
-  const novelBorderClass =
-    novelTheme === "sepia"
-      ? "border-[#d8cbb5]"
-      : novelTheme === "dark"
-        ? "border-white/10"
-        : "border-[#e5e7eb]";
+    "overflow-x-hidden bg-[radial-gradient(circle_at_top,rgba(255,79,154,0.12),transparent_26%),radial-gradient(circle_at_82%_16%,rgba(103,232,249,0.1),transparent_24%),linear-gradient(180deg,#05060a_0%,#0a0d16_46%,#05060a_100%)] text-white";
+  const novelMutedClass = "text-white/58";
+  const novelBorderClass = "border-white/10";
   const novelTopBarClass =
-    novelTheme === "sepia"
-      ? "border-[#d8cbb5]/85 bg-[rgba(251,247,239,0.92)] text-[#2f261f]"
-      : novelTheme === "dark"
-        ? "border-white/10 bg-[rgba(15,17,21,0.9)] text-[#e5e7eb]"
-        : "border-[#e5e7eb] bg-[rgba(250,250,250,0.94)] text-[#1f2933]";
-  const novelTopButtonClass =
-    novelTheme === "sepia"
-      ? "border-[#d8cbb5] bg-[#f8efdf]/90 text-[#2f261f] hover:bg-[#f1e3c8]"
-      : novelTheme === "dark"
-        ? "border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white"
-        : "border-[#d8dde6] bg-white/90 text-[#1f2933] hover:bg-white";
+    "border-white/10 bg-[rgba(7,9,15,0.88)] text-white shadow-[0_-18px_50px_rgba(0,0,0,0.3)]";
   const novelHeroClass =
-    novelTheme === "sepia"
-      ? "rounded-[30px] border border-[#d8cbb5] bg-[#fbf3e4] px-5 py-6 shadow-[0_24px_60px_rgba(88,63,39,0.08)] md:px-7 md:py-7"
-      : novelTheme === "dark"
-        ? "rounded-[30px] border border-white/10 bg-[#11161d] px-5 py-6 shadow-[0_24px_70px_rgba(0,0,0,0.28)] md:px-7 md:py-7"
-        : "rounded-[30px] border border-[#e5e7eb] bg-white px-5 py-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] md:px-7 md:py-7";
+    "rounded-[30px] border border-white/10 bg-[linear-gradient(145deg,rgba(17,20,30,0.96)_0%,rgba(8,10,16,0.98)_50%,rgba(20,12,26,0.94)_100%)] px-5 py-6 shadow-[0_28px_80px_rgba(0,0,0,0.34)] md:px-7 md:py-7";
   const novelReaderFrameClass =
-    novelTheme === "sepia"
-      ? "rounded-[28px] border border-[#d8cbb5] bg-[#fbf7ef]"
-      : novelTheme === "dark"
-        ? "rounded-[28px] border border-white/10 bg-[#0f1115]"
-        : "rounded-[28px] border border-[#e5e7eb] bg-white";
+    "rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,17,26,0.98)_0%,rgba(8,10,16,0.98)_100%)] shadow-[0_24px_70px_rgba(0,0,0,0.28)]";
   const readerMutedClass = isComic ? "text-white/58" : novelMutedClass;
   const readerPanelClass = isComic
     ? "border-white/10 bg-[rgba(255,255,255,0.035)]"
@@ -850,7 +816,7 @@ function ReaderContent({
   const loadingMutedClass = loadingIsComic ? "text-white/55" : novelMutedClass;
   const loadingBorderClass = loadingIsComic
     ? "border-white/10 bg-[rgba(255,255,255,0.035)]"
-    : `${novelBorderClass} bg-black/[0.02]`;
+    : `${novelBorderClass} bg-[rgba(255,255,255,0.035)]`;
   const readerAnalyticsPayload = useMemo(
     () => ({
       seriesId,
@@ -1508,7 +1474,7 @@ function ReaderContent({
           "rounded-2xl border px-6 py-3 font-bold transition-colors",
           loadingIsComic
             ? "border-white/10 text-gray-300 hover:bg-white/5 hover:text-white"
-            : `${novelBorderClass} text-current hover:bg-black/[0.035]`,
+            : `${novelBorderClass} bg-white/5 text-white hover:bg-white/10`,
         )}
         onRetry={() => router.refresh()}
         onBack={() => router.push(backToSeriesHref)}
@@ -1594,7 +1560,7 @@ function ReaderContent({
               "relative overflow-hidden border shadow-[0_26px_80px_rgba(0,0,0,0.28)]",
               isComic
                 ? "rounded-[30px] border-white/10 bg-[linear-gradient(145deg,rgba(17,20,30,0.98)_0%,rgba(8,10,16,0.98)_48%,rgba(18,13,24,0.98)_100%)] px-5 py-5 md:px-6 md:py-6"
-                : "rounded-[30px] border-[#e5dccd] bg-[linear-gradient(180deg,rgba(255,251,244,0.98)_0%,rgba(250,244,235,0.98)_100%)] px-5 py-5 shadow-[0_24px_60px_rgba(82,56,28,0.08)] md:px-6 md:py-6",
+                : "rounded-[30px] border-white/10 bg-[linear-gradient(145deg,rgba(17,20,30,0.96)_0%,rgba(8,10,16,0.98)_50%,rgba(20,12,26,0.94)_100%)] px-5 py-5 md:px-6 md:py-6",
             )}
           >
             {isComic ? (
@@ -1913,12 +1879,12 @@ function ReaderContent({
         borderClassName={
           isComic
             ? "border-white/10 bg-white/5 text-white hover:bg-white/10"
-            : `${novelBorderClass} bg-black/[0.02] text-current hover:bg-black/[0.035]`
+            : `${novelBorderClass} bg-white/5 text-white hover:bg-white/10`
         }
         primaryButtonClassName={cn(
           "inline-flex min-h-[56px] items-center justify-center rounded-2xl px-5 py-3 text-sm font-black text-white transition-transform active:scale-[0.98]",
           unlocked && !nextEpisode && !isComic
-            ? `${novelBorderClass} bg-black/[0.035] text-current`
+            ? `${novelBorderClass} bg-white/5 text-white`
             : unlocked && !nextEpisode
               ? "border border-white/10 bg-white/5"
               : palette.primaryBg,
@@ -1927,7 +1893,7 @@ function ReaderContent({
           "inline-flex min-h-[52px] items-center justify-center rounded-2xl border px-5 py-3 text-sm font-bold transition-colors",
           isComic
             ? "border-white/10 bg-white/5 text-white hover:bg-white/10"
-            : `${novelBorderClass} bg-black/[0.02] text-current hover:bg-black/[0.035]`,
+            : `${novelBorderClass} bg-white/5 text-white hover:bg-white/10`,
         )}
         heading={
           unlocked
@@ -2045,30 +2011,30 @@ function ReaderContent({
           "inline-flex min-h-[42px] min-w-[108px] items-center justify-center rounded-full border px-4 text-sm font-bold transition-colors",
           isComic
             ? "border-white/10 bg-white/5 text-white hover:bg-white/10"
-            : `${novelBorderClass} bg-black/[0.02] text-current hover:bg-black/[0.035]`,
+            : `${novelBorderClass} bg-white/5 text-white hover:bg-white/10`,
         )}
         centerButtonClassName={cn(
           "inline-flex min-h-[42px] items-center gap-2 rounded-full border px-4 text-sm font-bold transition-colors",
           isComic
             ? "border-white/10 bg-white/10 text-white hover:bg-white/15"
-            : `${novelBorderClass} bg-black/[0.02] text-current hover:bg-black/[0.035]`,
+            : `${novelBorderClass} bg-white/10 text-white hover:bg-white/15`,
         )}
         iconButtonClassName={cn(
           isComic
             ? "border-white/10 bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white"
-            : `${novelBorderClass} bg-black/[0.02] text-current hover:bg-black/[0.035]`,
+            : `${novelBorderClass} bg-white/5 text-white/82 hover:bg-white/10 hover:text-white`,
         )}
         activeButtonClassName={
           isComic
             ? "border-white/20 bg-white/10 text-white"
-            : "border-current bg-black/[0.06] text-current"
+            : "border-white/20 bg-white/12 text-white"
         }
         primaryButtonClassName={cn(
           "inline-flex min-h-[42px] min-w-[108px] items-center justify-center rounded-full px-4 text-sm font-black transition-transform active:scale-[0.98]",
           nextEpisode ? palette.primaryBg : "border border-white/10 bg-white/5",
           !nextEpisode &&
             !isComic &&
-            `${novelBorderClass} bg-black/[0.035] text-current`,
+            `${novelBorderClass} bg-white/5 text-white`,
         )}
         progressPercent={progressPercent}
         hasPrev={Boolean(prevEpisode)}

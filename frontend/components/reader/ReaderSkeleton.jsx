@@ -104,7 +104,7 @@ export default function ReaderSkeleton({
                 "inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-full border px-4 text-sm font-bold transition-colors",
                 isComic
                   ? `${storefrontSecondaryButtonClass} text-white`
-                  : `${borderClassName} bg-[rgba(15,23,42,0.02)] text-current hover:bg-[rgba(15,23,42,0.04)]`,
+                  : `${borderClassName} bg-white/5 text-white hover:bg-white/10`,
               )}
             >
               View Series

@@ -460,13 +460,23 @@ function SeriesDetailContent({
           <div className="mx-auto flex min-h-[72vh] max-w-[960px] items-center justify-center px-4 py-24">
             <div
               className={cn(
-                "w-full rounded-3xl border p-10 text-center shadow-2xl",
+                "relative w-full overflow-hidden rounded-[34px] border p-6 text-center shadow-[0_32px_90px_rgba(0,0,0,0.34)] md:p-10",
                 palette.surface,
                 palette.border,
               )}
             >
-              <h1 className="mb-3 text-3xl font-black text-white">
-                Loading story
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.16),transparent_30%),radial-gradient(circle_at_82%_12%,rgba(103,232,249,0.1),transparent_26%)]" />
+              <div className="relative mx-auto mb-6 grid max-w-md grid-cols-[92px_minmax(0,1fr)] gap-4 text-left">
+                <div className="h-32 animate-pulse rounded-[22px] border border-white/10 bg-white/10" />
+                <div className="space-y-3 pt-2">
+                  <div className="h-3 w-28 animate-pulse rounded-full bg-white/12" />
+                  <div className="h-8 w-full animate-pulse rounded-full bg-white/14" />
+                  <div className="h-3 w-4/5 animate-pulse rounded-full bg-white/10" />
+                  <div className="h-3 w-2/3 animate-pulse rounded-full bg-white/10" />
+                </div>
+              </div>
+              <h1 className="relative mb-3 text-3xl font-black text-white">
+                Preparing this story
               </h1>
               <p className="mx-auto max-w-lg text-gray-400">
                 Refreshing the correct catalog for this mode.
@@ -714,13 +724,17 @@ function SeriesDetailContent({
             <div className="mt-6 grid gap-3 md:grid-cols-3">
               <div className={storefrontInfoCardClass}>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46">
-                  Reading flow
+                  Story Snapshot
                 </p>
                 <p className="mt-3 text-base font-semibold text-white">
-                  {chapterItems.length > 0 ? "Jump in tonight" : "Waiting on release"}
+                  {isInteractive
+                    ? "Interactive route"
+                    : isNovel
+                      ? "Novel serial"
+                      : "Comic series"}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-white/62">
-                  Start from the first installment or open the latest live drop from the episode shelf.
+                  Start from the first installment or open the latest live drop from the shelf.
                 </p>
               </div>
               <div className={storefrontInfoCardClass}>
@@ -739,10 +753,12 @@ function SeriesDetailContent({
                   Episode access
                 </p>
                 <p className="mt-3 text-base font-semibold text-white">
-                  {chapterItems.length} listed
+                  {chapterItems.length > 0
+                    ? `${chapterItems.length} listed`
+                    : "Release pending"}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-white/62">
-                  Read, unlock, and preview states are surfaced directly in the chapter rail below.
+                  Read, unlock, and preview states stay inside the chapter rail.
                 </p>
               </div>
             </div>
@@ -812,13 +828,46 @@ function SeriesDetailContent({
                         {chapterPrefix} ({chapterItems.length})
                       </span>
                     }
-                    description="Begin at chapter one or jump into the newest drop."
+                    description={
+                      chapterItems.length > 0
+                        ? "Begin at chapter one or jump into the newest drop."
+                        : "The next drop will appear in this shelf."
+                    }
                     className="space-y-0"
                   />
                 </div>
               </div>
 
               <div className="space-y-3">
+                {chapterItems.length === 0 ? (
+                  <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0.035)_100%)] p-5 shadow-[0_22px_60px_rgba(0,0,0,0.22)] md:p-6">
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.14),transparent_28%),radial-gradient(circle_at_84%_18%,rgba(103,232,249,0.1),transparent_24%)]" />
+                    <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/46">
+                          {chapterPrefix} shelf
+                        </p>
+                        <h3 className="mt-2 text-xl font-black text-white">
+                          Release window pending
+                        </h3>
+                        <p className="mt-2 max-w-xl text-sm leading-6 text-white/60">
+                          Save the series and the shelf will update when this title opens.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleLibraryToggle}
+                        className={cn(
+                          storefrontSecondaryButtonClass,
+                          "min-h-[46px] rounded-full px-5 text-sm font-bold",
+                        )}
+                      >
+                        <BookmarkPlus className="h-4 w-4" />
+                        Save Series
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
                 {chapterItems.map((chapter, index) => {
                   const accessState = chapter.rawEpisode
                     ? getEpisodeAccessState({
@@ -888,6 +937,7 @@ function SeriesDetailContent({
                           "min-h-[44px] rounded-full px-4 py-2.5 text-sm font-bold",
                         )}
                       >
+                        <Lock className="h-4 w-4" />
                         Unlock with Points
                       </button>
                     </div>
