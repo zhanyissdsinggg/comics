@@ -17,9 +17,10 @@ import {
 } from "../landingUtils";
 import GenreChip from "./GenreChip";
 
-function buildCoverAlt(series) {
+function buildCoverAlt(series, sourceSection, position) {
   const title = String(series?.title || "").trim() || "Untitled";
-  return `Cover image for ${title}`;
+  const section = String(sourceSection || "home story").replace(/[_-]+/g, " ");
+  return `Cover image for ${title} in ${section} position ${position || 1}`;
 }
 
 export default function StoryMiniCard({
@@ -89,7 +90,7 @@ export default function StoryMiniCard({
           <div className="relative h-[102px] w-[76px] shrink-0 overflow-hidden rounded-[15px] border border-[rgba(255,255,255,0.08)]">
             <img
               src={coverUrl}
-              alt={buildCoverAlt(series)}
+              alt={buildCoverAlt(series, sourceSection, position)}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
               style={{ objectPosition: coverPosition }}
             />
@@ -151,7 +152,7 @@ export default function StoryMiniCard({
         <div className="relative w-[90px] shrink-0 overflow-hidden rounded-[20px] border border-[rgba(255,255,255,0.08)] sm:w-[104px]">
           <img
             src={coverUrl}
-            alt={buildCoverAlt(series)}
+            alt={buildCoverAlt(series, sourceSection, position)}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
             style={{ objectPosition: coverPosition }}
           />

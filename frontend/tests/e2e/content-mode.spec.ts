@@ -1616,7 +1616,7 @@ test.describe("Content mode filtering", () => {
     ).toBeVisible();
   });
 
-  test("search footer should keep Interactive when the current page is plain search", async ({
+  test("search footer should keep public discovery links when the current page is plain search", async ({
     page,
   }) => {
     const response = await page.goto("/search", {
@@ -1630,7 +1630,7 @@ test.describe("Content mode filtering", () => {
     ).toBeVisible();
     await expect(
       footer.getByRole("link", { name: "Search", exact: true }),
-    ).toHaveCount(0);
+    ).toBeVisible();
   });
 
   test("search fallback views should not collapse into repeated seed values", async ({
@@ -1678,7 +1678,7 @@ test.describe("Content mode filtering", () => {
     const footer = page.locator('footer[data-site-footer="1"]').first();
     await expect(
       footer.getByRole("link", { name: "Interactive", exact: true }),
-    ).toHaveCount(0);
+    ).toBeVisible();
     await expect(
       footer.getByRole("link", { name: "Search", exact: true }),
     ).toBeVisible();
@@ -1701,7 +1701,7 @@ test.describe("Content mode filtering", () => {
 
     await page.getByRole("button", { name: /menu/i }).first().click();
     const interactiveLink = page
-      .locator('div.fixed.inset-0.z-50')
+      .getByTestId("header-menu-modal")
       .getByRole("link", { name: "Interactive", exact: true })
       .first();
     await expect(interactiveLink).toBeVisible({ timeout: UI_TIMEOUT_MS });

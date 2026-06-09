@@ -55,7 +55,7 @@ function CompletedCard({ series, position, featured = false }) {
           <div className="aspect-[3/4] h-full w-full">
             <img
               src={coverUrl}
-              alt={`Cover image for ${series.title}`}
+              alt={`Cover image for ${series.title} in completed binge position ${position}`}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
               style={{ objectPosition: coverPosition }}
             />

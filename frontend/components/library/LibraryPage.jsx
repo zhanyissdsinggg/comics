@@ -1006,6 +1006,11 @@ export default function LibraryPage({
             eyebrow={heroEyebrow}
             title={libraryDeskTitle}
             description={signedInHeroDescription}
+            posterDescription={
+              viewerSignedIn
+                ? signedInHeroDescription
+                : "Start with a free chapter, then keep your shelf synced."
+            }
             secondary={signedOutHeroSecondary}
             stats={libraryStats}
             appearance="dark"

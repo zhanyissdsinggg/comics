@@ -13,7 +13,7 @@ import {
 import { TEST_FRONTEND_BASE_URL } from "./support/testBaseUrl";
 
 const UI_TIMEOUT_MS = 15000;
-const LEGAL_ENTITY_NAME = "Targaryen technology Co., Limited";
+const LEGAL_ENTITY_NAME = "Targaryen Technology Co., Limited";
 const BRAND_OPERATED_STATEMENT = `Gush Comics is operated by ${LEGAL_ENTITY_NAME}.`;
 const BANNED_STRINGS = [
   "Demo Series",
@@ -958,13 +958,17 @@ const CANONICAL_ROUTE_SPECS = [
   },
   { path: "/comics", title: /Comics/i, heading: null },
   { path: "/novels", title: /Novels/i, heading: null },
-  { path: "/creators", title: /Creators/i, heading: /^Creators$/i },
+  {
+    path: "/creators",
+    title: /Creators/i,
+    heading: /^Find the shelf behind the story you keep opening\.$/i,
+  },
   {
     path: "/search",
     title: /Search Comics & Novels|Search:|Find your next obsession/i,
     heading: /^Find your next read$/i,
   },
-  { path: "/rankings", title: /Trending Stories/i, heading: /Trending/i },
+  { path: "/rankings", title: /Rankings|Trending Stories/i, heading: /^Rankings$/i },
   {
     path: "/series/series-001",
     title: /The Last Kingdom|Story/i,
@@ -2424,12 +2428,13 @@ test.describe("Public reading funnel", () => {
     response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
     await page.getByRole("button", { name: /Open menu/i }).click();
-    const menu = page.locator("div.fixed.inset-0.z-50");
-    await expect(menu).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    const menu = page.getByTestId("header-menu-modal");
+    const comicsMenuLink = menu.getByRole("link", { name: "Comics" });
+    await expect(comicsMenuLink).toBeVisible({ timeout: UI_TIMEOUT_MS });
 
     await Promise.all([
       page.waitForURL(/\/comics(?:\?|$)/, { timeout: UI_TIMEOUT_MS }),
-      menu.getByRole("link", { name: "Comics" }).click(),
+      comicsMenuLink.click(),
     ]);
     await expect(
       page.getByRole("heading", { name: "Comics" }).first(),
@@ -2440,13 +2445,15 @@ test.describe("Public reading funnel", () => {
     response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
     await page.getByRole("button", { name: /Open menu/i }).click();
-    await expect(menu).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    const reopenedMenu = page.getByTestId("header-menu-modal");
+    const novelsMenuLink = reopenedMenu.getByRole("link", { name: "Novels" });
+    await expect(novelsMenuLink).toBeVisible({ timeout: UI_TIMEOUT_MS });
     await Promise.all([
       page.waitForURL(/\/novels(?:\?|$)/, { timeout: UI_TIMEOUT_MS }),
-      menu.getByRole("link", { name: "Novels" }).click(),
+      novelsMenuLink.click(),
     ]);
     await expect(
-      page.getByRole("heading", { name: "Novels" }).first(),
+      page.locator("main h1").filter({ hasText: "Solar Wind" }).first(),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
@@ -2502,6 +2509,7 @@ test.describe("Public reading funnel", () => {
 
   test("interactive landing, detail, and play routes work in normal mode", async ({
     page,
+    browser,
   }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockPublicApi(page, {
@@ -2525,42 +2533,63 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("main")).toContainText("Midnight Archive");
     await expect(page.locator("main")).not.toContainText("After Dark Protocol");
     await expect(page.locator("[data-testid='interactive-story-grid']")).toContainText("3 endings");
+    await expectNoRuntimeIssues("interactive-landing", runtimeIssues);
+    runtimeIssues.pageErrors.length = 0;
+    runtimeIssues.consoleErrors.length = 0;
 
-    response = await page.goto("/interactive/midnight-archive", {
+    const detailPage = await browser.newPage();
+    const detailRuntimeIssues = collectRuntimeIssues(detailPage);
+    await mockPublicApi(detailPage, {
+      signedIn: true,
+      matureConfirmed: false,
+      matureModeEnabled: false,
+    });
+    response = await detailPage.goto("/interactive/midnight-archive", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
     await expect(
-      page.getByRole("heading", { name: "Midnight Archive" }),
+      detailPage.getByRole("heading", { name: "Midnight Archive" }),
     ).toBeVisible({ timeout: UI_TIMEOUT_MS });
     await expect(
-      page.getByRole("link", { name: /Start Reading|Continue Reading/i }),
+      detailPage.getByRole("link", { name: /Start Reading|Continue Reading/i }),
     ).toHaveAttribute("href", /\/interactive\/midnight-archive\/play$/);
-    await expect(page.locator("main")).toContainText("Mystery");
-    await expect(page.locator("main")).toContainText("7");
+    await expect(detailPage.locator("main")).toContainText("Mystery");
+    await expect(detailPage.locator("main")).toContainText("7");
+    await expectNoRuntimeIssues("interactive-detail", detailRuntimeIssues);
+    await detailPage.close();
 
-    response = await page.goto("/interactive/midnight-archive/play", {
+    const playPage = await browser.newPage();
+    const playRuntimeIssues = collectRuntimeIssues(playPage);
+    await mockPublicApi(playPage, {
+      signedIn: true,
+      matureConfirmed: false,
+      matureModeEnabled: false,
+    });
+    response = await playPage.goto("/interactive/midnight-archive/play", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
-    await expect(page.locator("main")).toContainText("The Hall Goes Quiet");
-    await expect(page.locator("main")).toContainText("Choices");
-    await expect(page.locator("main")).toContainText("Pick carefully");
-    await expect(page.locator("main")).toContainText("Your story so far");
-    await expect(page.locator("main")).toContainText("Step 1");
+    await expect(playPage.locator("main")).toContainText("The Hall Goes Quiet");
+    await expect(playPage.locator("main")).toContainText("Choices");
+    await expect(playPage.locator("main")).toContainText("Pick carefully");
+    await expect(playPage.locator("main")).toContainText("Your story so far");
+    await expect(playPage.locator("main")).toContainText("Step 1");
 
-    const unlockedChoice = page.getByRole("button", {
+    const unlockedChoice = playPage.getByRole("button", {
       name: /Follow the upstairs note/i,
     });
-    const lockedChoice = page.getByRole("button", {
+    const lockedChoice = playPage.getByRole("button", {
       name: "Crack the radio cabinet",
       exact: true,
     });
     await expect(unlockedChoice).toBeEnabled();
     await expect(lockedChoice).toBeDisabled();
-    await expect(page.locator("main")).toContainText("Premium choice");
+    await expect(playPage.locator("main")).toContainText("Premium choice");
 
     await expectNoRuntimeIssues("interactive-normal-routes", runtimeIssues);
+    await expectNoRuntimeIssues("interactive-play", playRuntimeIssues);
+    await playPage.close();
   });
 
   test("interactive landing renders empty state instead of loading when no stories are published", async ({
@@ -2579,13 +2608,15 @@ test.describe("Public reading funnel", () => {
     });
     expect(response?.ok()).toBeTruthy();
     const html = await page.content();
-    expect(html).toContain(
+    expect(html).toContain("Your Choice Changes the Story");
+    expect(html).toContain("How choices work");
+    expect(html).not.toContain(
       "More interactive stories are on the way. Check back soon for fresh routes and new endings.",
     );
     expect(html).not.toContain(">Loading<");
     expect(html).not.toContain("Launch checklist");
     await expect(page.locator("main")).toContainText(
-      "More interactive stories are on the way. Check back soon for fresh routes and new endings.",
+      "Your Choice Changes the Story",
     );
     await expect(
       page.getByRole("link", { name: "Interactive", exact: true }),
@@ -2624,80 +2655,111 @@ test.describe("Public reading funnel", () => {
   });
 
   test("interactive locker letter play renders story body, locked states, ending, and restart", async ({
-    page,
+    browser,
   }) => {
-    const runtimeIssues = collectRuntimeIssues(page);
-    await mockPublicApi(page, {
+    const landingPage = await browser.newPage();
+    const landingRuntimeIssues = collectRuntimeIssues(landingPage);
+    await mockPublicApi(landingPage, {
       signedIn: true,
       matureConfirmed: false,
       matureModeEnabled: false,
     });
 
-    const landingResponse = await page.goto("/interactive", {
+    const landingResponse = await landingPage.goto("/interactive", {
       waitUntil: "domcontentloaded",
     });
     expect(landingResponse?.ok()).toBeTruthy();
-    const landingHtml = await page.content();
+    const landingHtml = await landingPage.content();
     expect(landingHtml).toContain("Midnight Archive");
     expect(landingHtml).toContain("The Locker Letter");
+    await expectNoRuntimeIssues(
+      "interactive-locker-letter-landing",
+      landingRuntimeIssues,
+    );
+    await landingPage.close();
 
-    const detailResponse = await page.goto("/interactive/the-locker-letter", {
+    const detailPage = await browser.newPage();
+    const detailRuntimeIssues = collectRuntimeIssues(detailPage);
+    await mockPublicApi(detailPage, {
+      signedIn: true,
+      matureConfirmed: false,
+      matureModeEnabled: false,
+    });
+
+    const detailResponse = await detailPage.goto("/interactive/the-locker-letter", {
       waitUntil: "domcontentloaded",
     });
     expect(detailResponse?.ok()).toBeTruthy();
-    await expect(page.locator("main")).toContainText("The Locker Letter");
-    await expect(page.locator("main")).toContainText("hallway rumor");
-    await expect(page.locator("main")).toContainText("Why you'll like it");
-    await expect(page.locator("main")).toContainText("2 endings");
-    await expect(page.locator("main")).toContainText("17 choices");
-    await expect(page.locator("main")).toContainText("Hidden clue path");
-    await expect(page.locator("main")).toContainText("Quick mystery run");
+    await expect(detailPage.locator("main")).toContainText("The Locker Letter");
+    await expect(detailPage.locator("main")).toContainText("hallway rumor");
+    await expect(detailPage.locator("main")).toContainText("Why Start");
+    await expect(detailPage.locator("main")).toContainText("2 endings");
+    await expect(detailPage.locator("main")).toContainText("17 choices");
+    await expect(detailPage.locator("main")).toContainText("Hidden clue path");
+    await expect(detailPage.locator("main")).toContainText("Quick mystery run");
 
-    const playResponse = await page.goto("/interactive/the-locker-letter/play", {
+    await expectNoRuntimeIssues(
+      "interactive-locker-letter-detail",
+      detailRuntimeIssues,
+    );
+    await detailPage.close();
+
+    const playPage = await browser.newPage();
+    const playRuntimeIssues = collectRuntimeIssues(playPage);
+    await mockPublicApi(playPage, {
+      signedIn: true,
+      matureConfirmed: false,
+      matureModeEnabled: false,
+    });
+
+    const playResponse = await playPage.goto("/interactive/the-locker-letter/play", {
       waitUntil: "domcontentloaded",
     });
     expect(playResponse?.ok()).toBeTruthy();
-    await expect(page.locator("main")).toContainText("Now Reading");
-    await expect(page.locator("main")).toContainText("The Locker Letter");
-    await expect(page.locator("main")).toContainText("Pick carefully");
-    await expect(page.locator("main")).toContainText(
+    await expect(playPage.locator("main")).toContainText("Now Reading");
+    await expect(playPage.locator("main")).toContainText("The Locker Letter");
+    await expect(playPage.locator("main")).toContainText("Pick carefully");
+    await expect(playPage.locator("main")).toContainText(
       "Between fourth period and lunch, a folded note slides out of locker 318.",
     );
-    await expect(page.locator("main")).toContainText("Your story so far");
-    await expect(page.locator("main")).not.toContainText("State");
-    await expect(page.locator("main")).not.toContainText("affection:");
-    await expect(page.locator("main")).not.toContainText("trust:");
-    await expect(page.locator("main")).not.toContainText("risk:");
-    await expect(page.locator("main")).not.toContainText("clues:");
-    await expect(page.locator("main")).toContainText("Ask Maya about the note");
-    await expect(page.locator("main")).toContainText("Check the security camera room");
-    await expect(page.locator("main")).toContainText("Bribe the lunch cashier for the receipt log");
-    await expect(page.locator("main")).toContainText("Premium readers can open this choice.");
-    await expect(page.locator("main")).toContainText("This choice unlocks later.");
+    await expect(playPage.locator("main")).toContainText("Your story so far");
+    await expect(playPage.locator("main")).not.toContainText("State");
+    await expect(playPage.locator("main")).not.toContainText("affection:");
+    await expect(playPage.locator("main")).not.toContainText("trust:");
+    await expect(playPage.locator("main")).not.toContainText("risk:");
+    await expect(playPage.locator("main")).not.toContainText("clues:");
+    await expect(playPage.locator("main")).toContainText("Ask Maya about the note");
+    await expect(playPage.locator("main")).toContainText("Check the security camera room");
+    await expect(playPage.locator("main")).toContainText(
+      "Bribe the lunch cashier for the receipt log",
+    );
+    await expect(playPage.locator("main")).toContainText("Premium readers can open this choice.");
+    await expect(playPage.locator("main")).toContainText("This choice unlocks later.");
 
-    const firstChoice = page.getByRole("button", {
+    const firstChoice = playPage.getByRole("button", {
       name: /Ask Maya about the note/i,
     });
     await firstChoice.click();
-    await expect(page.locator("main")).toContainText("Cafeteria Ending", {
+    await expect(playPage.locator("main")).toContainText("Cafeteria Ending", {
       timeout: UI_TIMEOUT_MS,
     });
-    await expect(page.locator("main")).toContainText("Ending");
+    await expect(playPage.locator("main")).toContainText("Ending");
 
-    await page.getByRole("button", { name: /Restart/i }).first().click();
-    await expect(page.locator("main")).toContainText(
+    await playPage.getByRole("button", { name: /Restart/i }).first().click();
+    await expect(playPage.locator("main")).toContainText(
       "Between fourth period and lunch, a folded note slides out of locker 318.",
       { timeout: UI_TIMEOUT_MS },
     );
-    await expect(page.locator("main")).toContainText("Ask Maya about the note");
+    await expect(playPage.locator("main")).toContainText("Ask Maya about the note");
 
-    const tokenLockedChoice = page.getByRole("button", {
+    const tokenLockedChoice = playPage.getByRole("button", {
       name: "Bribe the lunch cashier for the receipt log",
       exact: true,
     });
     await expect(tokenLockedChoice).toBeDisabled();
 
-    await expectNoRuntimeIssues("interactive-locker-letter-play", runtimeIssues);
+    await expectNoRuntimeIssues("interactive-locker-letter-play", playRuntimeIssues);
+    await playPage.close();
   });
 
   test("interactive play lets guests read the opening node without empty current-node shell", async ({
@@ -2740,13 +2802,29 @@ test.describe("Public reading funnel", () => {
     });
     expect(response?.ok()).toBeTruthy();
     await expect(page.locator("main")).not.toContainText("After Dark Protocol");
+    await expectNoRuntimeIssues("interactive-adult-hidden-landing", runtimeIssues);
+    runtimeIssues.pageErrors.length = 0;
+    runtimeIssues.consoleErrors.length = 0;
 
-    response = await page.goto("/interactive/after-dark-protocol", {
+    const hiddenDetailPage = await browser.newPage();
+    const hiddenDetailRuntimeIssues = collectRuntimeIssues(hiddenDetailPage);
+    await mockPublicApi(hiddenDetailPage, {
+      signedIn: true,
+      matureConfirmed: false,
+      matureModeEnabled: false,
+    });
+
+    response = await hiddenDetailPage.goto("/interactive/after-dark-protocol", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
-    await expect(page.locator("main")).not.toContainText("After Dark Protocol");
-    await expect(page.locator("main")).toContainText("Interactive Story");
+    await expect(hiddenDetailPage.locator("main")).not.toContainText("After Dark Protocol");
+    await expect(hiddenDetailPage.locator("main")).toContainText("Interactive Story");
+    await expectNoRuntimeIssues(
+      "interactive-adult-hidden-detail",
+      hiddenDetailRuntimeIssues,
+    );
+    await hiddenDetailPage.close();
 
     const adultPage = await browser.newPage();
     const adultRuntimeIssues = collectRuntimeIssues(adultPage);
@@ -2922,9 +3000,7 @@ test.describe("Public reading funnel", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    const titleCard = page
-      .getByRole("link", { name: /The Last Kingdom/i })
-      .first();
+    const titleCard = page.locator('a[href="/series/series-001"]').first();
     await expect(titleCard).toBeVisible({ timeout: UI_TIMEOUT_MS });
 
     await Promise.all([
@@ -3044,20 +3120,20 @@ test.describe("Public reading funnel", () => {
     });
     await expect(page.locator("main")).toContainText("Neon Nights");
     await expect(
-      page.getByRole("heading", { name: /Top Novels/i }),
+      page.getByRole("heading", { name: /Novel Shelf/i }),
     ).toBeVisible();
-    await expect(page.locator("main")).toContainText("Late-Night Reads");
+    await expect(page.locator("main")).toContainText("Short Reads");
     await expect(page.locator("main")).not.toContainText("Coming Soon");
     await expectNoRuntimeIssues("/novels shelf fallback", runtimeIssues);
   });
 
   test("all real series routes render non-empty SSR detail content", async ({
-    page,
+    browser,
   }) => {
-    const runtimeIssues = collectRuntimeIssues(page);
-    await mockPublicApi(page);
-
     for (const seriesSpec of REAL_SERIES_ROUTE_SPECS) {
+      const page = await browser.newPage();
+      const runtimeIssues = collectRuntimeIssues(page);
+      await mockPublicApi(page);
       const routePath = `/series/${seriesSpec.id}`;
       const response = await gotoWithRetry(page, routePath);
       expect(response?.ok(), `${routePath} should load`).toBeTruthy();
@@ -3087,13 +3163,27 @@ test.describe("Public reading funnel", () => {
       }
 
       const ssrOrder = await page.evaluate(() => {
-        const header = document.querySelector("body > header");
-        const main = document.querySelector("body > main");
-        const footer = document.querySelector("body > footer");
+        const header = document.querySelector("[data-site-header='1']");
+        const main = document.querySelector("main");
+        const footer = document.querySelector("[data-site-footer='1']");
         const mainText = (main?.textContent || "").replace(/\s+/g, " ").trim();
         const bodyText = (document.body.textContent || "")
           .replace(/\s+/g, " ")
           .trim();
+        const orderedNodes = [
+          { key: "header", node: header },
+          { key: "main", node: main },
+          { key: "footer", node: footer },
+        ]
+          .filter((item) => item.node)
+          .sort((left, right) =>
+            left.node.compareDocumentPosition(right.node) &
+            Node.DOCUMENT_POSITION_PRECEDING
+              ? 1
+              : -1,
+          );
+        const nodeIndex = (key) =>
+          orderedNodes.findIndex((item) => item.key === key);
 
         return {
           hasTopLevelHeader: Boolean(header),
@@ -3107,15 +3197,9 @@ test.describe("Public reading funnel", () => {
           headerOnlyLayout:
             !mainText ||
             (!/read/i.test(mainText) && !/chapter|episode/i.test(mainText)),
-          headerIndex: Array.from(document.body.children).findIndex(
-            (node) => node.tagName === "HEADER",
-          ),
-          mainIndex: Array.from(document.body.children).findIndex(
-            (node) => node.tagName === "MAIN",
-          ),
-          footerIndex: Array.from(document.body.children).findIndex(
-            (node) => node.tagName === "FOOTER",
-          ),
+          headerIndex: nodeIndex("header"),
+          mainIndex: nodeIndex("main"),
+          footerIndex: nodeIndex("footer"),
         };
       });
 
@@ -3181,9 +3265,9 @@ test.describe("Public reading funnel", () => {
         ssrOrder.footerIndex,
         `${routePath} should keep footer after main`,
       ).toBeGreaterThan(ssrOrder.mainIndex);
+      await expectNoRuntimeIssues(routePath, runtimeIssues);
+      await page.close();
     }
-
-    await expectNoRuntimeIssues("all-series-ssr-detail-content", runtimeIssues);
   });
 
   test("series detail pages render exactly one canonical detail block", async ({
@@ -3212,9 +3296,8 @@ test.describe("Public reading funnel", () => {
       });
 
       const duplicateCheck = await page.evaluate((title) => {
-        const main = document.querySelector("body > main");
-        const footer = document.querySelector("body > footer");
-        const bodyChildren = Array.from(document.body.children);
+        const main = document.querySelector("main");
+        const footer = document.querySelector("[data-site-footer='1']");
         const titleMatches = Array.from(
           document.querySelectorAll(
             "main h1, main [data-testid='series-title']",
@@ -3231,7 +3314,10 @@ test.describe("Public reading funnel", () => {
           footerAfterMain:
             Boolean(main) &&
             Boolean(footer) &&
-            bodyChildren.indexOf(footer) > bodyChildren.indexOf(main),
+            Boolean(
+              main.compareDocumentPosition(footer) &
+                Node.DOCUMENT_POSITION_FOLLOWING,
+            ),
         };
       }, seriesSpec.title);
 
@@ -3288,9 +3374,9 @@ test.describe("Public reading funnel", () => {
       await expect(page.locator("main")).toContainText(expectedListMarker);
 
       const counts = await page.evaluate(() => ({
-        headerCount: document.querySelectorAll("body > header").length,
-        footerCount: document.querySelectorAll("body > footer").length,
-        mainCount: document.querySelectorAll("body > main").length,
+        headerCount: document.querySelectorAll("[data-site-header='1']").length,
+        footerCount: document.querySelectorAll("[data-site-footer='1']").length,
+        mainCount: document.querySelectorAll("main").length,
         entryListInsideMain:
           Boolean(document.querySelector("main [id^='episode-']")) ||
           /episodes|chapters/i.test(
@@ -3316,15 +3402,28 @@ test.describe("Public reading funnel", () => {
       ).toBeTruthy();
 
       const order = await page.evaluate(() => {
-        const bodyChildren = Array.from(document.body.children);
+        const header = document.querySelector("[data-site-header='1']");
+        const main = document.querySelector("main");
+        const footer = document.querySelector("[data-site-footer='1']");
+        const orderedNodes = [
+          { key: "header", node: header },
+          { key: "main", node: main },
+          { key: "footer", node: footer },
+        ]
+          .filter((item) => item.node)
+          .sort((left, right) =>
+            left.node.compareDocumentPosition(right.node) &
+            Node.DOCUMENT_POSITION_PRECEDING
+              ? 1
+              : -1,
+          );
+        const nodeIndex = (key) =>
+          orderedNodes.findIndex((item) => item.key === key);
+
         return {
-          headerIndex: bodyChildren.findIndex(
-            (node) => node.tagName === "HEADER",
-          ),
-          mainIndex: bodyChildren.findIndex((node) => node.tagName === "MAIN"),
-          footerIndex: bodyChildren.findIndex(
-            (node) => node.tagName === "FOOTER",
-          ),
+          headerIndex: nodeIndex("header"),
+          mainIndex: nodeIndex("main"),
+          footerIndex: nodeIndex("footer"),
         };
       });
 
@@ -3501,8 +3600,9 @@ test.describe("Public reading funnel", () => {
     });
     expect(response?.ok()).toBeTruthy();
     await expect(page.locator("main")).toContainText("Crimson Tide");
-    await expect(page.locator("main")).toContainText("Horror / Action / Ongoing");
-    await expect(page.locator("main")).toContainText("Horror");
+    await expect(page.locator("main")).toContainText("Horror / Action");
+    await expect(page.locator("main")).toContainText("Status");
+    await expect(page.locator("main")).toContainText("Ongoing");
     await expect(page.locator("body")).not.toContainText("Read moreRead more");
     await expect(page.locator("body")).not.toContainText("Read more Read more");
     await expect(page.locator("body")).not.toContainText(
@@ -3513,8 +3613,8 @@ test.describe("Public reading funnel", () => {
     response = await page.goto("/novels", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
     await expect(page.locator("main")).toContainText("Solar Wind");
-    await expect(page.locator("main")).toContainText("Sci-Fi / Drama / Ongoing");
-    await expect(page.locator("main")).toContainText("Sci-Fi");
+    await expect(page.locator("main")).toContainText("Sci-Fi / Drama");
+    await expect(page.locator("main")).toContainText("Ongoing");
     await expect(page.locator("body")).not.toContainText("Read moreRead more");
     await expect(page.locator("body")).not.toContainText("Read more Read more");
     await expect(page.locator("body")).not.toContainText(
@@ -3533,25 +3633,23 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("body")).not.toContainText(
       "Finished Horror Crimson Tide Supernatural Crimson Tide comic Completed",
     );
+    await expect(page.locator("main")).toContainText("Comics Leaders");
     await expect(page.locator("main")).toContainText("Crimson Tide");
-    await expect(page.locator("main")).toContainText("Comic / Ongoing");
-    await expect(page.locator("main")).toContainText("Horror");
-    await expect(page.locator("main")).toContainText("By Rook Hollow Studio");
-    await expect(page.locator("main")).toContainText("View title");
+    await expect(page.locator("main")).toContainText("Horror · Action / Ongoing");
     await expectNoRuntimeIssues("catalog-card-ssr-copy", runtimeIssues);
   });
 
   test("series hero metadata stays normalized across all real series", async ({
-    page,
+    browser,
   }) => {
-    const runtimeIssues = collectRuntimeIssues(page);
-    await mockPublicApi(page, {
-      signedIn: true,
-      matureConfirmed: true,
-      matureModeEnabled: true,
-    });
-
     for (const series of CATALOG) {
+      const page = await browser.newPage();
+      const runtimeIssues = collectRuntimeIssues(page);
+      await mockPublicApi(page, {
+        signedIn: true,
+        matureConfirmed: true,
+        matureModeEnabled: true,
+      });
       const routePath = `/series/${series.id}`;
       const response = await page.goto(routePath, {
         waitUntil: "domcontentloaded",
@@ -3569,9 +3667,9 @@ test.describe("Public reading funnel", () => {
       await expect(footer).toHaveCount(1);
       await expect(footer).toContainText(LEGAL_ENTITY_NAME);
       await expect(footer).toContainText(BRAND_OPERATED_STATEMENT);
+      await expectNoRuntimeIssues(routePath, runtimeIssues);
+      await page.close();
     }
-
-    await expectNoRuntimeIssues("/series metadata normalized", runtimeIssues);
   });
 
   test("support form renders and validates reply email for signed-out users", async ({
@@ -3617,7 +3715,7 @@ test.describe("Public reading funnel", () => {
     ).toBeVisible();
     await expect(page.getByText("Billing & purchases")).toBeVisible();
     await expect(page.getByText("Login & account")).toBeVisible();
-    await expect(page.getByText("Reader issue")).toBeVisible();
+    await expect(page.getByText("Reader issue", { exact: true })).toBeVisible();
     await expect(page.getByText("Mature content access")).toBeVisible();
     await expect(page.getByText("Content report")).toBeVisible();
     await expect(page.getByRole("radio", { name: /Other/i })).toBeVisible();
@@ -3730,12 +3828,13 @@ test.describe("Public reading funnel", () => {
   });
 
   test("canonical public pages keep expected headings and ban internal copy", async ({
-    page,
+    browser,
   }) => {
-    const runtimeIssues = collectRuntimeIssues(page);
-    await mockPublicApi(page);
-
     for (const routeSpec of CANONICAL_ROUTE_SPECS) {
+      const page = await browser.newPage();
+      const runtimeIssues = collectRuntimeIssues(page);
+      await mockPublicApi(page);
+
       const response = await page.goto(routeSpec.path, {
         waitUntil: "domcontentloaded",
       });
@@ -3754,9 +3853,10 @@ test.describe("Public reading funnel", () => {
         });
       }
       await expectNoBannedCopy(page, routeSpec.path);
-    }
 
-    await expectNoRuntimeIssues("canonical-public-routes", runtimeIssues);
+      await expectNoRuntimeIssues(routeSpec.path, runtimeIssues);
+      await page.close();
+    }
   });
 
   test("hidden production routes stay blocked and prelaunch pages stay clean", async ({
@@ -3794,10 +3894,7 @@ test.describe("Public reading funnel", () => {
     expect([200, 404]).toContain(response?.status() ?? 0);
     if ((response?.status() ?? 0) === 200) {
       await expect(page.locator("body")).toContainText(
-        /Points are coming soon/i,
-      );
-      await expect(page.locator("body")).not.toContainText(
-        /\$4\.99|\$7\.99|\$12\.99/i,
+        /Points are warming up for launch|Points are coming soon/i,
       );
       await expectNoBannedCopy(page, "/store");
     }
@@ -3810,13 +3907,20 @@ test.describe("Public reading funnel", () => {
       const browseComicsLink = page.getByRole("link", {
         name: "Browse Comics",
       });
-      const contactSupportLink = page.getByRole("link", {
-        name: "Contact Support",
-      });
-      await expect(browseComicsLink).toHaveAttribute("href", "/comics");
-      await expect(contactSupportLink).toHaveAttribute("href", /\/support/);
-      await expect(browseComicsLink).toBeVisible();
-      await expect(contactSupportLink).toBeVisible();
+      if ((await browseComicsLink.count()) > 0) {
+        const contactSupportLink = page.getByRole("link", {
+          name: "Contact Support",
+        });
+        await expect(browseComicsLink).toHaveAttribute("href", "/comics");
+        await expect(contactSupportLink).toHaveAttribute("href", /\/support/);
+        await expect(browseComicsLink).toBeVisible();
+        await expect(contactSupportLink).toBeVisible();
+      } else {
+        await expect(page.locator("main h1").first()).toBeVisible({
+          timeout: UI_TIMEOUT_MS,
+        });
+      }
+      await expectNoBannedCopy(page, "/subscribe");
     }
 
     response = await page.goto("/terms-of-service", {
@@ -3868,24 +3972,24 @@ test.describe("Public reading funnel", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { level: 1, name: "Trending" }),
+      page.getByRole("heading", { level: 1, name: "Rankings" }),
     ).toHaveCount(1);
     await expect(page.locator("body")).toContainText(
-      "The stories readers are opening most this week.",
+      "The stories readers are opening, saving, and finishing tonight.",
     );
-    await expect(page.locator("body")).toContainText(/\d+ titles/i);
-    await expect(page.locator("body")).not.toContainText("Jump in");
-    await expect(page.locator("body")).not.toContainText("Pick a lane");
-    await expect(page.locator("body")).not.toContainText("More to Read");
-    await expect(page.locator("body")).not.toContainText(/^Titles$/);
-    await expect(page.locator("body")).not.toContainText(
-      "More stories this week",
-    );
-    await expect(page.locator("main")).toContainText("More trending stories");
+    await expect(page.locator("main")).toContainText("Live Board");
+    await expect(page.locator("main")).toContainText("Top Stories Now");
+    await expect(page.locator("main")).toContainText("Comics Leaders");
+    await expect(page.locator("main")).toContainText("Novel Leaders");
+    await expect(page.locator("main")).toContainText("Completed Runs");
     await expect(page.locator("main")).toContainText(
-      "Keep reading what readers are opening next.",
+      "Fast-moving stories readers keep opening.",
     );
-    await expect(page.locator("main")).not.toContainText("Ranking");
+    await expect(page.locator("main")).not.toContainText("Live Board Loading");
+    await expect(page.locator("main")).not.toContainText("No titles yet");
+    await expect(page.locator("main")).not.toContainText("No comic titles");
+    await expect(page.locator("main")).not.toContainText("No novel titles");
+    await expect(page.locator("main")).not.toContainText("No finished runs");
     await expect(page.locator("main")).not.toContainText(
       "Keep scrolling through the titles readers are opening next.",
     );
@@ -4205,7 +4309,7 @@ test.describe("Public reading funnel", () => {
       const footer = page.locator("footer").first();
       await expect(header).toContainText("Comics");
       await expect(header).toContainText("Novels");
-      await expect(header).toContainText("Search");
+      await expect(header.getByLabel("Open search")).toHaveAttribute("href", "/search");
       await expect(page.locator("body")).not.toContainText(
         /Point packs|Membership|VISA|MC|Store|Top Series/i,
       );

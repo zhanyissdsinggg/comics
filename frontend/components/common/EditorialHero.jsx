@@ -12,6 +12,7 @@ export default function EditorialHero({
   eyebrow,
   title,
   description,
+  posterDescription = description,
   secondary,
   actions = null,
   stats = [],
@@ -193,14 +194,14 @@ export default function EditorialHero({
                   >
                     {title}
                   </p>
-                  {description ? (
+                  {posterDescription ? (
                     <p
                       className={cn(
                         "mt-3 text-sm leading-6",
                         isLight ? "text-slate-600" : "text-white/60",
                       )}
                     >
-                      {description}
+                      {posterDescription}
                     </p>
                   ) : null}
                 </div>

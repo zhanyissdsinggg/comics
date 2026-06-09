@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
   ChevronRight,
@@ -72,6 +73,8 @@ export default function HeaderMenuModal({
 }) {
   void variant;
   const pathname = usePathname();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const { hydrated, isSignedIn } = useAuthStore();
   const { unreadCount } = useNotificationsStore();
   const { paidPts, bonusPts } = useWalletStore();
@@ -102,14 +105,18 @@ export default function HeaderMenuModal({
     }
 
     return (
-      <Link
+      <a
         key={item.href}
         href={item.href}
-        onClick={onClose}
+        onClick={(event) => {
+          event.preventDefault();
+          router.push(item.href);
+          onClose?.();
+        }}
         className={className}
       >
         {content}
-      </Link>
+      </a>
     );
   };
   const accountLinks = [
@@ -128,13 +135,21 @@ export default function HeaderMenuModal({
     },
   ];
 
-  if (!open) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!open || !mounted) {
     return null;
   }
 
-  return (
+  const modal = (
     <div
-      className="fixed inset-0 z-50 bg-[rgba(6,7,16,0.8)] backdrop-blur-xl md:hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Menu"
+      data-testid="header-menu-modal"
+      className="fixed inset-0 z-[70] bg-[rgba(6,7,16,0.8)] backdrop-blur-xl"
       onClick={onClose}
     >
       <div
@@ -267,4 +282,6 @@ export default function HeaderMenuModal({
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }

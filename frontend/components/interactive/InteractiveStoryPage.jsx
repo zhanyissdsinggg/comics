@@ -251,7 +251,9 @@ export default function InteractiveStoryPage({
   initialProgress = null,
   initialContentMode = "normal",
 }) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(
+    () => !initialStory || (mode === "play" && !initialProgress),
+  );
   const [story, setStory] = useState(initialStory);
   const [progress, setProgress] = useState(initialProgress);
   const [error, setError] = useState("");
@@ -669,6 +671,36 @@ export default function InteractiveStoryPage({
 
   if (loading) {
     return <LoadingShell />;
+  }
+
+  if (mode !== "play" && !story) {
+    return (
+      <StorefrontPage accentClass="from-[rgba(255,79,154,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.14)]">
+        <SurfacePanel
+          tone="highlight"
+          accent="cyan"
+          appearance="dark"
+          className="min-h-[320px]"
+        >
+          <div className="flex min-h-[260px] flex-col justify-between gap-6">
+            <div>
+              <p className={panelEyebrowClass}>Interactive Story</p>
+              <h1 className="mt-2 font-display text-[2.5rem] font-semibold leading-[0.92] tracking-[-0.07em] text-white">
+                Interactive
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-[1.72] text-white/72">
+                This route is not available in the current mode.
+              </p>
+            </div>
+            <div>
+              <Link href="/interactive" className={storefrontPrimaryButtonClass}>
+                Back to Interactive
+              </Link>
+            </div>
+          </div>
+        </SurfacePanel>
+      </StorefrontPage>
+    );
   }
 
   if (mode !== "play") {

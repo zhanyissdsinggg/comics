@@ -67,9 +67,10 @@ test.describe("Mobile layout", () => {
     await expect(
       bottomNav.getByRole("link", { name: "Me", exact: true }),
     ).toBeVisible();
+    await expect(bottomNav.getByRole("link")).toHaveCount(5);
     await expect(
       bottomNav.getByRole("button", { name: /Enter 18\+ mode|18\+/i }),
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(header.getByRole("link", { name: "Comics" })).toHaveCount(0);
 
     const bodyPaddingBottom = await page.evaluate(() =>

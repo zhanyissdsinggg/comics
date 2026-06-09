@@ -50,7 +50,7 @@ function EpisodeCard({ series, position }) {
         <div className="relative h-[84px] w-[68px] shrink-0 overflow-hidden rounded-[14px] border border-[rgba(255,255,255,0.08)]">
           <img
             src={coverUrl}
-            alt={`Cover image for ${series.title}`}
+            alt={`Cover image for ${series.title} in new episodes position ${position}`}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
             style={{ objectPosition: coverPosition }}
           />

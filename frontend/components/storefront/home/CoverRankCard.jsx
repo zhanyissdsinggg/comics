@@ -16,9 +16,10 @@ import {
   buildStatusLabel,
 } from "../landingUtils";
 
-function buildCoverAlt(series) {
+function buildCoverAlt(series, sourceSection, position) {
   const title = String(series?.title || "").trim() || "Untitled";
-  return `Cover image for ${title}`;
+  const section = String(sourceSection || "home ranking").replace(/[_-]+/g, " ");
+  return `Cover image for ${title} in ${section} position ${position || 1}`;
 }
 
 function buildRatingLabel(series) {
@@ -114,7 +115,7 @@ export default function CoverRankCard({
           <div className="aspect-[0.74] overflow-hidden rounded-[16px] border border-[rgba(255,255,255,0.08)]">
             <img
               src={coverUrl}
-              alt={buildCoverAlt(series)}
+              alt={buildCoverAlt(series, sourceSection, position)}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
               style={{ objectPosition: coverPosition }}
             />
@@ -158,7 +159,7 @@ export default function CoverRankCard({
         >
           <img
             src={coverUrl}
-            alt={buildCoverAlt(series)}
+            alt={buildCoverAlt(series, sourceSection, position)}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.045]"
             style={{ objectPosition: coverPosition }}
           />

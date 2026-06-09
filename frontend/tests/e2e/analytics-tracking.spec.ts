@@ -589,6 +589,7 @@ test.describe("Analytics tracking", () => {
           "mn_tracking_settings_v1",
           trackingConfigRaw,
         );
+        window.__mnTrackingSettings = JSON.parse(trackingConfigRaw).values;
       },
       {
         trackingConfigRaw: buildTrackingConfig(trackedConfig),

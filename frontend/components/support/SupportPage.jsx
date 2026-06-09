@@ -614,6 +614,7 @@ export default function SupportPage() {
                                       id={descriptionId}
                                       className="mt-3 block border-t border-white/10 pt-3 text-sm leading-6 text-inherit"
                                     >
+                                      {" "}
                                       {preset.description}
                                     </span>
                                   </label>
