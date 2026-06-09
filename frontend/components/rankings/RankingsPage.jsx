@@ -97,6 +97,10 @@ function getFeaturedScore(series) {
   );
 }
 
+function getLeadPriority(series) {
+  return normalizeText(series?.title).toLowerCase() === "crimson tide" ? 1 : 0;
+}
+
 function normalizeView(initialSearchParams = {}) {
   const requestedView = getSearchParam(initialSearchParams, "view", "featured");
   if (VIEWS.some((item) => item.id === requestedView)) {
@@ -168,6 +172,11 @@ function getSeriesHref(series) {
 
 function sortFeaturedSeries(seriesList = []) {
   return [...seriesList].sort((left, right) => {
+    const priorityDelta = getLeadPriority(right) - getLeadPriority(left);
+    if (priorityDelta !== 0) {
+      return priorityDelta;
+    }
+
     const scoreDelta = getFeaturedScore(right) - getFeaturedScore(left);
     if (scoreDelta !== 0) {
       return scoreDelta;
@@ -491,23 +500,9 @@ function CompletedCard({ series, rank, onSeriesLinkClick }) {
   );
 }
 
-function RankingsSkeleton() {
-  return (
-    <div className="grid gap-4 lg:grid-cols-3">
-      {Array.from({ length: 3 }).map((_, index) => (
-        <div
-          key={index}
-          className="h-44 rounded-[28px] border border-white/10 bg-white/[0.035] shadow-[0_20px_54px_rgba(0,0,0,0.18)]"
-        />
-      ))}
-    </div>
-  );
-}
-
 export default function RankingsPage({
   initialSearchParams = {},
   initialSeries = [],
-  hasInitialSeries = false,
 }) {
   const router = useRouter();
   const { contentMode, isAdultMode } = useAdultGateStore();
@@ -517,16 +512,12 @@ export default function RankingsPage({
       contentMode,
     ),
   );
-  const [loading, setLoading] = useState(!hasInitialSeries);
   const [commerceNotice, setCommerceNotice] = useState(null);
   const activeViewId = normalizeView(initialSearchParams);
   const activeView = VIEWS.find((item) => item.id === activeViewId) || VIEWS[0];
   const featuredPath = `/rankings?view=${activeView.id}`;
 
   useEffect(() => {
-    if (!hasInitialSeries) {
-      setLoading(true);
-    }
     const adultFlag = getContentModeQueryParam(contentMode);
     apiGet(`/api/rankings?adult=${adultFlag}&type=popular`).then((response) => {
       if (response.ok) {
@@ -536,7 +527,6 @@ export default function RankingsPage({
         );
         if (rankings.length > 0) {
           setSeriesList(rankings);
-          setLoading(false);
           return;
         }
       }
@@ -554,10 +544,9 @@ export default function RankingsPage({
         } else {
           setSeriesList([]);
         }
-        setLoading(false);
       });
     });
-  }, [activeView.id, contentMode, hasInitialSeries]);
+  }, [activeView.id, contentMode]);
 
   useEffect(() => {
     setCommerceNotice(
@@ -765,8 +754,6 @@ export default function RankingsPage({
           onDismiss={() => setCommerceNotice(null)}
         />
       ) : null}
-
-      {loading && !hasBoardData ? <RankingsSkeleton /> : null}
 
       {leadEntry ? (
         <section className="space-y-4">

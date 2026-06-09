@@ -527,7 +527,7 @@ export default function InteractiveLandingPage({
 
       <section className="space-y-4">
         <SectionHeader
-          title="How choices work"
+          title="How Choices Work"
           subtitle="Read, choose, and unlock a different scene."
         />
         <div className="relative grid gap-4 lg:grid-cols-3">
