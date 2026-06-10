@@ -32,12 +32,12 @@ import { cn } from "./figma-utils";
 
 const TRUST_POINTS = [
   {
-    title: "Sync your shelf",
+    title: "Reader profile",
     body: "Keep progress, bookmarks, and wallet state attached to the same reader identity.",
   },
   {
-    title: "Faster re-entry",
-    body: "Jump back into the exact chapter or branch you left on another device.",
+    title: "Fast return",
+    body: "Reopen the exact chapter or branch you left on another device.",
   },
   {
     title: "Protected access",

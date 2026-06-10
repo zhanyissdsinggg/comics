@@ -948,23 +948,23 @@ export default function LibraryPage({
       ]
     : [
         {
-          label: "Why sign in",
-          title: "Keep your shelf in sync",
-          body: "Save progress, bookmarks, and reading history across devices.",
+          label: "Reader desk",
+          title: "Browse now",
+          body: "Open a story first, then sign in when you want the shelf to follow you.",
           icon: Sparkles,
           tone: "cyan",
         },
         {
-          label: "Start here",
-          title: "Build your queue",
-          body: "Save titles, keep your place, and come back without hunting for chapters.",
+          label: "Pick up next",
+          title: "Recommended reads",
+          body: "Fresh picks stay available below, even before you create a shelf.",
           icon: LibraryIcon,
           tone: "rose",
         },
         {
-          label: "Reading flow",
-          title: "Jump back faster",
-          body: "Continue rails and recent activity fill in automatically once you sign in.",
+          label: "Catalog mode",
+          title: "Mode-aware shelf",
+          body: "The library view follows the active normal or adult catalog mode.",
           icon: ArrowRight,
           tone: "amber",
         },
@@ -1282,7 +1282,7 @@ export default function LibraryPage({
                   </div>
                 </SurfacePanel>
               )
-            ) : signedOutRecommendedStarts.length > 0 ? (
+            ) : (
               <SurfacePanel
                 className="space-y-4"
                 appearance="dark"
@@ -1297,53 +1297,66 @@ export default function LibraryPage({
                     Recommended reads
                   </h2>
                 </div>
-                <div className="grid gap-3 md:grid-cols-3">
-                  {signedOutRecommendedStarts.map((item) => (
-                    <button
-                      key={`signed-out-library-${item.id}`}
-                      type="button"
-                      onClick={() =>
-                        router.push(
-                          buildLibrarySeriesHref(
-                            item.seriesId,
-                            item.entryPoint || "LIBRARY_SIGNED_OUT_RECO",
-                            item.campaignId || "library_signed_out_reco",
-                          ),
-                        )
-                      }
-                      className={`${storefrontInfoCardClass} p-4 text-left text-white transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16`}
-                    >
-                      <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">
-                        {item.eyebrow || "Free start"}
-                      </p>
-                      <h3 className="mt-2 text-base font-black uppercase tracking-[-0.03em] text-white">
-                        {item.title}
-                      </h3>
-                      <p className="mt-2 text-sm font-semibold leading-6 text-white/70">
-                        {item.subtitle ||
-                          "Open the series page and start reading."}
-                      </p>
-                      <span className={`${storefrontChipClass} mt-4 min-h-[36px] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-white/75`}>
-                        Start reading
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                {signedOutRecommendedStarts.length > 0 ? (
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {signedOutRecommendedStarts.map((item) => (
+                      <button
+                        key={`signed-out-library-${item.id}`}
+                        type="button"
+                        onClick={() =>
+                          router.push(
+                            buildLibrarySeriesHref(
+                              item.seriesId,
+                              item.entryPoint || "LIBRARY_SIGNED_OUT_RECO",
+                              item.campaignId || "library_signed_out_reco",
+                            ),
+                          )
+                        }
+                        className={`${storefrontInfoCardClass} p-4 text-left text-white transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16`}
+                      >
+                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">
+                          {item.eyebrow || "Reader pick"}
+                        </p>
+                        <h3 className="mt-2 text-base font-black uppercase tracking-[-0.03em] text-white">
+                          {item.title}
+                        </h3>
+                        <p className="mt-2 text-sm font-semibold leading-6 text-white/70">
+                          {item.subtitle ||
+                            "Open the series page and start reading."}
+                        </p>
+                        <span className={`${storefrontChipClass} mt-4 min-h-[36px] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-white/75`}>
+                          Start reading
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={`${storefrontInfoCardClass} p-4`}>
+                    <p className="text-sm font-semibold leading-6 text-white/72">
+                      Pick a channel and start reading while the shelf prepares fresh recommendations.
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <Link href="/comics" className={secondaryButtonClass}>
+                        Comics
+                      </Link>
+                      <Link href="/novels" className={secondaryButtonClass}>
+                        Novels
+                      </Link>
+                      <Link href="/rankings" className={secondaryButtonClass}>
+                        Rankings
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </SurfacePanel>
-            ) : null}
+            )}
 
             <div className="grid gap-6">
               {continueRailItems.length > 0 ? (
                 <div id="continue-reading">
                   <Rail
-                    eyebrow={
-                      viewerSignedIn ? "Continue Reading" : "On This Device"
-                    }
-                    title={
-                      viewerSignedIn
-                        ? "Continue Reading"
-                        : "Continue on this device"
-                    }
+                    eyebrow="Continue Reading"
+                    title="Continue Reading"
                     railName="continue"
                     items={continueRailItems}
                     appearance="dark"
