@@ -909,6 +909,13 @@ export default function LibraryPage({
     },
     [recommendedItems, seriesList],
   );
+  const hasSignedOutStoryCards = signedOutRecommendedStarts.length > 0;
+  const signedOutRecommendationEyebrow = hasSignedOutStoryCards
+    ? "Pick up next"
+    : "Start here";
+  const signedOutRecommendationTitle = hasSignedOutStoryCards
+    ? "Recommended reads"
+    : "Browse starting points";
   const primaryButtonClass = storefrontPrimaryButtonClass;
   const secondaryButtonClass = storefrontSecondaryButtonClass;
   const signedInHeroDescription = viewerSignedIn
@@ -1357,13 +1364,13 @@ export default function LibraryPage({
               >
                 <div className="space-y-1">
                   <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
-                    Pick up next
+                    {signedOutRecommendationEyebrow}
                   </p>
                   <h2 className="text-lg font-black uppercase tracking-[-0.03em] text-white">
-                    Recommended reads
+                    {signedOutRecommendationTitle}
                   </h2>
                 </div>
-                {signedOutRecommendedStarts.length > 0 ? (
+                {hasSignedOutStoryCards ? (
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     {signedOutRecommendedStarts.map((item) => (
                       <button
@@ -1412,7 +1419,7 @@ export default function LibraryPage({
                 ) : (
                   <div className={`${storefrontInfoCardClass} p-4`}>
                     <p className="text-sm font-semibold leading-6 text-white/72">
-                      Pick a channel and start reading while the shelf prepares fresh recommendations.
+                      Choose a channel to browse while story recommendations load for this mode.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <Link href="/comics" className={secondaryButtonClass}>

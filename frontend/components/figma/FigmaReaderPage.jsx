@@ -1617,7 +1617,7 @@ function ReaderContent({
                           : `${novelBorderClass} bg-transparent ${readerMutedClass}`,
                       )}
                     >
-                      {isComic ? "Reader" : installmentTitle}
+                      {isComic ? "Reader" : "Novel"}
                     </ReaderMetaPill>
                     <ReaderMetaPill
                       className={cn(

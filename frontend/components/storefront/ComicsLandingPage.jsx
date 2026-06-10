@@ -250,7 +250,7 @@ export default function ComicsLandingPage({
 
       <section className="space-y-4">
         <SectionHeading
-          eyebrow="Reader Picks"
+          eyebrow="Trending Shelf"
           title="Popular Comics"
           description="Big covers, immediate mood, and the titles readers are most likely to open right now."
           tone="channel"
@@ -300,7 +300,7 @@ export default function ComicsLandingPage({
       {model.completed.length > 0 ? (
         <section className="space-y-4">
           <SectionHeading
-            eyebrow="Completed Comics"
+            eyebrow="Ready to binge"
             title="Completed Comics"
             description="Finished runs when you want the payoff tonight, not next week."
             tone="channel"

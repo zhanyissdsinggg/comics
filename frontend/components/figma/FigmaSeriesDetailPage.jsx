@@ -136,6 +136,23 @@ function buildEpisodePlatformLabel(episode, index, seriesType) {
   return `${installmentName} ready`;
 }
 
+function buildInstallmentDisplayTitle(episode, seriesType) {
+  const installmentName = getInstallmentLabel(seriesType || "comic");
+  const installmentNumber = Number(episode?.number || 0) || 1;
+  const fallbackTitle = `${installmentName} ${installmentNumber}`;
+  const rawTitle = String(episode?.title || "").replace(/\s+/g, " ").trim();
+
+  if (!rawTitle) {
+    return fallbackTitle;
+  }
+
+  if (/^(episode|chapter)\s+\d+$/i.test(rawTitle)) {
+    return fallbackTitle;
+  }
+
+  return rawTitle;
+}
+
 function getSeriesFormatLabel(item) {
   if (item?.kind === FIGMA_CONTENT_TYPES.INTERACTIVE) {
     return "Interactive";
@@ -384,21 +401,18 @@ function SeriesDetailContent({
         const leftTime = new Date(left?.releasedAt || 0).getTime() || 0;
         return rightTime - leftTime;
       })
-      .map((episode, index) => ({
-        id: String(episode?.id || "").trim(),
-        title:
-          String(episode?.title || "").trim() ||
-          getInstallmentLabel(payload?.series?.type || payload?.series) +
-            ` ${episode?.number || 1}`,
-        metaLabel: buildEpisodePlatformLabel(
-          episode,
-          index,
-          payload?.series?.type || payload?.series,
-        ),
-        readsValue: resolveEpisodeReadsValue(episode),
-        number: Number(episode?.number || 0) || 1,
-        rawEpisode: episode,
-      }));
+      .map((episode, index) => {
+        const seriesType = payload?.series?.type || payload?.series;
+
+        return {
+          id: String(episode?.id || "").trim(),
+          title: buildInstallmentDisplayTitle(episode, seriesType),
+          metaLabel: buildEpisodePlatformLabel(episode, index, seriesType),
+          readsValue: resolveEpisodeReadsValue(episode),
+          number: Number(episode?.number || 0) || 1,
+          rawEpisode: episode,
+        };
+      });
 
     const distinctReadValues = new Set(
       mappedChapters

@@ -331,7 +331,7 @@ export default function NovelsLandingPage({
 
       <section className="space-y-4">
         <SectionHeading
-          eyebrow="Fresh Updates"
+          eyebrow="Fresh serials"
           title="Latest Chapters"
           description="Updated today, atmosphere first, and clean serial pull for late-night reading."
           tone="channel"
@@ -381,7 +381,7 @@ export default function NovelsLandingPage({
       {model.shortReads.length > 0 ? (
         <section className="space-y-4">
           <SectionHeading
-            eyebrow="Quick Sessions"
+            eyebrow="Quick reads"
             title="Short Reads"
             description="Quick-entry reads with real mood, clean pacing, and a strong stop point."
             tone="channel"
