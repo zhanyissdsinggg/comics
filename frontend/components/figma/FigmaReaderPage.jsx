@@ -27,7 +27,6 @@ import ReaderEndPanel from "../reader/ReaderEndPanel";
 import ReaderSkeleton from "../reader/ReaderSkeleton";
 import ReaderErrorState from "../reader/ReaderErrorState";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
-import FigmaCommentsSection from "./FigmaCommentsSection";
 import { storefrontSoftCardClass } from "../common/StorefrontPagePrimitives";
 import {
   canAccessInContentMode,
@@ -64,6 +63,10 @@ function formatMetaDate(value, seriesType = "comic") {
   const installmentName = getInstallmentLabel(seriesType || "comic")
     .toLowerCase();
   return `Full ${installmentName} ready`;
+}
+
+function getReaderInstallmentNoun(seriesType = "comic") {
+  return getInstallmentLabel(seriesType || "comic").toLowerCase();
 }
 
 function formatPriceLabel(value) {
@@ -757,6 +760,7 @@ function ReaderContent({
           ),
         )
     : 0;
+  const installmentNoun = getReaderInstallmentNoun(seriesType);
   const isEpisodeComplete = Boolean(unlocked && hasReachedChapterEnd);
   const creatorName =
     resolveSeriesCreatorName(seriesData?.series) ||
@@ -832,14 +836,14 @@ function ReaderContent({
         label: "Progress",
         value: `${progressPercent}%`,
         hint: unlocked
-          ? "Live reading progress in this chapter."
+          ? `Live reading progress in this ${installmentNoun}.`
           : "Preview progress before unlock.",
       },
       {
         label: "Access",
         value: unlocked ? "Unlocked" : formatPriceLabel(currentPricePts),
         hint: unlocked
-          ? "Full chapter is open right now."
+          ? `Full ${installmentNoun} is open right now.`
           : `${safeVisibleUnits} free ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} before the gate.`,
       },
       {
@@ -862,6 +866,7 @@ function ReaderContent({
       currentNumber,
       currentPricePts,
       isComic,
+      installmentNoun,
       nextEpisode,
       progressPercent,
       safeVisibleUnits,
@@ -1561,7 +1566,7 @@ function ReaderContent({
               </>
             ) : null}
             <div className="relative">
-              <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
+              <div className="grid gap-5">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <ReaderMetaPill
@@ -1634,19 +1639,6 @@ function ReaderContent({
                   </p>
                 </div>
 
-                {isComic ? (
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                    {readerStatCards.slice(0, 2).map((card) => (
-                      <ReaderStatCard
-                        key={card.label}
-                        label={card.label}
-                        value={card.value}
-                        hint={card.hint}
-                        className="border-white/10 bg-[rgba(255,255,255,0.035)]"
-                      />
-                    ))}
-                  </div>
-                ) : null}
               </div>
 
               {isComic ? (
@@ -1894,7 +1886,7 @@ function ReaderContent({
         }
         description={
           unlocked
-            ? `${currentInstallmentLabel} is complete. Keep reading, revisit the previous chapter, or jump into the comments below.`
+            ? `${currentInstallmentLabel} is complete. Keep reading, revisit the previous ${installmentNoun}, or open reader reactions below.`
             : `The free preview stops here. Unlock the rest of this ${installmentLabel.toLowerCase()} to keep reading.`
         }
         nextEpisodeTitle={
@@ -1911,8 +1903,8 @@ function ReaderContent({
         }
         nextEpisodeHint={
           Number(nextEpisode?.pricePts || 0) > 0
-            ? `${formatPriceLabel(nextEpisode?.pricePts)} if this next chapter is still locked.`
-            : "The next chapter is ready."
+            ? `${formatPriceLabel(nextEpisode?.pricePts)} if this next ${installmentNoun} is still locked.`
+            : `The next ${installmentNoun} is ready.`
         }
         hasNextEpisode={Boolean(nextEpisode)}
         isUnlocked={unlocked}
@@ -1960,14 +1952,19 @@ function ReaderContent({
             isComic ? "max-w-5xl" : "max-w-[760px]",
           )}
         >
-          <div className="mb-5 rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.035)] px-5 py-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)] backdrop-blur-xl">
+          <div
+            className={cn(
+              storefrontSoftCardClass,
+              "rounded-[28px] border-white/10 bg-[rgba(255,255,255,0.035)] px-5 py-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)] backdrop-blur-xl",
+            )}
+          >
             <p
               className={cn(
                 "text-[10px] font-black uppercase tracking-[0.22em]",
                 readerMutedClass,
               )}
             >
-              Comments
+              Reader reactions
             </p>
             <h3
               className={cn(
@@ -1975,7 +1972,7 @@ function ReaderContent({
                 isComic ? "text-white" : "text-current",
               )}
             >
-              Talk about this chapter
+              Reactions will appear here
             </h3>
             <p
               className={cn(
@@ -1983,10 +1980,9 @@ function ReaderContent({
                 isComic ? "text-white/62" : "text-current/62",
               )}
             >
-              Reactions, theories, and chapter takes stay threaded right below the read.
+              Reactions will appear here as readers join the thread.
             </p>
           </div>
-          <FigmaCommentsSection seriesTitle={seriesData.series.title} />
         </div>
       </section>
 
