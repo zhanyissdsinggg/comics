@@ -761,6 +761,8 @@ function ReaderContent({
         )
     : 0;
   const installmentNoun = getReaderInstallmentNoun(seriesType);
+  const installmentTitle =
+    installmentNoun.charAt(0).toUpperCase() + installmentNoun.slice(1);
   const isEpisodeComplete = Boolean(unlocked && hasReachedChapterEnd);
   const creatorName =
     resolveSeriesCreatorName(seriesData?.series) ||
@@ -1576,7 +1578,7 @@ function ReaderContent({
                           : `${novelBorderClass} bg-transparent ${readerMutedClass}`,
                       )}
                     >
-                      {isComic ? "Reader" : "Chapter"}
+                      {isComic ? "Reader" : installmentTitle}
                     </ReaderMetaPill>
                     <ReaderMetaPill
                       className={cn(
@@ -1637,23 +1639,21 @@ function ReaderContent({
                       ? `Full ${installmentLabel.toLowerCase()} unlocked.`
                       : `${safeVisibleUnits} free ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} open now.`}
                   </p>
+
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    {readerStatCards.map((card) => (
+                      <ReaderStatCard
+                        key={card.label}
+                        label={card.label}
+                        value={card.value}
+                        hint={card.hint}
+                        className="border-white/10 bg-[rgba(255,255,255,0.035)]"
+                      />
+                    ))}
+                  </div>
                 </div>
 
               </div>
-
-              {isComic ? (
-                <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  {readerStatCards.map((card) => (
-                    <ReaderStatCard
-                      key={`footer-${card.label}`}
-                      label={card.label}
-                      value={card.value}
-                      hint={card.hint}
-                      className="border-white/10 bg-[rgba(255,255,255,0.035)]"
-                    />
-                  ))}
-                </div>
-              ) : null}
             </div>
           </div>
         </div>
@@ -1865,6 +1865,7 @@ function ReaderContent({
             ? "border-white/10 bg-white/5 text-white hover:bg-white/10"
             : `${novelBorderClass} bg-white/5 text-white hover:bg-white/10`
         }
+        completionLabel={`${installmentTitle} Complete`}
         primaryButtonClassName={cn(
           "inline-flex min-h-[56px] items-center justify-center rounded-2xl px-5 py-3 text-sm font-black text-white transition-transform active:scale-[0.98]",
           unlocked && !nextEpisode && !isComic
@@ -1906,6 +1907,8 @@ function ReaderContent({
             ? `${formatPriceLabel(nextEpisode?.pricePts)} if this next ${installmentNoun} is still locked.`
             : `The next ${installmentNoun} is ready.`
         }
+        nextActionLabel={`Next ${installmentNoun}`}
+        nextReadyLabel={`Next ${installmentNoun} is ready.`}
         hasNextEpisode={Boolean(nextEpisode)}
         isUnlocked={unlocked}
         isSignedIn={isSignedIn}

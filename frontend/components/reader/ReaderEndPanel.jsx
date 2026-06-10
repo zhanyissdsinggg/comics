@@ -10,10 +10,13 @@ export default function ReaderEndPanel({
   borderClassName = "",
   primaryButtonClassName = "",
   secondaryButtonClassName = "",
+  completionLabel = "Part Complete",
   heading,
   description,
   nextEpisodeTitle = "",
   nextEpisodeHint = "",
+  nextActionLabel = "Next part",
+  nextReadyLabel = "Next part is ready",
   hasNextEpisode = false,
   isUnlocked = true,
   isSignedIn = false,
@@ -36,7 +39,7 @@ export default function ReaderEndPanel({
         <div className="grid gap-4">
           <div className={shellClassName}>
             <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/46">
-              Chapter Complete
+              {completionLabel}
             </p>
             <h3
               className={cn(
@@ -86,10 +89,10 @@ export default function ReaderEndPanel({
                 <button
                   type="button"
                   onClick={onPrimaryAction}
-                  aria-label={hasNextEpisode ? "Next chapter" : "View Series"}
+                  aria-label={hasNextEpisode ? nextActionLabel : "View Series"}
                   className={primaryButtonClassName}
                 >
-                  {hasNextEpisode ? "Next chapter" : "View Series"}
+                  {hasNextEpisode ? nextActionLabel : "View Series"}
                 </button>
               ) : !isSignedIn ? (
                 <button
@@ -136,7 +139,7 @@ export default function ReaderEndPanel({
                 onClick={onOpenComments}
                 className={secondaryButtonClassName}
               >
-                Comments
+                Reader reactions
               </button>
               <button
                 type="button"
@@ -148,7 +151,7 @@ export default function ReaderEndPanel({
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2 text-xs uppercase tracking-[0.16em] text-white/42">
-              {hasNextEpisode ? <span>Next chapter is ready</span> : null}
+              {hasNextEpisode ? <span>{nextReadyLabel}</span> : null}
               {currentBookmark ? <span>Progress saved</span> : null}
               {liked ? <span>Liked</span> : null}
             </div>
