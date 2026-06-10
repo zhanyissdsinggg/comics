@@ -51,7 +51,7 @@ export default function SearchPageInput({
         <div className="mb-2 flex items-center justify-between gap-3">
           <span className={`${storefrontBadgeClass} gap-2 text-white/64`}>
             <Sparkles className="size-3.5" />
-            Search
+            Command
           </span>
           <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/40">
             {includeAdult ? "Adult Mode" : "Normal Mode"}
@@ -80,7 +80,7 @@ export default function SearchPageInput({
       </div>
       <div className="flex flex-wrap gap-2">
         <button type="submit" className={storefrontPrimaryButtonClass}>
-          Search
+          Explore
         </button>
       </div>
     </form>

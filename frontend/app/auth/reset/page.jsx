@@ -140,7 +140,7 @@ function ResetPageContent() {
     <EmailLinkActionShell
       eyebrow="Account access"
       title="Reset your password"
-      description=""
+      description="Request a fresh reset email or set a new password from the secure link in your URL."
       asideTitle="Next"
       asideBody={hasToken ? "Set a new password." : "Send a reset link."}
     >
@@ -153,7 +153,7 @@ function ResetPageContent() {
             {hasToken ? "Choose a new password" : "Send another email?"}
           </h2>
           <p className="mt-3 max-w-xl text-sm leading-7 text-white/68">
-            {hasToken ? "Link ready." : "Enter your email."}
+            {hasToken ? "Enter a new password for this account." : "Enter the email tied to your reader account."}
           </p>
         </div>
 
@@ -221,7 +221,7 @@ function ResetPageContent() {
           message={status?.message}
         />
 
-        <StorefrontInfoCard title="More">
+        <StorefrontInfoCard title="Account links">
           <p className="mt-3 text-sm leading-6 text-white/70">
             Go to{" "}
             <Link

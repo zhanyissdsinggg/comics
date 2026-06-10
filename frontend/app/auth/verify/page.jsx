@@ -149,7 +149,7 @@ function VerifyPageContent() {
     <EmailLinkActionShell
       eyebrow="Account access"
       title="Confirm your email"
-      description=""
+      description="Confirm the secure token in your URL or request a fresh verification email."
       asideTitle="Next"
       asideBody={hasToken ? "Check the link." : "Send a new link."}
     >
@@ -162,7 +162,7 @@ function VerifyPageContent() {
             {hasToken ? "Verifying your email link" : "Send another email?"}
           </h2>
           <p className="mt-3 max-w-xl text-sm leading-7 text-white/68">
-            {hasToken ? "Checking your account." : "Enter your email."}
+            {hasToken ? "We are checking the verification token now." : "Enter the email tied to your reader account."}
           </p>
         </div>
 
@@ -224,7 +224,7 @@ function VerifyPageContent() {
           message={status?.message}
         />
 
-        <StorefrontInfoCard title="More">
+        <StorefrontInfoCard title="Account links">
           <p className="mt-3 text-sm leading-6 text-white/70">
             Go to{" "}
             <Link

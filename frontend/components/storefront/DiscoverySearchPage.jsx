@@ -80,7 +80,7 @@ const CURATED_RECENT_UPDATE_FALLBACKS = {
     latestEpisodeNumber: 5,
     latestEpisodeId: "series-004e5",
     firstReadableEpisodeId: "series-004e1",
-    updatedAt: "2026-05-28T08:00:00.000Z",
+    updatedAt: "",
   },
   "series-006": {
     id: "series-006",
@@ -92,7 +92,7 @@ const CURATED_RECENT_UPDATE_FALLBACKS = {
     latestEpisodeNumber: 3,
     latestEpisodeId: "series-006e3",
     firstReadableEpisodeId: "series-006e1",
-    updatedAt: "2026-05-28T08:05:00.000Z",
+    updatedAt: "",
   },
   "series-011": {
     id: "series-011",
@@ -104,7 +104,7 @@ const CURATED_RECENT_UPDATE_FALLBACKS = {
     latestEpisodeNumber: 3,
     latestEpisodeId: "series-011e3",
     firstReadableEpisodeId: "series-011e1",
-    updatedAt: "2026-05-28T08:10:00.000Z",
+    updatedAt: "",
   },
   "series-001": {
     id: "series-001",
@@ -116,7 +116,7 @@ const CURATED_RECENT_UPDATE_FALLBACKS = {
     latestEpisodeNumber: 3,
     latestEpisodeId: "series-001e3",
     firstReadableEpisodeId: "series-001e1",
-    updatedAt: "2026-05-28T08:15:00.000Z",
+    updatedAt: "",
   },
   "series-010": {
     id: "series-010",
@@ -128,7 +128,7 @@ const CURATED_RECENT_UPDATE_FALLBACKS = {
     latestEpisodeNumber: 5,
     latestEpisodeId: "series-010e5",
     firstReadableEpisodeId: "series-010e1",
-    updatedAt: "2026-05-28T08:20:00.000Z",
+    updatedAt: "",
   },
   "series-002": {
     id: "series-002",
@@ -140,7 +140,7 @@ const CURATED_RECENT_UPDATE_FALLBACKS = {
     latestEpisodeNumber: 3,
     latestEpisodeId: "series-002e3",
     firstReadableEpisodeId: "series-002e1",
-    updatedAt: "2026-05-28T08:25:00.000Z",
+    updatedAt: "",
   },
 };
 
@@ -863,28 +863,15 @@ export default function DiscoverySearchPage({
         </>
       ) : (
         <>
-          {discoveryModel.featured ? (
-            <StoryHero
-              series={discoveryModel.featured}
-              eyebrow="Best Match"
-              title={discoveryModel.featured.title}
-              hook={query ? `Best match for "${query}", plus a few more stories with the same pull.` : undefined}
-              primaryLabel="Start Reading"
-              primaryHref={buildSeriesHref(
-                discoveryModel.featured,
-                searchPath,
-                query,
-                "search_featured_match",
-              )}
-              secondaryLabel="View Series"
-            />
-          ) : null}
-
           <section className="space-y-4">
             <SectionHeading
-              eyebrow="Search Results"
-              title={query ? `"${query}"` : "Filtered Titles"}
-              description="The closest matches right now."
+              eyebrow={query ? `"${query}"` : "Filtered Titles"}
+              title={query ? "Search Results" : "Results Board"}
+              description={
+                query
+                  ? "The closest matches for this search appear before discovery rails."
+                  : "The closest matches for these filters appear before discovery rails."
+              }
             />
             {loading ? null : error ? (
               <EmptyShelf
@@ -921,7 +908,7 @@ export default function DiscoverySearchPage({
               </div>
             ) : (
               <EmptyShelf
-                title="Nothing landed this time"
+                title="Try another route"
                 description="Try a broader vibe, open a hot search, or clear a few filters."
                 actionHref="/search"
               />
@@ -938,6 +925,23 @@ export default function DiscoverySearchPage({
               </div>
             ) : null}
           </section>
+
+          {discoveryModel.featured ? (
+            <StoryHero
+              series={discoveryModel.featured}
+              eyebrow="Top Match"
+              title={discoveryModel.featured.title}
+              hook={query ? `A strong match for "${query}" after the full results board.` : undefined}
+              primaryLabel="Start Reading"
+              primaryHref={buildSeriesHref(
+                discoveryModel.featured,
+                searchPath,
+                query,
+                "search_featured_match",
+              )}
+              secondaryLabel="View Series"
+            />
+          ) : null}
 
           {discoveryModel.recent.length > 0 ? (
             <section className="space-y-4">

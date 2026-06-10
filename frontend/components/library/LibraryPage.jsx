@@ -802,7 +802,7 @@ export default function LibraryPage({
               label: "Bookmarks",
               value: bookmarkCountTotal.toLocaleString(),
               hint:
-                bookmarkCountTotal > 0 ? "Bookmarks ready" : "No bookmarks yet",
+                bookmarkCountTotal > 0 ? "Bookmarks ready" : "Pin a favorite scene",
             },
           ]
         : [],
@@ -895,8 +895,8 @@ export default function LibraryPage({
       ? resumeSpotlightReadHref
         ? "Jump back in."
         : "Saved series and recent reads."
-      : "Save a few titles to get started."
-    : "Sign in to save progress and favorites.";
+      : "Start a shelf with a story that fits tonight."
+    : "Sign in to sync progress, or keep browsing the shelf picks below.";
   const signedOutHeroSecondary =
     "";
   const libraryDeskTitle = viewerSignedIn
@@ -905,7 +905,7 @@ export default function LibraryPage({
       : hasLibrarySignals
         ? "Your shelf."
         : "Your shelf starts here."
-    : "Your library";
+    : "Reader desk";
   const heroEyebrow = viewerSignedIn ? "Library Hub" : "Saved Stories";
   const resumeSpotlightPanelTitle = resumeSpotlight?.seriesId
     ? resumeSpotlight?.title || "Continue reading"
@@ -924,7 +924,7 @@ export default function LibraryPage({
         {
           label: "Shelf Mood",
           title:
-            visibleLibraryItems.length > 0 ? "Saved and stacked" : "Still empty",
+            visibleLibraryItems.length > 0 ? "Saved and stacked" : "Ready to build",
           body:
             visibleLibraryItems.length > 0
               ? `${visibleLibraryItems.length} saved titles are ready for tonight.`
@@ -937,7 +937,7 @@ export default function LibraryPage({
           title:
             bookmarkCountTotal > 0
               ? `${bookmarkCountTotal} markers ready`
-              : "No bookmarks yet",
+              : "Scene pins ready",
           body:
             bookmarkCountTotal > 0
               ? "Jump back to exact scenes and panels from your saved markers."
@@ -1035,7 +1035,7 @@ export default function LibraryPage({
                   </button>
                 ) : (
                   <Link
-                    href="/account"
+                    href="/login"
                     data-testid="library-entry-cta"
                     className={primaryButtonClass}
                   >
@@ -1291,10 +1291,10 @@ export default function LibraryPage({
               >
                 <div className="space-y-1">
                   <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
-                    Free starts
+                    Pick up next
                   </p>
                   <h2 className="text-lg font-black uppercase tracking-[-0.03em] text-white">
-                    Try these first
+                    Recommended reads
                   </h2>
                 </div>
                 <div className="grid gap-3 md:grid-cols-3">
