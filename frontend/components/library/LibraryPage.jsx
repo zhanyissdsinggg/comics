@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowUpRight, Bookmark, Clock3, Library as LibraryIcon, Sparkles } from "lucide-react";
 import Rail from "../home/Rail";
 import Skeleton from "../common/Skeleton";
-import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import {
@@ -1024,72 +1023,117 @@ export default function LibraryPage({
     <StorefrontPage accentClass="from-[rgba(103,232,249,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(255,79,154,0.12)]">
       <div className="flex flex-col gap-8">
         <section className="space-y-5">
-          <EditorialHero
-            eyebrow={heroEyebrow}
-            title={libraryDeskTitle}
-            description={signedInHeroDescription}
-            posterDescription={
-              viewerSignedIn
-                ? signedInHeroDescription
-                : "Start with a free chapter, then keep your shelf synced."
-            }
-            secondary={signedOutHeroSecondary}
-            stats={libraryStats}
+          <SurfacePanel
             appearance="dark"
             accent="cyan"
-            actions={
-              <>
-                {resumeSpotlightReadHref ? (
-                  <a
-                    href={resumeSpotlightReadHref}
-                    role="button"
-                    className={primaryButtonClass}
-                  >
-                    Continue Reading
-                  </a>
-                ) : viewerSignedIn && visibleLibraryItems.length > 0 ? (
-                  <button
-                    type="button"
-                    onClick={() => scrollToSection("saved-series")}
-                    className={primaryButtonClass}
-                  >
-                    Saved Series
-                  </button>
-                ) : (
-                  <Link
-                    href="/login"
-                    data-testid="library-entry-cta"
-                    className={primaryButtonClass}
-                  >
-                    Sign in
-                  </Link>
-                )}
-                {viewerSignedIn ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (visibleLibraryItems.length > 0) {
-                        scrollToSection("saved-series");
-                        return;
-                      }
-                      setShowCollectionManager((value) => !value);
-                    }}
-                    className={secondaryButtonClass}
-                  >
-                    {visibleLibraryItems.length > 0
-                      ? "Open Library"
-                      : showCollectionManager
-                        ? "Hide collections"
-                        : "Collections"}
-                  </button>
-                ) : (
-                  <Link href="/comics" className={secondaryButtonClass}>
-                    Browse free chapters
-                  </Link>
-                )}
-              </>
-            }
-          />
+            tone="highlight"
+            className="overflow-hidden p-0"
+          >
+            <div className="relative grid gap-5 px-5 py-5 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
+              <div className="max-w-4xl">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <p className={`${storefrontBadgeClass} gap-2 text-white/74`}>
+                    <Sparkles className="size-3.5" />
+                    {heroEyebrow}
+                  </p>
+                  {signedOutHeroSecondary ? (
+                    <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/44">
+                      {signedOutHeroSecondary}
+                    </p>
+                  ) : null}
+                </div>
+                <h1 className="mt-4 max-w-4xl font-display text-[2.35rem] font-semibold leading-[0.92] tracking-[-0.05em] text-white sm:text-[2.9rem] xl:text-[4rem]">
+                  {libraryDeskTitle}
+                </h1>
+                <p className="mt-4 max-w-2xl text-sm leading-[1.72] text-white/70 sm:text-[15px] sm:leading-[1.78]">
+                  {signedInHeroDescription}
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3 [&>a]:min-h-11 [&>a]:px-4 sm:[&>a]:px-5 [&>button]:min-h-11 [&>button]:px-4 sm:[&>button]:px-5">
+                  {resumeSpotlightReadHref ? (
+                    <a
+                      href={resumeSpotlightReadHref}
+                      role="button"
+                      className={primaryButtonClass}
+                    >
+                      Continue Reading
+                    </a>
+                  ) : viewerSignedIn && visibleLibraryItems.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => scrollToSection("saved-series")}
+                      className={primaryButtonClass}
+                    >
+                      Saved Series
+                    </button>
+                  ) : (
+                    <Link
+                      href="/login"
+                      data-testid="library-entry-cta"
+                      className={primaryButtonClass}
+                    >
+                      Sign in
+                    </Link>
+                  )}
+                  {viewerSignedIn ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (visibleLibraryItems.length > 0) {
+                          scrollToSection("saved-series");
+                          return;
+                        }
+                        setShowCollectionManager((value) => !value);
+                      }}
+                      className={secondaryButtonClass}
+                    >
+                      {visibleLibraryItems.length > 0
+                        ? "Open Library"
+                        : showCollectionManager
+                          ? "Hide collections"
+                          : "Collections"}
+                    </button>
+                  ) : (
+                    <Link href="/comics" className={secondaryButtonClass}>
+                      Browse free chapters
+                    </Link>
+                  )}
+                </div>
+                {libraryStats.length > 0 ? (
+                  <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    {libraryStats.map((stat) => (
+                      <div
+                        key={stat.label}
+                        className="min-w-[10rem] rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.035)_100%)] px-4 py-4 shadow-[0_18px_40px_rgba(8,6,20,0.22)]"
+                      >
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46">
+                          {stat.label}
+                        </p>
+                        <p className="mt-2 font-display text-[1.35rem] font-semibold tracking-[-0.04em] text-white">
+                          {stat.value}
+                        </p>
+                        {stat.hint ? (
+                          <p className="mt-1.5 max-w-[16rem] text-[13px] leading-[1.58] text-white/54">
+                            {stat.hint}
+                          </p>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+              <div className={`${storefrontInsetCardClass} hidden p-5 text-white lg:block`}>
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
+                  Pick up next
+                </p>
+                <h2 className="mt-3 font-display text-[2rem] font-semibold leading-[0.96] tracking-[-0.05em] text-white">
+                  Recommended reads
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-white/66">
+                  Start with a story card below, or sign in when you want this desk to keep your place.
+                </p>
+              </div>
+            </div>
+          </SurfacePanel>
 
           <SurfacePanel
             appearance="dark"
@@ -1101,7 +1145,7 @@ export default function LibraryPage({
               <div className="max-w-[40rem]">
                 <p className={`${storefrontBadgeClass} gap-2 text-white/64`}>
                   <Sparkles className="size-3.5" />
-                  Shelf Overview
+                  Reader Snapshot
                 </p>
                 <h2 className="mt-3 font-display text-[1.85rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.35rem]">
                   Your saved reads, progress, and next-open signals live here

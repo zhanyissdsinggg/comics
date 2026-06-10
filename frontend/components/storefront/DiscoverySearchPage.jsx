@@ -613,11 +613,8 @@ export default function DiscoverySearchPage({
     },
     {
       label: "Fresh Picks",
-      value: `${discoveryModel.recent.length}`,
-      description:
-        discoveryModel.recent.length > 0
-          ? "Recent updates ready to open without digging through filters."
-          : "Fresh update cards appear here as releases land.",
+      value: "Ready",
+      description: "Stories are ready to open tonight.",
     },
   ];
 
