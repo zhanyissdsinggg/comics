@@ -404,7 +404,9 @@ function SeriesDetailContent({
         return rightTime - leftTime;
       })
       .map((episode, index) => {
-        const seriesType = payload?.series?.type || payload?.series;
+        const seriesType =
+          payload?.series?.type ||
+          (detailItem?.kind === FIGMA_CONTENT_TYPES.NOVELS ? "novel" : "comic");
 
         return {
           id: String(episode?.id || "").trim(),
@@ -432,7 +434,7 @@ function SeriesDetailContent({
           ? ""
           : compactNumberLabel(chapter.readsValue),
     }));
-  }, [payload?.episodes, payload?.series]);
+  }, [detailItem?.kind, payload?.episodes, payload?.series]);
 
   const isInteractive = detailItem?.kind === FIGMA_CONTENT_TYPES.INTERACTIVE;
   const isNovel = detailItem?.kind === FIGMA_CONTENT_TYPES.NOVELS;

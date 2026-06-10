@@ -571,6 +571,29 @@ export function filterByGenre(items = [], genre = "All") {
 }
 
 export function buildChapterItems(series, episodes = []) {
+  const buildDisplayTitle = (episode) => {
+    const seriesType = series?.type || series;
+    const installmentLabel = formatInstallmentLabel(
+      seriesType,
+      episode?.number || 1,
+    );
+    const rawTitle = String(episode?.title || "").replace(/\s+/g, " ").trim();
+    const genericPrefixMatch = rawTitle.match(
+      /^(episode|chapter)\s+(\d+)(.*)$/i,
+    );
+
+    if (!rawTitle) {
+      return installmentLabel;
+    }
+
+    if (genericPrefixMatch) {
+      const suffix = String(genericPrefixMatch[3] || "");
+      return `${formatInstallmentLabel(seriesType, genericPrefixMatch[2])}${suffix}`;
+    }
+
+    return rawTitle;
+  };
+
   const normalizedEpisodes = Array.isArray(episodes) ? episodes : [];
   if (normalizedEpisodes.length > 0) {
     return [...normalizedEpisodes]
@@ -587,9 +610,7 @@ export function buildChapterItems(series, episodes = []) {
       })
       .map((episode) => ({
         id: String(episode?.id || "").trim(),
-        title:
-          String(episode?.title || "").trim() ||
-          formatInstallmentLabel(series?.type || series, episode?.number || 1),
+        title: buildDisplayTitle(episode),
         date: toIsoDateLabel(episode?.releasedAt),
         views: compactNumber(
           seededNumber(

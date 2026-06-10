@@ -300,6 +300,7 @@ export default function ComicsLandingPage({
       {model.completed.length > 0 ? (
         <section className="space-y-4">
           <SectionHeading
+            eyebrow=""
             title="Completed Comics"
             description="Finished runs when you want the payoff tonight, not next week."
             tone="channel"

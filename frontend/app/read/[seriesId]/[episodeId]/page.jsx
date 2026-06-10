@@ -37,6 +37,33 @@ function hasInAppReaderAttribution(searchParams) {
   return Boolean(sourcePath || entry);
 }
 
+function parseInstallmentNumberFromId(value) {
+  const match = String(value || "").match(/(?:^|e)(\d+)$/i);
+  return match ? Number(match[1]) || null : null;
+}
+
+function isGenericReaderTitle(title, seriesType) {
+  const normalizedTitle = String(title || "").trim().toLowerCase();
+  if (!normalizedTitle) {
+    return false;
+  }
+
+  const installmentLabel = getInstallmentLabel(seriesType).toLowerCase();
+  const shortLabel = getInstallmentLabel(seriesType, {
+    short: true,
+  }).toLowerCase();
+
+  return (
+    isDefaultInstallmentTitle(title, seriesType) ||
+    normalizedTitle === installmentLabel ||
+    normalizedTitle === shortLabel ||
+    normalizedTitle === "episode" ||
+    normalizedTitle === "chapter" ||
+    normalizedTitle === "ep." ||
+    normalizedTitle === "ch."
+  );
+}
+
 export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await Promise.resolve(params);
   const resolvedSearchParams = await Promise.resolve(searchParams);
@@ -79,12 +106,12 @@ export async function generateMetadata({ params, searchParams }) {
   const seriesTitle = String(series?.title || "").trim() || "Series";
   const fallbackEpisodeTitle = formatInstallmentLabel(
     series?.type || episode,
-    episode?.number || episodeId,
+    episode?.number || parseInstallmentNumberFromId(episodeId) || 1,
   );
   const rawEpisodeTitle = String(episode?.title || "").trim();
   const episodeTitle =
     rawEpisodeTitle &&
-    !isDefaultInstallmentTitle(rawEpisodeTitle, series?.type || episode)
+    !isGenericReaderTitle(rawEpisodeTitle, series?.type || episode)
       ? rawEpisodeTitle
       : fallbackEpisodeTitle;
   const creatorName = resolveSeriesCreatorName(series);
@@ -178,11 +205,11 @@ export default async function Page({ params, searchParams }) {
 
   const defaultEpisodeLabel = formatInstallmentLabel(
     series?.type || episode?.type,
-    episode?.number,
+    episode?.number || parseInstallmentNumberFromId(episodeId) || 1,
   );
   const episodeTitle =
     episode &&
-    !isDefaultInstallmentTitle(episode?.title, series?.type || episode)
+    !isGenericReaderTitle(episode?.title, series?.type || episode)
       ? String(episode.title || "").trim()
       : defaultEpisodeLabel;
 
@@ -191,10 +218,16 @@ export default async function Page({ params, searchParams }) {
       return "";
     }
 
-    return isDefaultInstallmentTitle(item?.title, series?.type || item)
-      ? formatInstallmentLabel(series?.type || item, item?.number)
+    return isGenericReaderTitle(item?.title, series?.type || item)
+      ? formatInstallmentLabel(
+          series?.type || item,
+          item?.number || parseInstallmentNumberFromId(item?.id) || 1,
+        )
       : String(item?.title || "").trim() ||
-          formatInstallmentLabel(series?.type || item, item?.number);
+          formatInstallmentLabel(
+            series?.type || item,
+            item?.number || parseInstallmentNumberFromId(item?.id) || 1,
+          );
   };
 
   const fallbackData = {

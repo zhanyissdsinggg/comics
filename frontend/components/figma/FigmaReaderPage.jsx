@@ -58,6 +58,11 @@ function createIdempotencyKey() {
   return `reader_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
+function parseInstallmentNumberFromId(value) {
+  const match = String(value || "").match(/(?:^|e)(\d+)$/i);
+  return match ? Number(match[1]) || null : null;
+}
+
 function formatMetaDate(value, seriesType = "comic") {
   void value;
   const installmentName = getInstallmentLabel(seriesType || "comic")
@@ -721,7 +726,11 @@ function ReaderContent({
       ? episodes[currentIndex + 1]
       : null;
   const seriesType = seriesData?.series?.type || episodeData?.type || "comic";
-  const currentNumber = currentEpisode?.number || episodeData?.number || 1;
+  const currentNumber =
+    currentEpisode?.number ||
+    episodeData?.number ||
+    parseInstallmentNumberFromId(episodeId) ||
+    1;
   const currentInstallmentLabel = formatInstallmentLabel(
     seriesType,
     currentNumber,
