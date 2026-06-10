@@ -68,8 +68,8 @@ function LoginContent() {
     mode === "register" ? "Create your reader pass" : "Welcome back";
   const subtitle =
     mode === "register"
-      ? "Create an account to keep your reading history, bookmarks, and wallet synced across devices."
-      : `Sign in to continue reading your favorite ${isAdultMode ? "mature stories" : "stories"} without losing your place.`;
+      ? "Create one reader pass for history, bookmarks, and wallet state."
+      : "Pick up your shelf without losing your place.";
   const accentTone = isAdultMode
     ? "bg-red-500/10 text-red-300"
     : "bg-cyan-400/10 text-cyan-300";
@@ -168,9 +168,9 @@ function LoginContent() {
               className="space-y-5"
             >
               <StorefrontSectionHeading
-                eyebrow="Tonight's Reader Flow"
-                title="One sign-in brings the whole shelf back"
-                description="Auth still uses the current store methods. The page shell now matches the rest of the storefront."
+                eyebrow="Reader Access"
+                title="Email access for your shelf"
+                description="The current account flow stays simple: email, password, and a clean return path."
               />
 
               <div className="grid gap-3 sm:grid-cols-3">
@@ -218,8 +218,8 @@ function LoginContent() {
                 </p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight text-white md:text-3xl">
                   {mode === "register"
-                    ? "Start your library"
-                    : "Open your shelf"}
+                    ? "Create account"
+                    : "Email sign in"}
                 </h2>
               </div>
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 text-white">

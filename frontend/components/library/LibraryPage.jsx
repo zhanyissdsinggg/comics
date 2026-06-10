@@ -34,6 +34,7 @@ import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { parallelRequests2 } from "../../lib/parallelRequests";
 import { getLibraryReturnCandidates } from "../../lib/homeMerchandising";
+import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
@@ -885,8 +886,29 @@ export default function LibraryPage({
     visibleLibraryItems.length,
   ]);
   const signedOutRecommendedStarts = useMemo(
-    () => recommendedItems.slice(0, 3),
-    [recommendedItems],
+    () => {
+      if (recommendedItems.length > 0) {
+        return recommendedItems.slice(0, 6);
+      }
+
+      return seriesList.slice(0, 6).map((series) => ({
+        id: series.id,
+        seriesId: series.id,
+        title: series.title,
+        eyebrow: series.type === "novel" ? "Novel pick" : "Comic pick",
+        subtitle:
+          series.genres?.slice(0, 2).join(" | ") ||
+          series.badge ||
+          series.status ||
+          "Ready to open tonight.",
+        coverUrl: series.coverUrl,
+        badge: series.badge,
+        isAdult: Boolean(series.adult),
+        entryPoint: "LIBRARY_SIGNED_OUT_FALLBACK",
+        campaignId: "library_signed_out_fallback",
+      }));
+    },
+    [recommendedItems, seriesList],
   );
   const primaryButtonClass = storefrontPrimaryButtonClass;
   const secondaryButtonClass = storefrontSecondaryButtonClass;
@@ -1298,7 +1320,7 @@ export default function LibraryPage({
                   </h2>
                 </div>
                 {signedOutRecommendedStarts.length > 0 ? (
-                  <div className="grid gap-3 md:grid-cols-3">
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     {signedOutRecommendedStarts.map((item) => (
                       <button
                         key={`signed-out-library-${item.id}`}
@@ -1312,20 +1334,33 @@ export default function LibraryPage({
                             ),
                           )
                         }
-                        className={`${storefrontInfoCardClass} p-4 text-left text-white transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16`}
+                        className={`${storefrontInfoCardClass} group grid grid-cols-[72px_minmax(0,1fr)] gap-3 p-3 text-left text-white transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16 hover:bg-white/[0.075]`}
                       >
-                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">
-                          {item.eyebrow || "Reader pick"}
-                        </p>
-                        <h3 className="mt-2 text-base font-black uppercase tracking-[-0.03em] text-white">
-                          {item.title}
-                        </h3>
-                        <p className="mt-2 text-sm font-semibold leading-6 text-white/70">
-                          {item.subtitle ||
-                            "Open the series page and start reading."}
-                        </p>
-                        <span className={`${storefrontChipClass} mt-4 min-h-[36px] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-white/75`}>
-                          Start reading
+                        <span className="relative block aspect-[3/4] overflow-hidden rounded-[18px] border border-white/10 bg-white/5">
+                          <img
+                            src={resolveDisplayImageUrl(item.coverUrl, {
+                              kind: "cover",
+                              adult: item.isAdult,
+                            })}
+                            alt={`${item.title} library pick cover`}
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                          />
+                          <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_45%,rgba(0,0,0,0.52)_100%)]" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block truncate text-[11px] font-black uppercase tracking-[0.2em] text-white/60">
+                            {item.eyebrow || "Reader pick"}
+                          </span>
+                          <span className="mt-2 line-clamp-2 block text-base font-black uppercase tracking-[-0.03em] text-white">
+                            {item.title}
+                          </span>
+                          <span className="mt-2 line-clamp-2 block text-sm font-semibold leading-6 text-white/70">
+                            {item.subtitle ||
+                              "Open the series page and start reading."}
+                          </span>
+                          <span className={`${storefrontChipClass} mt-3 min-h-[34px] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-white/75`}>
+                            Start reading
+                          </span>
                         </span>
                       </button>
                     ))}

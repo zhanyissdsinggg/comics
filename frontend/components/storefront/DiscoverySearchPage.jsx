@@ -598,7 +598,6 @@ export default function DiscoverySearchPage({
   const hasSearchIntent = Boolean(query || type || format || status || genre);
   const activeFilterCount = [type || format, status, genre].filter(Boolean).length;
   const heroTitle = query ? `"${query}"` : "Find your next read";
-  const totalIndexedTitles = formatCounts.comics + formatCounts.novels;
   const heroInsights = [
     {
       label: "Catalog Mode",
@@ -608,12 +607,9 @@ export default function DiscoverySearchPage({
         : "Search stays locked to the normal catalog in the active mode.",
     },
     {
-      label: "Indexed Titles",
-      value: `${totalIndexedTitles}`,
-      description:
-        totalIndexedTitles > 0
-          ? "Comics and novels already sitting in the searchable catalog."
-          : "The searchable catalog is still warming up.",
+      label: "Discovery Mode",
+      value: "Active",
+      description: "Search by title, genre, mood, or format.",
     },
     {
       label: "Fresh Picks",
