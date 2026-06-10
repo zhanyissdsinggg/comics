@@ -323,15 +323,15 @@ export default function NovelsLandingPage({
         />
       ) : loading ? null : (
         <EmptyShelf
-          title="No novels here yet"
-          description="Novel picks will show up here as soon as they go live in this mode."
+          title="Fresh novel picks are being queued"
+          description="Open Search or Rankings for ready-to-read stories in this mode."
           actionHref="/search?type=novel"
         />
       )}
 
       <section className="space-y-4">
         <SectionHeading
-          eyebrow="Latest Chapters"
+          eyebrow="Fresh Updates"
           title="Latest Chapters"
           description="Updated today, atmosphere first, and clean serial pull for late-night reading."
           tone="channel"
@@ -381,7 +381,7 @@ export default function NovelsLandingPage({
       {model.shortReads.length > 0 ? (
         <section className="space-y-4">
           <SectionHeading
-            eyebrow="Short Reads"
+            eyebrow="Quick Sessions"
             title="Short Reads"
             description="Quick-entry reads with real mood, clean pacing, and a strong stop point."
             tone="channel"

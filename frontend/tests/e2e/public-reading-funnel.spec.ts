@@ -981,7 +981,7 @@ const CANONICAL_ROUTE_SPECS = [
   },
   { path: "/support", title: /Support/i, heading: /Support/i },
   { path: "/account", title: /Account/i, heading: /Account/i },
-  { path: "/library", title: /Library/i, heading: /Your library/i },
+  { path: "/library", title: /Library/i, heading: /Reader desk/i },
   { path: "/orders", title: /Orders/i, heading: /Sign in to view purchases/i },
 ] as const;
 
@@ -2609,15 +2609,14 @@ test.describe("Public reading funnel", () => {
     expect(response?.ok()).toBeTruthy();
     const html = await page.content();
     expect(html).toContain("Your Choice Changes the Story");
-    expect(html).toContain("How choices work");
-    expect(html).not.toContain(
-      "More interactive stories are on the way. Check back soon for fresh routes and new endings.",
-    );
+    expect(html).not.toContain("More interactive stories are on the way.");
+    expect(html).not.toContain("fresh routes and new endings.");
     expect(html).not.toContain(">Loading<");
     expect(html).not.toContain("Launch checklist");
     await expect(page.locator("main")).toContainText(
       "Your Choice Changes the Story",
     );
+    await expect(page.locator("main")).toContainText(/How choices work/i);
     await expect(
       page.getByRole("link", { name: "Interactive", exact: true }),
     ).toHaveCount(0);
@@ -3504,21 +3503,26 @@ test.describe("Public reading funnel", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: "Your library" }).first(),
+      page.getByRole("heading", { name: "Reader desk" }).first(),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
 
     const signedOutCopyCount = await page.evaluate(() => {
       const text = document.body.innerText || "";
-      const matches = text.match(/Sign in to save progress and favorites\./g);
+      const matches = text.match(
+        /Sign in to sync progress, or keep browsing the shelf picks below\./g,
+      );
       return matches ? matches.length : 0;
     });
 
     expect(signedOutCopyCount).toBe(1);
     await expect(
+      page.getByRole("heading", { name: "Recommended reads" }).first(),
+    ).toBeVisible();
+    await expect(
       page.getByRole("link", { name: "Sign in" }).first(),
-    ).toHaveAttribute("href", "/account");
+    ).toHaveAttribute("href", "/login");
     await expect(
       page.getByRole("link", { name: "Browse free chapters" }).first(),
     ).toHaveAttribute("href", "/comics");

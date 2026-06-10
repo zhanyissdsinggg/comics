@@ -217,7 +217,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
                   ? () => onResume(item)
                   : () => onOpenSeries(item)
               }
-              className={`${storefrontPrimaryButtonClass} min-h-[42px] gap-2 px-4 py-2`}
+              className={`${storefrontPrimaryButtonClass} min-h-[44px] gap-2 px-4 py-2`}
             >
               {actionLabel}
               <ArrowUpRight className="size-4" />
@@ -727,7 +727,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                   aria-selected={isActive}
                   aria-controls={`account-library-panel-${tab.id}`}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`inline-flex min-h-[42px] items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] transition-[background-color,border-color,box-shadow,transform] duration-200 ${
+                  className={`inline-flex min-h-[44px] items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] transition-[background-color,border-color,box-shadow,transform] duration-200 ${
                     isActive
                       ? `${storefrontAccentChipClass} text-white`
                       : `${storefrontChipClass} text-white/75 active:translate-y-px`

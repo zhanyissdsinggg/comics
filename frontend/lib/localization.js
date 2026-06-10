@@ -233,6 +233,6 @@ export const US_LABELS = {
   readMore: "View title",
   showLess: "Show Less",
   viewAll: "View All",
-  noResults: "No results found",
+  noResults: "No perfect match yet",
   searchPlaceholder: "Search...",
 };

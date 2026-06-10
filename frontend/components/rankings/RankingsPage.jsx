@@ -596,7 +596,7 @@ export default function RankingsPage({
   const modeLabel = isAdultMode ? "Adult mode" : "Normal mode";
   const heroStats = [
     {
-      label: "Live Board",
+      label: "Tracked Titles",
       value: `${seriesList.length}`,
       icon: Flame,
       tone: "rose",
@@ -675,7 +675,7 @@ export default function RankingsPage({
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`${storefrontAccentChipClass} px-3 py-1 text-[10px] tracking-[0.24em] text-fuchsia-50`}>
-                  Live Board
+                  Reading Signals
                 </span>
                 <span className={`${storefrontBadgeClass} px-3 py-1 text-[10px] tracking-[0.18em] text-white/64`}>
                   {modeLabel}

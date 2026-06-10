@@ -1562,7 +1562,7 @@ test.describe("Content mode filtering", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: /Nothing landed this time/i }),
+      page.getByRole("heading", { name: /No perfect match yet/i }),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });

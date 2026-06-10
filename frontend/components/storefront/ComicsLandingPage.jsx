@@ -250,7 +250,7 @@ export default function ComicsLandingPage({
 
       <section className="space-y-4">
         <SectionHeading
-          eyebrow="Popular Comics"
+          eyebrow="Reader Picks"
           title="Popular Comics"
           description="Big covers, immediate mood, and the titles readers are most likely to open right now."
           tone="channel"
@@ -291,7 +291,7 @@ export default function ComicsLandingPage({
           shelves={model.genres}
           variant="comic"
           visual="channel"
-          eyebrow="Genre Shelves"
+          eyebrow="Browse by mood"
           title="Genre Shelves"
           description="Action, romance, and fantasy shelves trimmed down to quick, high-click picks."
         />

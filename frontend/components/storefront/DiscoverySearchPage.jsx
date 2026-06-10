@@ -901,8 +901,8 @@ export default function DiscoverySearchPage({
               </div>
             ) : (
               <EmptyShelf
-                title="Try another route"
-                description="Try a broader vibe, open a hot search, or clear a few filters."
+                title="No perfect match yet"
+                description="Try a genre, mood, or story title."
                 actionHref="/search"
               />
             )}

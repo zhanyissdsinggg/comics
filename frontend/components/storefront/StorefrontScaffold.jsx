@@ -356,7 +356,7 @@ export function StoryHero({
               {stats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="inline-flex min-h-[42px] items-center gap-2 rounded-full border border-white/10 bg-[rgba(255,255,255,0.055)] px-4 py-2 text-sm text-white/78 shadow-[0_16px_34px_rgba(4,3,9,0.22)] backdrop-blur-xl"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/10 bg-[rgba(255,255,255,0.055)] px-4 py-2 text-sm text-white/78 shadow-[0_16px_34px_rgba(4,3,9,0.22)] backdrop-blur-xl"
                 >
                   <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/44">
                     {stat.label}

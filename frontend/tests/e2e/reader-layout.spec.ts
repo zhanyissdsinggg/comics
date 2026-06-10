@@ -992,18 +992,16 @@ test.describe("Reader layout", () => {
       const firstParagraph = document.querySelector(
         "main [data-index='0']",
       ) as HTMLElement | null;
-      const commentsHeading = Array.from(
-        document.querySelectorAll("main h3"),
-      ).find((node) => node.textContent?.includes("Talk about this chapter")) as
-        | HTMLElement
-        | undefined;
+      const commentsRegion = document.querySelector(
+        '[data-testid="reader-reactions"]',
+      ) as HTMLElement | null;
 
       return {
         paragraphWidth: firstParagraph?.getBoundingClientRect().width || 0,
         paragraphLeft: firstParagraph?.getBoundingClientRect().left || 0,
         paragraphRight: firstParagraph?.getBoundingClientRect().right || 0,
         viewportWidth: window.innerWidth,
-        commentsTop: commentsHeading?.getBoundingClientRect().top || 0,
+        commentsTop: commentsRegion?.getBoundingClientRect().top || 0,
         paragraphTop: firstParagraph?.getBoundingClientRect().top || 0,
       };
     });
@@ -1265,11 +1263,9 @@ test.describe("Reader layout", () => {
       const endPanelNode = document.querySelector(
         '[data-testid="reader-end-panel"]',
       ) as HTMLElement | null;
-      const commentsHeading = Array.from(
-        document.querySelectorAll("main h3"),
-      ).find((node) => node.textContent?.includes("Talk about this chapter")) as
-        | HTMLElement
-        | undefined;
+      const commentsRegion = document.querySelector(
+        '[data-testid="reader-reactions"]',
+      ) as HTMLElement | null;
       const documentTop = window.scrollY;
       return {
         shellMarkerTop:
@@ -1281,7 +1277,7 @@ test.describe("Reader layout", () => {
         endPanelTop:
           (endPanelNode?.getBoundingClientRect().top || 0) + documentTop,
         commentsTop:
-          (commentsHeading?.getBoundingClientRect().top || 0) + documentTop,
+          (commentsRegion?.getBoundingClientRect().top || 0) + documentTop,
       };
     });
 

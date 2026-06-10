@@ -32,7 +32,7 @@ function SegmentedButton({ active, disabled = false, onClick, children }) {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`min-h-[42px] px-4 text-sm font-semibold transition ${
+      className={`min-h-[44px] px-4 text-sm font-semibold transition ${
         active
           ? `${storefrontHighlightBadgeClass} border-white/40 bg-white text-black shadow-[0_12px_24px_rgba(8,6,20,0.16)]`
             : disabled

@@ -288,10 +288,10 @@ export default function FigmaCommentsSection({
           )}
         >
           <p className="text-base font-bold text-white">
-            Be the first to comment
+            Reader reactions
           </p>
           <p className="mt-2 text-sm text-gray-400">
-            No comments yet. Say what you think before everyone else catches up.
+            Reactions will appear here as readers join the thread.
           </p>
         </div>
       )}

@@ -191,8 +191,8 @@ export const EmptyLibrary = memo(function EmptyLibrary({ onBrowse }) {
   return (
     <EmptyState
       icon="book"
-      title="Your library is empty"
-      description="Save a few series and they'll be waiting here when you're ready."
+      title="Save a story to build your shelf"
+      description="Start from Trending Covers or Rankings, then return here when a title is worth keeping."
       action={onBrowse}
       actionText="Find a Story"
       eyebrow="Saved Series"
@@ -204,10 +204,10 @@ export const EmptySearch = memo(function EmptySearch({ query }) {
   return (
     <EmptyState
       icon="search"
-      title="No results"
+      title="No perfect match yet"
       description={
         query
-          ? `Nothing matched "${query}" yet. Try a mood, genre, or creator instead.`
+          ? `Try a genre, mood, or story title after "${query}".`
           : ""
       }
       eyebrow="Search"

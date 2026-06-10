@@ -1987,7 +1987,11 @@ function ReaderContent({
         unlockBusy={unlockBusy}
       />
 
-      <section ref={commentsRef} className="px-4 pb-20 pt-6 md:px-6">
+      <section
+        ref={commentsRef}
+        data-testid="reader-reactions"
+        className="px-4 pb-20 pt-6 md:px-6"
+      >
         <div
           className={cn(
             "mx-auto w-full",
@@ -2038,13 +2042,13 @@ function ReaderContent({
         }
         progressClassName={palette.primaryBg}
         navButtonClassName={cn(
-          "inline-flex min-h-[42px] min-w-[108px] items-center justify-center rounded-full border px-4 text-sm font-bold transition-colors",
+          "inline-flex min-h-[44px] min-w-[108px] items-center justify-center rounded-full border px-4 text-sm font-bold transition-colors",
           isComic
             ? "border-white/10 bg-white/5 text-white hover:bg-white/10"
             : `${novelBorderClass} bg-white/5 text-white hover:bg-white/10`,
         )}
         centerButtonClassName={cn(
-          "inline-flex min-h-[42px] items-center gap-2 rounded-full border px-4 text-sm font-bold transition-colors",
+          "inline-flex min-h-[44px] items-center gap-2 rounded-full border px-4 text-sm font-bold transition-colors",
           isComic
             ? "border-white/10 bg-white/10 text-white hover:bg-white/15"
             : `${novelBorderClass} bg-white/10 text-white hover:bg-white/15`,
@@ -2060,7 +2064,7 @@ function ReaderContent({
             : "border-white/20 bg-white/12 text-white"
         }
         primaryButtonClassName={cn(
-          "inline-flex min-h-[42px] min-w-[108px] items-center justify-center rounded-full px-4 text-sm font-black transition-transform active:scale-[0.98]",
+          "inline-flex min-h-[44px] min-w-[108px] items-center justify-center rounded-full px-4 text-sm font-black transition-transform active:scale-[0.98]",
           nextEpisode ? palette.primaryBg : "border border-white/10 bg-white/5",
           !nextEpisode &&
             !isComic &&
