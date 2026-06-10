@@ -290,6 +290,7 @@ function SeriesDetailContent({
   const requestRef = useRef(0);
   const isFollowing = followedSeriesIds.includes(seriesId);
   const [unlockModalState, setUnlockModalState] = useState(null);
+  const [accessNowMs, setAccessNowMs] = useState(0);
   void initialSearchParams;
   const entitlement = bySeriesId[seriesId] || {
     seriesId,
@@ -305,6 +306,10 @@ function SeriesDetailContent({
     void loadWallet();
     void loadEntitlement(seriesId);
   }, [isSignedIn, loadEntitlement, loadFollowed, loadWallet, seriesId]);
+
+  useEffect(() => {
+    setAccessNowMs(Date.now());
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -895,7 +900,7 @@ function SeriesDetailContent({
                         subscription,
                         subscriptionUsage,
                         coupons: [],
-                        nowMs: Date.now(),
+                        nowMs: accessNowMs,
                         fallbackPrice: chapter.rawEpisode.pricePts,
                       })
                     : null;

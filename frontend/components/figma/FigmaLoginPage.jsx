@@ -379,7 +379,7 @@ function LoginContent() {
                   setMode(mode === "register" ? "login" : "register")
                 }
                 className={cn(
-                  "font-bold transition-colors hover:underline",
+                  "-mx-1 -my-3 inline-flex min-h-11 items-center px-1 font-bold transition-colors hover:underline",
                   palette.primaryText,
                 )}
               >

@@ -13,7 +13,7 @@ import {
 function AuthSkeleton({ variant = "default" }) {
   return (
     <div
-      className="hidden h-11 w-24 animate-pulse rounded-full border border-white/10 bg-[rgba(255,255,255,0.035)] sm:block"
+      className="hidden h-11 w-11 animate-pulse rounded-full border border-white/10 bg-[rgba(255,255,255,0.035)] sm:block lg:w-24"
       aria-hidden="true"
     />
   );
@@ -62,7 +62,7 @@ export default function HeaderActions({
   };
 
   return (
-    <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+    <div className="flex shrink-0 items-center gap-1.5 lg:gap-3">
       <button
         type="button"
         onClick={handleNotificationsClick}
@@ -103,7 +103,7 @@ export default function HeaderActions({
           type="button"
           onClick={onAdultToggleClick}
           className={cn(
-            "inline-flex h-11 min-w-[5.3rem] items-center justify-center gap-2 rounded-full border px-3 text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-150 sm:min-w-[6.3rem] sm:px-3.5",
+            "inline-flex h-11 min-w-[5.3rem] items-center justify-center gap-2 rounded-full border px-3 text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-150 lg:min-w-[6.3rem] lg:px-3.5",
             isAdultMode
               ? "border-[rgba(255,79,154,0.34)] bg-[linear-gradient(135deg,rgba(255,79,154,0.22)_0%,rgba(120,54,84,0.3)_100%)] text-white shadow-[0_16px_32px_rgba(255,79,154,0.18)]"
               : storefrontSecondaryButtonClass,
