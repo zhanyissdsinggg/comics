@@ -109,12 +109,31 @@ function formatPriceLabel(value) {
   return numeric > 0 ? `${numeric} pts` : "Free";
 }
 
+function isReaderDefaultInstallmentTitle(title, seriesType) {
+  const normalizedTitle = String(title || "").trim().toLowerCase();
+  if (!normalizedTitle) {
+    return false;
+  }
+
+  const installmentLabel = getInstallmentLabel(seriesType).toLowerCase();
+  const shortLabel = getInstallmentLabel(seriesType, {
+    short: true,
+  }).toLowerCase();
+
+  return (
+    isDefaultInstallmentTitle(title, seriesType) ||
+    normalizedTitle === installmentLabel ||
+    normalizedTitle === shortLabel ||
+    normalizedTitle === "episode" ||
+    normalizedTitle === "chapter" ||
+    normalizedTitle === "ep." ||
+    normalizedTitle === "ch."
+  );
+}
+
 function resolveEpisodeDisplayTitle(title, fallbackLabel, seriesType) {
   const normalizedTitle = String(title || "").trim();
-  if (
-    !normalizedTitle ||
-    isDefaultInstallmentTitle(normalizedTitle, seriesType)
-  ) {
+  if (!normalizedTitle || isReaderDefaultInstallmentTitle(normalizedTitle, seriesType)) {
     return fallbackLabel;
   }
 
@@ -714,7 +733,7 @@ function ReaderContent({
       "",
   ).trim();
   const currentEpisodeTitle =
-    rawEpisodeTitle && !isDefaultInstallmentTitle(rawEpisodeTitle, seriesType)
+    rawEpisodeTitle && !isReaderDefaultInstallmentTitle(rawEpisodeTitle, seriesType)
       ? rawEpisodeTitle
       : currentInstallmentLabel;
   const currentPricePts = Number(
@@ -1617,18 +1636,18 @@ function ReaderContent({
                           : `${novelBorderClass} bg-transparent ${readerMutedClass}`,
                       )}
                     >
-                      {isComic ? "Reader" : "Novel"}
+                      {isComic ? "Reader" : currentInstallmentLabel}
                     </ReaderMetaPill>
-                    <ReaderMetaPill
-                      className={cn(
-                        isComic
-                          ? "border-white/10 bg-[rgba(255,255,255,0.035)] text-white/72"
-                          : `${novelBorderClass} bg-transparent`,
-                        readerMutedClass,
-                      )}
-                    >
-                      {isComic ? "Comic" : currentInstallmentLabel}
-                    </ReaderMetaPill>
+                    {isComic ? (
+                      <ReaderMetaPill
+                        className={cn(
+                          "border-white/10 bg-[rgba(255,255,255,0.035)] text-white/72",
+                          readerMutedClass,
+                        )}
+                      >
+                        Comic
+                      </ReaderMetaPill>
+                    ) : null}
                     <Pill
                       className={
                         isComic

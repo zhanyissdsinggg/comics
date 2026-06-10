@@ -146,8 +146,10 @@ function buildInstallmentDisplayTitle(episode, seriesType) {
     return fallbackTitle;
   }
 
-  if (/^(episode|chapter)\s+\d+$/i.test(rawTitle)) {
-    return fallbackTitle;
+  const genericPrefixMatch = rawTitle.match(/^(episode|chapter)\s+(\d+)(.*)$/i);
+  if (genericPrefixMatch) {
+    const suffix = String(genericPrefixMatch[3] || "");
+    return `${installmentName} ${genericPrefixMatch[2]}${suffix}`;
   }
 
   return rawTitle;
