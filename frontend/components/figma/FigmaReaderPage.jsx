@@ -65,8 +65,43 @@ function formatMetaDate(value, seriesType = "comic") {
   return `Full ${installmentName} ready`;
 }
 
-function getReaderInstallmentNoun(seriesType = "comic") {
-  return getInstallmentLabel(seriesType || "comic").toLowerCase();
+function getReaderInstallmentNoun({
+  seriesType = "comic",
+  isNovel = false,
+  rawEpisodeTitle = "",
+  fallbackEpisodeTitle = "",
+} = {}) {
+  const terminologySignal = [
+    seriesType,
+    rawEpisodeTitle,
+    fallbackEpisodeTitle,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  if (
+    /\bchapter\b/.test(terminologySignal) ||
+    /\bch\./.test(terminologySignal)
+  ) {
+    return "chapter";
+  }
+
+  if (
+    /\bepisode\b/.test(terminologySignal) ||
+    /\bep\./.test(terminologySignal) ||
+    terminologySignal.includes("novel") ||
+    terminologySignal.includes("fiction") ||
+    terminologySignal.includes("text episode") ||
+    terminologySignal.includes("text-episode")
+  ) {
+    return "episode";
+  }
+
+  if (isNovel) {
+    return "episode";
+  }
+
+  return "chapter";
 }
 
 function formatPriceLabel(value) {
@@ -667,7 +702,6 @@ function ReaderContent({
       ? episodes[currentIndex + 1]
       : null;
   const seriesType = seriesData?.series?.type || episodeData?.type || "comic";
-  const installmentLabel = getInstallmentLabel(seriesType);
   const currentNumber = currentEpisode?.number || episodeData?.number || 1;
   const currentInstallmentLabel = formatInstallmentLabel(
     seriesType,
@@ -760,7 +794,12 @@ function ReaderContent({
           ),
         )
     : 0;
-  const installmentNoun = getReaderInstallmentNoun(seriesType);
+  const installmentNoun = getReaderInstallmentNoun({
+    seriesType,
+    isNovel,
+    rawEpisodeTitle,
+    fallbackEpisodeTitle: fallbackData?.episodeTitle,
+  });
   const installmentTitle =
     installmentNoun.charAt(0).toUpperCase() + installmentNoun.slice(1);
   const isEpisodeComplete = Boolean(unlocked && hasReachedChapterEnd);
@@ -1636,7 +1675,7 @@ function ReaderContent({
                       seriesType,
                     )}{" / "}
                     {unlocked
-                      ? `Full ${installmentLabel.toLowerCase()} unlocked.`
+                      ? `Full ${installmentNoun} unlocked.`
                       : `${safeVisibleUnits} free ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} open now.`}
                   </p>
 
@@ -1737,10 +1776,10 @@ function ReaderContent({
                     </Pill>
                   </div>
                   <h2 className="mt-4 font-display text-3xl font-semibold tracking-[-0.05em] text-white md:text-4xl">
-                    Unlock the rest of this {installmentLabel.toLowerCase()}.
+                    Unlock the rest of this {installmentNoun}.
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-300">
-                    Keep the flow going without leaving the reader. Unlock now and stay inside the same chapter experience.
+                    Keep the flow going without leaving the reader. Unlock now and stay inside the same {installmentNoun} experience.
                   </p>
 
                   <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -1888,7 +1927,7 @@ function ReaderContent({
         description={
           unlocked
             ? `${currentInstallmentLabel} is complete. Keep reading, revisit the previous ${installmentNoun}, or open reader reactions below.`
-            : `The free preview stops here. Unlock the rest of this ${installmentLabel.toLowerCase()} to keep reading.`
+            : `The free preview stops here. Unlock the rest of this ${installmentNoun} to keep reading.`
         }
         nextEpisodeTitle={
           nextEpisode
