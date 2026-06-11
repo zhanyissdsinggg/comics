@@ -5,8 +5,6 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import EmailLinkActionShell from "../../../components/auth/EmailLinkActionShell";
 import {
-  StorefrontInfoCard,
-  storefrontBadgeClass,
   storefrontInputClass,
   storefrontNoticeClass,
   storefrontPrimaryButtonClass,
@@ -141,30 +139,11 @@ function ResetPageContent() {
       eyebrow="Account access"
       title="Reset your password"
       description="Request a fresh reset email or set a new password from the secure link in your URL."
-      asideTitle="Next"
-      asideBody={hasToken ? "Set a new password." : "Send a reset link."}
+      minimal
     >
-      <div className="space-y-6">
-        <div className="relative">
-          <p className={storefrontBadgeClass}>
-            Password reset
-          </p>
-          <h2 className="mt-4 font-display text-[1.9rem] font-semibold leading-[0.94] tracking-[-0.06em] text-white sm:text-[2.15rem]">
-            {hasToken ? "Choose a new password" : "Send another email?"}
-          </h2>
-          <p className="mt-3 max-w-xl text-sm leading-7 text-white/68">
-            {hasToken ? "Enter a new password for this account." : "Enter the email tied to your reader account."}
-          </p>
-        </div>
-
+      <div className="space-y-5">
         {hasToken ? (
           <div className="space-y-4">
-            <StorefrontInfoCard
-              eyebrow="Secure link"
-              title="Reset link loaded"
-              description="Set a new password to get back into your account."
-              className="border-cyan-300/16 bg-[linear-gradient(135deg,rgba(34,211,238,0.08)_0%,rgba(255,255,255,0.04)_100%)]"
-            />
             <input
               type="password"
               value={password}
@@ -221,9 +200,9 @@ function ResetPageContent() {
           message={status?.message}
         />
 
-        <StorefrontInfoCard title="Account links">
-          <p className="mt-3 text-sm leading-6 text-white/70">
-            Go to{" "}
+        <div className="rounded-[22px] border border-white/10 bg-white/[0.035] px-4 py-4">
+          <p className="text-sm font-semibold text-white">Account links</p>
+          <p className="mt-3 text-sm leading-6 text-white/64">
             <Link
               href="/account"
               className="font-semibold text-[#00E5FF] underline decoration-[#00E5FF]/35 underline-offset-4 hover:text-[#7DF4FF]"
@@ -239,7 +218,7 @@ function ResetPageContent() {
             </Link>
             .
           </p>
-        </StorefrontInfoCard>
+        </div>
       </div>
     </EmailLinkActionShell>
   );

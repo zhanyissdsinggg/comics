@@ -150,8 +150,7 @@ function VerifyPageContent() {
       eyebrow="Account access"
       title="Confirm your email"
       description="Confirm the secure token in your URL or request a fresh verification email."
-      asideTitle="Next"
-      asideBody={hasToken ? "Check the link." : "Send a new link."}
+      minimal
     >
       <div className="space-y-6">
         <div>
