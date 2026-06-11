@@ -55,16 +55,6 @@ export default function HeaderActions({
     router.push("/library");
   };
 
-  const handleLoginRouteClick = () => {
-    if (typeof window === "undefined") {
-      router.push("/login");
-      return;
-    }
-
-    const returnTo = `${window.location.pathname}${window.location.search || ""}`;
-    router.push(`/login?returnTo=${encodeURIComponent(returnTo)}`);
-  };
-
   const handleAccountClick = () => {
     if (!hydrated || !isSignedIn) {
       onLoginClick?.();
@@ -178,7 +168,7 @@ export default function HeaderActions({
       ) : (
         <button
           type="button"
-          onClick={handleLoginRouteClick}
+          onClick={onLoginClick}
           className={`hidden h-11 items-center justify-center px-5 text-sm font-semibold tracking-[0.01em] text-[#160d13] sm:inline-flex ${storefrontPrimaryButtonClass}`}
         >
           Sign In

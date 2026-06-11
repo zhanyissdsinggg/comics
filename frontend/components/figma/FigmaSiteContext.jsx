@@ -119,10 +119,19 @@ export function FigmaSiteProvider({
       (typeof window !== "undefined"
         ? `${window.location.pathname}${window.location.search || ""}`
         : "/");
-    const search = new URLSearchParams();
-    search.set("mode", mode === "register" ? "register" : "login");
-    search.set("returnTo", targetReturnTo);
-    router.push(`/login?${search.toString()}`);
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent("auth:open", {
+        detail: {
+          mode: mode === "register" ? "register" : "login",
+          returnTo: targetReturnTo,
+        },
+      }),
+    );
   };
 
   const handleAdultToggle = () => {
