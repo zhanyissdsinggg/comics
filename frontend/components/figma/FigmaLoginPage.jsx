@@ -17,22 +17,19 @@ import {
 } from "lucide-react";
 import { siteConfig } from "../../lib/siteConfig";
 import { useAuthStore } from "../../store/useAuthStore";
-import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
+import { FigmaSiteProvider } from "./FigmaSiteContext";
 
 const VALUE_POINTS = [
   {
     label: "Private shelf",
-    detail: "Your favorites, always saved.",
     icon: Bookmark,
   },
   {
     label: "Reading progress",
-    detail: "Pick up right where you left off.",
     icon: Library,
   },
   {
     label: "Mode-aware",
-    detail: "Content that fits your mode.",
     icon: ShieldCheck,
   },
 ];
@@ -90,7 +87,7 @@ function BrandMark({ compact = false }) {
   );
 }
 
-function DecorativeCollage({ isAdultMode }) {
+function DecorativeCollage() {
   return (
     <div
       className="pointer-events-none relative hidden min-h-[470px] overflow-hidden rounded-[32px] border border-white/8 bg-white/[0.025] lg:block"
@@ -114,11 +111,6 @@ function DecorativeCollage({ isAdultMode }) {
         </div>
       ))}
       <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_58%,#070A13_100%)]" />
-      {isAdultMode ? (
-        <div className="absolute right-5 top-5 rounded-full border border-[#EC4899]/25 bg-[#EC4899]/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#F9A8D4]">
-          18+ mode
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -132,7 +124,7 @@ function ValueStrip({ compact = false }) {
           : "grid gap-4 sm:grid-cols-3 lg:gap-6"
       }
     >
-      {VALUE_POINTS.map(({ label, detail, icon: Icon }) => (
+      {VALUE_POINTS.map(({ label, icon: Icon }) => (
         <div
           key={label}
           className={
@@ -154,16 +146,14 @@ function ValueStrip({ compact = false }) {
             <span
               className={
                 compact
-                  ? "block truncate text-[10px] font-black text-white"
+                  ? "block text-[10px] font-black leading-tight text-white"
                   : "block text-base font-black text-white"
               }
             >
-              {compact ? label.replace("Reading ", "") : label}
+              {label}
             </span>
             {!compact ? (
-              <span className="mt-1 block text-sm leading-6 text-white/58">
-                {detail}
-              </span>
+              <span className="mt-2 block h-1.5 w-10 rounded-full bg-[linear-gradient(90deg,#EC4899,#A855F7)] opacity-65" />
             ) : null}
           </span>
         </div>
@@ -382,7 +372,6 @@ function AuthCard({
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAdultMode } = useFigmaSite();
   const { signIn } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [mode, setMode] = useState(
@@ -397,7 +386,6 @@ function LoginContent() {
     () => searchParams?.get("returnTo") || "/",
     [searchParams],
   );
-  const isRegister = mode === "register";
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -432,9 +420,6 @@ function LoginContent() {
             <BrandMark compact />
 
             <div className="max-w-[650px]">
-              <p className="mb-3 text-[11px] font-black uppercase tracking-[0.24em] text-white/40 lg:hidden">
-                {isAdultMode ? "18+ mode active" : "Core mode active"}
-              </p>
               <h1 className="text-[42px] font-black leading-[0.98] tracking-[-0.06em] text-white sm:text-[58px] lg:text-[72px] xl:text-[84px]">
                 Your shelf,
                 <br />
@@ -453,7 +438,7 @@ function LoginContent() {
               <ValueStrip compact />
             </div>
 
-            <DecorativeCollage isAdultMode={isAdultMode} />
+            <DecorativeCollage />
           </div>
 
           <div className="hidden lg:block">
@@ -475,10 +460,6 @@ function LoginContent() {
             error={error}
             handleSubmit={handleSubmit}
           />
-          <p className="mt-5 text-center text-xs leading-6 text-white/42 lg:hidden">
-            Private shelf <span className="mx-1">/</span> Reading progress{" "}
-            <span className="mx-1">/</span> Mode-aware
-          </p>
         </div>
       </main>
 
