@@ -5,11 +5,9 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowRight,
-  Bookmark,
   Compass,
   Eye,
   EyeOff,
-  Library,
   Lock,
   Mail,
   ShieldCheck,
@@ -20,18 +18,9 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { FigmaSiteProvider } from "./FigmaSiteContext";
 
 const VALUE_POINTS = [
-  {
-    label: "Private shelf",
-    icon: Bookmark,
-  },
-  {
-    label: "Reading progress",
-    icon: Library,
-  },
-  {
-    label: "Mode-aware",
-    icon: ShieldCheck,
-  },
+  "Private shelf",
+  "Reading progress",
+  "Mode-aware",
 ];
 
 const COLLAGE_IMAGES = [
@@ -115,48 +104,16 @@ function DecorativeCollage() {
   );
 }
 
-function ValueStrip({ compact = false }) {
+function ValueStrip() {
   return (
-    <div
-      className={
-        compact
-          ? "grid grid-cols-3 gap-2"
-          : "grid gap-4 sm:grid-cols-3 lg:gap-6"
-      }
-    >
-      {VALUE_POINTS.map(({ label, icon: Icon }) => (
-        <div
+    <div className="flex flex-wrap gap-2">
+      {VALUE_POINTS.map((label) => (
+        <span
           key={label}
-          className={
-            compact
-              ? "rounded-xl border border-white/10 bg-white/[0.045] px-3 py-2 text-center"
-              : "flex gap-4 border-t border-white/10 pt-6"
-          }
+          className="inline-flex min-h-11 items-center rounded-full border border-white/10 bg-white/[0.045] px-4 text-xs font-black text-white/88 shadow-[0_14px_34px_rgba(0,0,0,0.20)] backdrop-blur-xl sm:px-5 sm:text-sm"
         >
-          <span
-            className={
-              compact
-                ? "mx-auto mb-1 flex h-5 w-5 items-center justify-center text-[#EC4899]"
-                : "mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#EC4899]/30 bg-[#EC4899]/10 text-[#EC4899]"
-            }
-          >
-            <Icon className={compact ? "h-3.5 w-3.5" : "h-5 w-5"} />
-          </span>
-          <span className="block min-w-0">
-            <span
-              className={
-                compact
-                  ? "block text-[10px] font-black leading-tight text-white"
-                  : "block text-base font-black text-white"
-              }
-            >
-              {label}
-            </span>
-            {!compact ? (
-              <span className="mt-2 block h-1.5 w-10 rounded-full bg-[linear-gradient(90deg,#EC4899,#A855F7)] opacity-65" />
-            ) : null}
-          </span>
-        </div>
+          {label}
+        </span>
       ))}
     </div>
   );
@@ -435,7 +392,7 @@ function LoginContent() {
             </div>
 
             <div className="lg:hidden">
-              <ValueStrip compact />
+              <ValueStrip />
             </div>
 
             <DecorativeCollage />

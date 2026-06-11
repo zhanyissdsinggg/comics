@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import EmailLinkActionShell from "../../../components/auth/EmailLinkActionShell";
 import {
   storefrontInputClass,
   storefrontNoticeClass,
@@ -12,6 +11,29 @@ import {
 } from "../../../components/common/StorefrontPagePrimitives";
 import { apiPost } from "../../../lib/apiClient";
 import { StorefrontPage } from "../../../components/storefront/StorefrontScaffold";
+
+function ResetActionShell({ children }) {
+  return (
+    <StorefrontPage
+      contentClassName="flex min-h-[calc(100vh-220px)] items-center"
+    >
+      <div className="mx-auto grid w-full max-w-[1040px] gap-6 py-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(360px,0.78fr)] lg:items-center lg:py-12">
+        <section className="min-w-0">
+          <h1 className="max-w-[560px] text-[2.45rem] font-black leading-[0.98] tracking-[-0.06em] text-white sm:text-[3.8rem]">
+            Reset your password
+          </h1>
+          <p className="mt-5 max-w-[560px] text-base leading-7 text-white/68 sm:text-lg sm:leading-8">
+            Request a fresh reset email or set a new password from the secure link in your URL.
+          </p>
+        </section>
+
+        <section className="min-w-0 rounded-[28px] border border-white/12 bg-white/[0.045] p-5 text-white shadow-[0_30px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl sm:p-8">
+          {children}
+        </section>
+      </div>
+    </StorefrontPage>
+  );
+}
 
 function StatusNotice({ tone = "neutral", title = "", message = "" }) {
   if (!title && !message) {
@@ -135,23 +157,23 @@ function ResetPageContent() {
   };
 
   return (
-    <EmailLinkActionShell
-      eyebrow="Account access"
-      title="Reset your password"
-      description="Request a fresh reset email or set a new password from the secure link in your URL."
-      minimal
-    >
+    <ResetActionShell>
       <div className="space-y-5">
         {hasToken ? (
           <div className="space-y-4">
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="Choose a new password"
-              autoComplete="new-password"
-              className={storefrontInputClass}
-            />
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-white/78">
+                Password
+              </span>
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Choose a new password"
+                autoComplete="new-password"
+                className={storefrontInputClass}
+              />
+            </label>
             <button
               type="button"
               disabled={submitting}
@@ -175,14 +197,19 @@ function ResetPageContent() {
           </div>
         ) : (
           <div className="space-y-4">
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="name@example.com"
-              autoComplete="email"
-              className={storefrontInputClass}
-            />
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold text-white/78">
+                Email
+              </span>
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="name@example.com"
+                autoComplete="email"
+                className={storefrontInputClass}
+              />
+            </label>
             <button
               type="button"
               disabled={submitting}
@@ -220,7 +247,7 @@ function ResetPageContent() {
           </p>
         </div>
       </div>
-    </EmailLinkActionShell>
+    </ResetActionShell>
   );
 }
 
