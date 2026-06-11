@@ -97,10 +97,12 @@ export default function AppProviders({
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith("/admin");
   const isReaderRoute = pathname?.startsWith("/read");
-  // PublicHeader stays off the immersive reader route, while the shared
-  // footer now covers every non-admin public route through one component.
-  const shouldShowPublicHeader = !isAdminRoute && !isReaderRoute;
-  const shouldShowPublicFooter = !isAdminRoute;
+  const isStandaloneAuthActionRoute =
+    pathname === "/auth/reset" || pathname?.startsWith("/auth/reset/");
+  // PublicHeader stays off immersive and standalone account-action routes.
+  const shouldShowPublicHeader =
+    !isAdminRoute && !isReaderRoute && !isStandaloneAuthActionRoute;
+  const shouldShowPublicFooter = !isAdminRoute && !isStandaloneAuthActionRoute;
 
   return (
     <ErrorBoundary
