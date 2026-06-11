@@ -20,7 +20,9 @@ function AuthSkeleton({ variant = "default" }) {
 }
 
 const ICON_BUTTON_CLASS =
-  `relative inline-flex h-11 w-11 items-center justify-center px-0 ${storefrontSecondaryButtonClass}`;
+  `relative inline-flex h-11 w-11 items-center justify-center px-0 text-white/82 [&>svg]:stroke-current ${storefrontSecondaryButtonClass}`;
+const HEADER_ACTION_PILL_CLASS =
+  `relative inline-flex h-11 items-center justify-center gap-2 rounded-full px-3 text-white/82 [&>svg]:stroke-current ${storefrontSecondaryButtonClass}`;
 
 export default function HeaderActions({
   onAdultToggleClick,
@@ -63,39 +65,43 @@ export default function HeaderActions({
 
   return (
     <div className="flex shrink-0 items-center gap-1.5 lg:gap-3">
-      <button
-        type="button"
-        onClick={handleNotificationsClick}
-        className={cn(
-          iconButtonClass,
-          "hidden items-center justify-center md:inline-flex",
-        )}
-        aria-label={
-          hydrated && isSignedIn && unreadCount > 0
-            ? `View notifications, ${unreadCount > 99 ? "99 plus" : unreadCount} unread`
-            : "Open notifications"
-        }
-        title="Notifications"
-      >
-        <Bell aria-hidden="true" className="size-4" />
-        {hydrated && isSignedIn && unreadCount > 0 ? (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[linear-gradient(135deg,#ff4f9a_0%,#ff7ab1_100%)] px-1 text-[10px] font-bold text-white shadow-[0_10px_24px_rgba(255,79,154,0.32)]">
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        ) : null}
-      </button>
+      {hydrated && isSignedIn ? (
+        <button
+          type="button"
+          onClick={handleNotificationsClick}
+          className={cn(
+            HEADER_ACTION_PILL_CLASS,
+            "hidden min-w-11 items-center justify-center md:inline-flex lg:px-4",
+          )}
+          aria-label={
+            unreadCount > 0
+              ? `View notifications, ${unreadCount > 99 ? "99 plus" : unreadCount} unread`
+              : "Open notifications"
+          }
+          title="Notifications"
+        >
+          <Bell aria-hidden="true" className="size-4 shrink-0" />
+          <span className="hidden text-xs font-semibold lg:inline">Alerts</span>
+          {unreadCount > 0 ? (
+            <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[linear-gradient(135deg,#ff4f9a_0%,#ff7ab1_100%)] px-1 text-[10px] font-bold text-white shadow-[0_10px_24px_rgba(255,79,154,0.32)]">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          ) : null}
+        </button>
+      ) : null}
 
       <button
         type="button"
         onClick={handleLibraryClick}
         className={cn(
-          iconButtonClass,
-          "hidden items-center justify-center md:inline-flex",
+          HEADER_ACTION_PILL_CLASS,
+          "hidden min-w-11 items-center justify-center md:inline-flex lg:px-4",
         )}
         aria-label="Open library"
         title="Library"
       >
-        <Bookmark aria-hidden="true" className="size-4" />
+        <Bookmark aria-hidden="true" className="size-4 shrink-0" />
+        <span className="hidden text-xs font-semibold lg:inline">Library</span>
       </button>
 
       {showAdultToggle ? (

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { apiPost } from "../../lib/apiClient";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -18,6 +19,9 @@ export default function LoginGateModal({
   errorMessage = "",
 }) {
   const titleId = useId();
+  const formRef = useRef(null);
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState("login");
@@ -29,6 +33,8 @@ export default function LoginGateModal({
   const [countryCode, setCountryCode] = useState("+1");
   const [resetStatus, setResetStatus] = useState("");
   const [socialError, setSocialError] = useState("");
+  const [portalReady, setPortalReady] = useState(false);
+  const [allowInput, setAllowInput] = useState(false);
   const { refresh } = useAuthStore();
   const { config } = useRegionStore();
   const googleAuthEnabled = isGoogleAuthEnabled();
@@ -47,9 +53,14 @@ export default function LoginGateModal({
   const dividerClass = "h-px flex-1 bg-white/10";
 
   useEffect(() => {
+    setPortalReady(true);
+  }, []);
+
+  useEffect(() => {
     if (open) {
       setEmail("");
       setPassword("");
+      setAllowInput(false);
       setMode(initialMode === "register" ? "register" : "login");
       setStep("login");
       setOtpCode("");
@@ -61,6 +72,39 @@ export default function LoginGateModal({
       setSocialError("");
     }
   }, [initialMode, open]);
+
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
+
+    const clearAutofill = () => {
+      if (
+        document.activeElement === emailRef.current ||
+        document.activeElement === passwordRef.current
+      ) {
+        return;
+      }
+      setEmail("");
+      setPassword("");
+      if (emailRef.current) {
+        emailRef.current.value = "";
+      }
+      if (passwordRef.current) {
+        passwordRef.current.value = "";
+      }
+      formRef.current?.reset?.();
+    };
+
+    clearAutofill();
+    const timers = [80, 260, 700].map((delay) =>
+      window.setTimeout(clearAutofill, delay),
+    );
+
+    return () => {
+      timers.forEach((timer) => window.clearTimeout(timer));
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) {
@@ -168,14 +212,14 @@ export default function LoginGateModal({
     setSocialError(message || "Social sign-in failed.");
   }, []);
 
-  if (!open) {
+  if (!open || !portalReady) {
     return null;
   }
 
-  return (
+  return createPortal(
     <div
       role="presentation"
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#070A13]/86 px-4 py-6 font-[Inter,Geist,Satoshi,'SF_Pro_Display',system-ui,sans-serif] text-white backdrop-blur-xl"
+      className="fixed inset-0 z-[1000] flex min-h-screen items-center justify-center overflow-y-auto bg-[#070A13]/92 px-4 py-6 font-[Inter,Geist,Satoshi,'SF_Pro_Display',system-ui,sans-serif] text-white backdrop-blur-2xl"
       onClick={onClose}
     >
       <div
@@ -195,7 +239,12 @@ export default function LoginGateModal({
           <X size={18} aria-hidden="true" />
         </button>
 
-        <form onSubmit={handleSubmit} className="relative">
+        <form
+          ref={formRef}
+          onSubmit={handleSubmit}
+          className="relative"
+          autoComplete="off"
+        >
           <div className="pr-12">
             <h3
               id={titleId}
@@ -223,11 +272,17 @@ export default function LoginGateModal({
 
           <div className="mt-6 space-y-4">
           <input
+            ref={emailRef}
             type="email"
+            name="gush-reader-access-email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
+            onFocus={() => setAllowInput(true)}
             placeholder="Email"
-            autoComplete="email"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            readOnly={!allowInput}
             className={inputClass}
           />
 
@@ -256,13 +311,15 @@ export default function LoginGateModal({
 
           {step !== "otp" ? (
             <input
+              ref={passwordRef}
               type="password"
+              name="gush-reader-access-passcode"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
+              onFocus={() => setAllowInput(true)}
               placeholder="Password"
-              autoComplete={
-                mode === "register" ? "new-password" : "current-password"
-              }
+              autoComplete="new-password"
+              readOnly={!allowInput}
               className={inputClass}
             />
           ) : (
@@ -396,6 +453,7 @@ export default function LoginGateModal({
         ) : null}
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
