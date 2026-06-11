@@ -2,13 +2,135 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowRight, Compass, Eye, EyeOff, UserPlus, X } from "lucide-react";
+import {
+  ArrowRight,
+  BarChart3,
+  Bookmark,
+  Compass,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+  UserPlus,
+  X,
+} from "lucide-react";
 import { apiPost } from "../../lib/apiClient";
 import { useAuthStore } from "../../store/useAuthStore";
 import { getCookie, setCookie } from "../../lib/cookies";
 import { useRegionStore } from "../../store/useRegionStore";
 import { isGoogleAuthEnabled } from "../../lib/socialAuthConfig";
 import SocialAuthButton from "../auth/SocialAuthButton";
+
+const MODAL_COLLAGE_IMAGES = [
+  {
+    src: "/images/home/crimson-tide-cover.png",
+    className: "left-[3%] bottom-[9%] h-[34%] w-[38%] rotate-[-7deg]",
+    objectPosition: "50% 36%",
+  },
+  {
+    src: "/images/home/solar-wind-cover.png",
+    className: "left-[33%] bottom-[5%] h-[44%] w-[38%] rotate-[-3deg]",
+    objectPosition: "46% 42%",
+  },
+  {
+    src: "/images/home/cherry-blossom-high-cover.png",
+    className: "right-[2%] top-[20%] h-[39%] w-[34%] rotate-[6deg]",
+    objectPosition: "48% 28%",
+  },
+  {
+    src: "/images/home/the-last-kingdom-hero.png",
+    className: "left-[28%] top-[-7%] h-[40%] w-[42%] rotate-[-2deg]",
+    objectPosition: "50% 18%",
+  },
+  {
+    src: "/images/home/wild-hearts-cover.png",
+    className: "right-[4%] bottom-[8%] h-[32%] w-[35%] rotate-[5deg]",
+    objectPosition: "50% 38%",
+  },
+];
+
+const MODAL_VALUE_POINTS = [
+  { label: "Private shelf", icon: Bookmark },
+  { label: "Reading progress", icon: BarChart3 },
+  { label: "Mode-aware", icon: ShieldCheck },
+];
+
+function AuthModalVisualPanel() {
+  return (
+    <section
+      className="relative min-h-[13rem] overflow-hidden border-b border-white/10 bg-[#070A13] md:min-h-[17rem] lg:min-h-[38rem] lg:border-b-0 lg:border-r"
+      aria-hidden="true"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_10%,rgba(236,72,153,0.20),transparent_34%),radial-gradient(circle_at_76%_48%,rgba(168,85,247,0.20),transparent_36%)]" />
+      {MODAL_COLLAGE_IMAGES.map((image) => (
+        <div
+          key={image.src}
+          className={`absolute overflow-hidden rounded-[1.25rem] border border-white/10 bg-white/[0.035] opacity-82 shadow-[0_2rem_5rem_rgba(0,0,0,0.62)] ${image.className}`}
+        >
+          <img
+            src={image.src}
+            alt=""
+            aria-hidden="true"
+            role="presentation"
+            className="h-full w-full object-cover saturate-[1.08]"
+            style={{ objectPosition: image.objectPosition }}
+          />
+          <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,10,19,0.02),rgba(7,10,19,0.58))]" />
+        </div>
+      ))}
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,19,0.76)_0%,rgba(7,10,19,0.28)_50%,rgba(7,10,19,0.86)_100%)]" />
+      <div className="absolute inset-x-0 bottom-0 h-56 bg-[linear-gradient(180deg,transparent,#070A13_86%)]" />
+
+      <div className="relative z-10 flex min-h-[13rem] flex-col justify-between p-5 sm:p-7 md:min-h-[17rem] lg:min-h-[38rem] lg:p-10">
+        <div>
+          <div className="inline-flex flex-col text-white">
+            <span className="text-[1.65rem] font-black italic leading-none tracking-[-0.06em] sm:text-[1.95rem] lg:text-[2.1rem]">
+              <span>G</span>
+              <span className="bg-[linear-gradient(135deg,#EC4899,#A855F7)] bg-clip-text text-transparent">
+                U
+              </span>
+              <span>SH</span>
+            </span>
+            <span className="mt-1 text-[0.56rem] font-black uppercase tracking-[0.16em] text-white/82 sm:text-[0.62rem] lg:text-[0.66rem]">
+              Comics & Novels
+            </span>
+          </div>
+
+          <h2 className="mt-7 max-w-[18rem] text-[2.05rem] font-black leading-[1.02] tracking-[-0.055em] text-white sm:text-[2.45rem] md:max-w-[26rem] lg:mt-24 lg:text-[3.35rem]">
+            Your shelf,
+            <br />
+            always{" "}
+            <span className="bg-[linear-gradient(90deg,#F9A8D4_0%,#EC4899_36%,#A855F7_100%)] bg-clip-text text-transparent">
+              with you.
+            </span>
+          </h2>
+          <p className="mt-3 max-w-[19rem] text-sm leading-6 text-white/72 sm:text-base md:max-w-[24rem] lg:mt-5 lg:text-lg lg:leading-8">
+            Continue comics, novels, and routes from where you left off.
+          </p>
+          <div className="mt-4 flex items-center gap-2 lg:mt-6">
+            <span className="h-1.5 w-12 rounded-full bg-[#EC4899]" />
+            <span className="h-1.5 w-1.5 rounded-full bg-[#C084FC]" />
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-3 gap-2 border-t border-white/8 pt-4 lg:mt-0 lg:gap-4 lg:pt-6">
+          {MODAL_VALUE_POINTS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div key={item.label} className="min-w-0">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#EC4899]/45 bg-[#EC4899]/8 text-[#D946EF] sm:h-8 sm:w-8 lg:h-9 lg:w-9">
+                  <Icon className="h-4 w-4 lg:h-5 lg:w-5" strokeWidth={1.9} />
+                </div>
+                <p className="mt-2 text-[0.62rem] font-black text-white sm:text-xs lg:mt-3">
+                  {item.label}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function LoginGateModal({
   open,
@@ -223,7 +345,7 @@ export default function LoginGateModal({
   return createPortal(
     <div
       role="presentation"
-      className="fixed inset-0 z-[1000] flex min-h-screen items-center justify-center overflow-y-auto bg-[#070A13]/90 px-4 py-6 font-[Inter,Geist,Satoshi,'SF_Pro_Display',system-ui,sans-serif] text-white backdrop-blur-2xl"
+      className="fixed inset-0 z-[1000] flex min-h-screen items-start justify-center overflow-y-auto bg-[#070A13]/90 px-4 py-6 font-[Inter,Geist,Satoshi,'SF_Pro_Display',system-ui,sans-serif] text-white backdrop-blur-2xl lg:items-center"
       onClick={onClose}
     >
       <style jsx global>{`
@@ -240,7 +362,7 @@ export default function LoginGateModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative w-full max-w-[620px] overflow-hidden rounded-[1.65rem] border border-white/10 bg-white/[0.045] p-[1.35rem] shadow-[0_2rem_7rem_rgba(0,0,0,0.48)] backdrop-blur-2xl sm:rounded-[2rem] sm:p-10 lg:p-14"
+        className="relative grid w-full max-w-[1180px] overflow-hidden rounded-[1.65rem] border border-white/10 bg-white/[0.045] shadow-[0_2rem_7rem_rgba(0,0,0,0.48)] backdrop-blur-2xl sm:rounded-[2rem] lg:grid-cols-[minmax(0,1fr)_minmax(470px,0.86fr)] xl:max-w-[1260px]"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_top_right,rgba(236,72,153,0.22),transparent_34%)]" />
@@ -255,10 +377,12 @@ export default function LoginGateModal({
           <X size={18} aria-hidden="true" />
         </button>
 
+        <AuthModalVisualPanel />
+
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          className="relative"
+          className="relative min-w-0 p-[1.35rem] sm:p-10 lg:p-12 xl:p-14"
           autoComplete="off"
         >
           <div className="pr-12">
