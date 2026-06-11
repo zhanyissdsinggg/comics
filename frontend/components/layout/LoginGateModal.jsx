@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { ArrowRight, Compass, Eye, EyeOff, UserPlus, X } from "lucide-react";
 import { apiPost } from "../../lib/apiClient";
 import { useAuthStore } from "../../store/useAuthStore";
 import { getCookie, setCookie } from "../../lib/cookies";
@@ -24,6 +24,8 @@ export default function LoginGateModal({
   const passwordRef = useRef(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [mode, setMode] = useState("login");
   const [step, setStep] = useState("login");
   const [otpCode, setOtpCode] = useState("");
@@ -45,7 +47,9 @@ export default function LoginGateModal({
     : "Continue your stories.";
   const primaryLabel = isRegister ? "Create account" : "Sign in";
   const inputClass =
-    "h-12 w-full rounded-2xl border border-white/10 bg-[#10131f]/88 px-4 text-base font-semibold text-white outline-none transition placeholder:text-white/34 focus:border-[#EC4899]/70 focus:ring-2 focus:ring-[#EC4899]/18 sm:h-14";
+    "gush-auth-modal-input h-12 w-full rounded-lg border border-white/10 bg-[#10131f] px-4 text-sm font-semibold text-white outline-none transition placeholder:text-white/35 focus:border-[#EC4899]/70 focus:ring-2 focus:ring-[#EC4899]/18 sm:h-14 sm:rounded-xl sm:px-5 sm:text-base";
+  const secondaryActionClass =
+    "group flex min-h-[3.25rem] w-full items-center justify-between rounded-lg border border-white/10 bg-black/10 px-4 text-sm font-black text-[#E879F9] transition hover:border-[#EC4899]/35 hover:bg-white/[0.045] sm:min-h-[4rem] sm:rounded-xl sm:px-5 sm:text-base";
   const secondaryPillClass =
     "rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-black text-white/72 transition hover:border-white/20 hover:bg-white/[0.06] hover:text-white";
   const activePillClass =
@@ -219,22 +223,34 @@ export default function LoginGateModal({
   return createPortal(
     <div
       role="presentation"
-      className="fixed inset-0 z-[1000] flex min-h-screen items-center justify-center overflow-y-auto bg-[#070A13]/92 px-4 py-6 font-[Inter,Geist,Satoshi,'SF_Pro_Display',system-ui,sans-serif] text-white backdrop-blur-2xl"
+      className="fixed inset-0 z-[1000] flex min-h-screen items-center justify-center overflow-y-auto bg-[#070A13]/90 px-4 py-6 font-[Inter,Geist,Satoshi,'SF_Pro_Display',system-ui,sans-serif] text-white backdrop-blur-2xl"
       onClick={onClose}
     >
+      <style jsx global>{`
+        .gush-auth-modal-input:-webkit-autofill,
+        .gush-auth-modal-input:-webkit-autofill:hover,
+        .gush-auth-modal-input:-webkit-autofill:focus {
+          -webkit-box-shadow: 0 0 0 1000px #10131f inset !important;
+          -webkit-text-fill-color: #ffffff !important;
+          caret-color: #ffffff;
+          transition: background-color 9999s ease-out;
+        }
+      `}</style>
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative w-full max-w-[480px] overflow-hidden rounded-[30px] border border-white/12 bg-white/[0.045] p-5 shadow-[0_30px_90px_rgba(0,0,0,0.48)] backdrop-blur-2xl sm:p-7"
+        className="relative w-full max-w-[620px] overflow-hidden rounded-[1.65rem] border border-white/10 bg-white/[0.045] p-[1.35rem] shadow-[0_2rem_7rem_rgba(0,0,0,0.48)] backdrop-blur-2xl sm:rounded-[2rem] sm:p-10 lg:p-14"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(236,72,153,0.16),transparent_34%),radial-gradient(circle_at_100%_12%,rgba(168,85,247,0.14),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.07),transparent_40%)]" />
+        <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_top_right,rgba(236,72,153,0.22),transparent_34%)]" />
+        <div className="pointer-events-none absolute inset-[1px] rounded-[calc(1.65rem-1px)] border border-white/5 sm:rounded-[calc(2rem-1px)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(236,72,153,0.92),rgba(168,85,247,0.72),transparent)]" />
         <button
           type="button"
           onClick={onClose}
           aria-label="Close sign in"
-          className="absolute right-4 top-4 z-10 inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/12 bg-white/[0.055] text-white/78 shadow-[0_12px_30px_rgba(0,0,0,0.26)] transition hover:border-white/24 hover:bg-white/[0.09] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#EC4899]/45"
+          className="absolute right-4 top-4 z-10 inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/12 bg-white/[0.055] text-white/78 shadow-[0_12px_30px_rgba(0,0,0,0.26)] transition hover:border-white/24 hover:bg-white/[0.09] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#EC4899]/45 sm:right-6 sm:top-6"
         >
           <X size={18} aria-hidden="true" />
         </button>
@@ -248,43 +264,39 @@ export default function LoginGateModal({
           <div className="pr-12">
             <h3
               id={titleId}
-              className="text-[2.15rem] font-black leading-none tracking-[-0.055em] text-white sm:text-[2.65rem]"
+              className="text-[2rem] font-black leading-tight tracking-[-0.045em] text-white sm:text-[2.85rem]"
             >
               {title}
             </h3>
-            <p className="mt-3 text-sm font-semibold leading-6 text-white/66 sm:text-base">
+            <p className="mt-1.5 text-sm leading-6 text-white/64 sm:mt-3 sm:text-lg">
               {subtitle}
             </p>
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-2">
-            {["Private shelf", "Reading progress", "Mode-aware"].map(
-              (item) => (
-                <span
-                  key={item}
-                  className="rounded-full border border-white/10 bg-white/[0.045] px-3 py-2 text-[11px] font-black text-white/72"
-                >
-                  {item}
-                </span>
-              ),
-            )}
+          <div className="mt-7 space-y-5 sm:mt-10 sm:space-y-7">
+          <div>
+            <label
+              htmlFor="gush-modal-email"
+              className="mb-2 block text-[0.7rem] font-black text-white/88 sm:mb-3 sm:text-sm"
+            >
+              Email
+            </label>
+            <input
+              ref={emailRef}
+              id="gush-modal-email"
+              type="email"
+              name="gush-reader-access-email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              onFocus={() => setAllowInput(true)}
+              placeholder="you@example.com"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              readOnly={!allowInput}
+              className={inputClass}
+            />
           </div>
-
-          <div className="mt-6 space-y-4">
-          <input
-            ref={emailRef}
-            type="email"
-            name="gush-reader-access-email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            onFocus={() => setAllowInput(true)}
-            placeholder="Email"
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-            readOnly={!allowInput}
-            className={inputClass}
-          />
 
           {step === "otp" ? (
             <div className="flex items-center gap-3 text-xs">
@@ -310,18 +322,41 @@ export default function LoginGateModal({
           ) : null}
 
           {step !== "otp" ? (
-            <input
-              ref={passwordRef}
-              type="password"
-              name="gush-reader-access-passcode"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              onFocus={() => setAllowInput(true)}
-              placeholder="Password"
-              autoComplete="new-password"
-              readOnly={!allowInput}
-              className={inputClass}
-            />
+            <div>
+              <label
+                htmlFor="gush-modal-password"
+                className="mb-2 block text-[0.7rem] font-black text-white/88 sm:mb-3 sm:text-sm"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  ref={passwordRef}
+                  id="gush-modal-password"
+                  type={showPassword ? "text" : "password"}
+                  name="gush-reader-access-passcode"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  onFocus={() => setAllowInput(true)}
+                  placeholder="Enter your password"
+                  autoComplete="new-password"
+                  readOnly={!allowInput}
+                  className={`${inputClass} pr-12 sm:pr-14`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute inset-y-0 right-0 flex min-h-11 w-12 items-center justify-center text-white/52 transition hover:text-white sm:w-14"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
+                  ) : (
+                    <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
           ) : (
             <>
               {otpChannel === "sms" ? (
@@ -367,6 +402,27 @@ export default function LoginGateModal({
             </>
           )}
 
+          {step !== "otp" ? (
+            <div className="flex items-center justify-between gap-4">
+              <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-xs font-black text-white/82 sm:text-sm">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(event) => setRememberMe(event.target.checked)}
+                  className="h-4 w-4 rounded border-white/20 accent-[#8B5CF6] sm:h-5 sm:w-5"
+                />
+                Remember me
+              </label>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="inline-flex min-h-11 items-center text-xs font-black text-[#F472B6] transition hover:text-white sm:text-sm"
+              >
+                Forgot password?
+              </button>
+            </div>
+          ) : null}
+
           {step !== "otp" && googleAuthEnabled ? (
             <div className="space-y-2">
               <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.08em] text-white/40">
@@ -410,39 +466,58 @@ export default function LoginGateModal({
 
         <button
           type="submit"
-          className="mt-6 inline-flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-[linear-gradient(90deg,#EC4899_0%,#A855F7_52%,#7C3AED_100%)] px-5 text-sm font-black text-white shadow-[0_18px_44px_rgba(168,85,247,0.28)] transition hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-[#EC4899]/45 sm:min-h-[60px]"
+          className="mt-6 inline-flex min-h-[52px] w-full items-center justify-center gap-3 rounded-lg bg-[linear-gradient(90deg,#EC4899_0%,#A855F7_52%,#7C3AED_100%)] px-5 text-sm font-black text-white shadow-[0_1.3rem_3.2rem_rgba(168,85,247,0.28)] transition hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-[#EC4899]/45 sm:min-h-[60px] sm:rounded-xl sm:text-base"
         >
           {primaryLabel}
+          <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
         </button>
 
-        {allowRegister ? (
-          <div className="mt-4 flex justify-center">
+        <div className="my-5 flex items-center gap-6 text-sm text-white/50 sm:my-8">
+          <span className="h-px flex-1 bg-white/10" />
+          <span>or</span>
+          <span className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <div className="grid gap-3 sm:gap-4">
+          {allowRegister ? (
             <button
               type="button"
               onClick={() => setMode(isRegister ? "login" : "register")}
-              className="min-h-11 rounded-full px-4 text-sm font-black text-white/72 transition hover:bg-white/[0.05] hover:text-white"
+              className={secondaryActionClass}
             >
-              {isRegister
-                ? "Already have a reader pass? Sign in"
-                : "Create account"}
+              <span className="flex items-center gap-3">
+                <UserPlus
+                  className="h-5 w-5 text-[#E879F9]"
+                  strokeWidth={1.9}
+                  aria-hidden="true"
+                />
+                {isRegister
+                  ? "Already have a reader pass? Sign in"
+                  : "Create account"}
+              </span>
+              <ArrowRight
+                className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                aria-hidden="true"
+              />
             </button>
-          </div>
-        ) : null}
-
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+          ) : null}
           <button
             type="button"
             onClick={onClose}
-            className="font-semibold tracking-[0.01em] text-white/55 transition-colors duration-300 hover:text-white"
+            className={secondaryActionClass}
           >
-            Continue browsing
-          </button>
-          <button
-            type="button"
-            onClick={handleReset}
-            className="font-semibold tracking-[0.01em] text-white/55 transition-colors duration-300 hover:text-white"
-          >
-            Forgot password?
+            <span className="flex items-center gap-3">
+              <Compass
+                className="h-5 w-5 text-[#E879F9]"
+                strokeWidth={1.9}
+                aria-hidden="true"
+              />
+              Continue browsing
+            </span>
+            <ArrowRight
+              className="h-4 w-4 transition-transform group-hover:translate-x-1"
+              aria-hidden="true"
+            />
           </button>
         </div>
 
