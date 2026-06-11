@@ -14,7 +14,6 @@ export default function FeaturedHero({
   series,
   primaryHref,
   secondaryHref,
-  metaChips = [],
 }) {
   if (!series) {
     return null;
@@ -29,11 +28,10 @@ export default function FeaturedHero({
       adult: series?.adult || series?.isAdult,
     },
   );
-  const compactMetaChips = Array.isArray(metaChips) ? metaChips.slice(0, 3) : [];
 
   return (
     <section
-      className={`${storefrontHomeGlassCardClass} relative min-h-[520px] overflow-hidden rounded-[30px] border-[rgba(255,255,255,0.10)] shadow-[0_32px_100px_rgba(0,0,0,0.42)] lg:h-[408px] lg:min-h-0 xl:h-[432px]`}
+      className={`${storefrontHomeGlassCardClass} relative min-h-[560px] overflow-hidden rounded-[30px] border-[rgba(255,255,255,0.10)] shadow-[0_32px_100px_rgba(0,0,0,0.42)] lg:h-[468px] lg:min-h-0 xl:h-[492px]`}
       style={{
         borderRadius: "30px",
         borderColor: "rgba(255,255,255,0.10)",
@@ -53,21 +51,8 @@ export default function FeaturedHero({
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,10,19,0.12)_0%,rgba(7,10,19,0.26)_44%,rgba(7,10,19,0.58)_100%)]" />
       </div>
 
-      <div className="relative min-h-[520px] p-5 sm:p-7 lg:flex lg:h-full lg:items-end lg:p-8 xl:p-9">
-        {compactMetaChips.length > 0 ? (
-          <div className="absolute right-5 top-5 z-20 flex max-w-[14rem] flex-wrap justify-end gap-2 sm:right-7 sm:top-7 lg:right-8 lg:top-8 xl:right-9 xl:top-9">
-            {compactMetaChips.map((item) => (
-              <span
-                key={item}
-                className="inline-flex min-h-[34px] items-center rounded-full border border-[rgba(255,255,255,0.10)] bg-[rgba(7,10,19,0.54)] px-3.5 py-1.5 text-[11px] font-semibold tracking-[0.02em] text-[color:var(--gush-home-text-primary)] shadow-[0_14px_34px_rgba(0,0,0,0.24)] backdrop-blur-xl"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-        ) : null}
-
-        <div className="relative z-20 flex min-h-[480px] max-w-[42rem] flex-col justify-end gap-4 pb-1 sm:min-h-[486px] lg:min-h-0 lg:gap-5">
+      <div className="relative min-h-[560px] p-5 sm:p-7 lg:flex lg:h-full lg:items-end lg:p-8 xl:p-9">
+        <div className="relative z-20 flex min-h-[520px] max-w-[42rem] flex-col justify-end gap-4 pb-7 sm:min-h-[526px] sm:pb-8 lg:min-h-0 lg:gap-5 lg:pb-12">
           <div className="space-y-3 sm:space-y-4">
             <p className={storefrontHomeSectionEyebrowClass}>Featured Today</p>
             <h1 className="max-w-[9ch] font-display text-[2.72rem] font-black leading-[0.96] tracking-[-0.04em] text-[color:var(--gush-home-text-primary)] sm:text-[3.15rem] lg:text-[3.7rem] xl:text-[4.2rem]">
