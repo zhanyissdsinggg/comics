@@ -101,6 +101,27 @@ function formatEpisodeSubtitle(prefix, episodeId) {
   return `${prefix} Ep ${number || "?"}`;
 }
 
+function formatLibraryStoryFormat(type) {
+  const normalized = String(type || "").toLowerCase();
+  if (normalized === "novel") {
+    return "Novel";
+  }
+  if (normalized === "interactive") {
+    return "Interactive";
+  }
+  return "Comic";
+}
+
+function getLibraryStoryHook(series) {
+  return (
+    series?.shortDescription ||
+    series?.description ||
+    series?.synopsis ||
+    series?.status ||
+    "Ready to open tonight."
+  );
+}
+
 function toTimestamp(value) {
   if (typeof value === "number" && Number.isFinite(value)) {
     return value;
@@ -701,9 +722,16 @@ export default function LibraryPage({
           series.genres?.slice(0, 2).join(" | ") ||
           series.badge ||
           series.status,
+        formatLabel: formatLibraryStoryFormat(series.type),
+        genreLabel:
+          series.genres?.slice(0, 2).join(" / ") ||
+          series.badge ||
+          "Story pick",
+        hook: getLibraryStoryHook(series),
         coverTone: series.coverTone,
         coverUrl: series.coverUrl,
         badge: series.badge,
+        seriesType: series.type || "",
         isAdult: Boolean(series.adult),
         sourceSlot,
         entryPoint,
@@ -900,8 +928,15 @@ export default function LibraryPage({
           series.badge ||
           series.status ||
           "Ready to open tonight.",
+        formatLabel: formatLibraryStoryFormat(series.type),
+        genreLabel:
+          series.genres?.slice(0, 2).join(" / ") ||
+          series.badge ||
+          "Story pick",
+        hook: getLibraryStoryHook(series),
         coverUrl: series.coverUrl,
         badge: series.badge,
+        seriesType: series.type || "",
         isAdult: Boolean(series.adult),
         entryPoint: "LIBRARY_SIGNED_OUT_FALLBACK",
         campaignId: "library_signed_out_fallback",
@@ -1385,7 +1420,7 @@ export default function LibraryPage({
                             ),
                           )
                         }
-                        className={`${storefrontInfoCardClass} group grid grid-cols-[72px_minmax(0,1fr)] gap-3 p-3 text-left text-white transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16 hover:bg-white/[0.075]`}
+                        className={`${storefrontInfoCardClass} group grid min-h-32 grid-cols-[76px_minmax(0,1fr)] gap-3 p-3 text-left text-white transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16 hover:bg-white/[0.075]`}
                       >
                         <span className="relative block aspect-[3/4] overflow-hidden rounded-[18px] border border-white/10 bg-white/5">
                           <img
@@ -1397,20 +1432,25 @@ export default function LibraryPage({
                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
                           />
                           <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_45%,rgba(0,0,0,0.52)_100%)]" />
+                          <span className="absolute bottom-2 left-2 rounded-full border border-white/12 bg-black/55 px-2 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-white/80 backdrop-blur">
+                            {item.formatLabel || "Comic"}
+                          </span>
                         </span>
                         <span className="min-w-0">
                           <span className="block truncate text-[11px] font-black uppercase tracking-[0.2em] text-white/60">
-                            {item.eyebrow || "Reader pick"}
+                            {item.genreLabel || item.eyebrow || "Reader pick"}
                           </span>
                           <span className="mt-2 line-clamp-2 block text-base font-black uppercase tracking-[-0.03em] text-white">
                             {item.title}
                           </span>
                           <span className="mt-2 line-clamp-2 block text-sm font-semibold leading-6 text-white/70">
-                            {item.subtitle ||
+                            {item.hook ||
+                              item.subtitle ||
                               "Open the series page and start reading."}
                           </span>
-                          <span className={`${storefrontChipClass} mt-3 min-h-[34px] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-white/75`}>
+                          <span className={`${storefrontChipClass} mt-3 inline-flex min-h-11 items-center gap-2 px-3 py-2 text-[11px] uppercase tracking-[0.12em] text-white/75`}>
                             Start reading
+                            <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                           </span>
                         </span>
                       </button>
