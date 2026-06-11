@@ -1,15 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import {
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowRight,
+  BarChart3,
+  Bookmark,
   Compass,
   Eye,
   EyeOff,
-  Lock,
-  Mail,
   ShieldCheck,
   UserPlus,
 } from "lucide-react";
@@ -18,129 +24,74 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { FigmaSiteProvider } from "./FigmaSiteContext";
 
 const VALUE_POINTS = [
-  "Private shelf",
-  "Reading progress",
-  "Mode-aware",
+  {
+    label: "Private shelf",
+    detail: "Your favorites, always saved.",
+    icon: Bookmark,
+  },
+  {
+    label: "Reading progress",
+    detail: "Pick up right where you left off.",
+    icon: BarChart3,
+  },
+  {
+    label: "Mode-aware",
+    detail: "Content that fits your mode.",
+    icon: ShieldCheck,
+  },
 ];
 
 const COLLAGE_IMAGES = [
   {
     src: "/images/home/crimson-tide-cover.png",
     className:
-      "left-[38%] top-[-4%] h-[34%] w-[34%] rotate-[-3deg] opacity-80",
+      "left-[2%] bottom-[7%] h-[31%] w-[30%] rotate-[-8deg] opacity-78",
+    objectPosition: "50% 36%",
   },
   {
     src: "/images/home/solar-wind-cover.png",
     className:
-      "right-[8%] top-[15%] h-[36%] w-[30%] rotate-[5deg] opacity-82",
-  },
-  {
-    src: "/images/home/the-last-kingdom-hero.png",
-    className:
-      "left-[8%] bottom-[7%] h-[38%] w-[31%] rotate-[-6deg] opacity-76",
-  },
-  {
-    src: "/images/home/wild-hearts-cover.png",
-    className:
-      "left-[37%] bottom-[2%] h-[42%] w-[32%] rotate-[4deg] opacity-82",
+      "left-[31%] bottom-[4%] h-[40%] w-[31%] rotate-[-5deg] opacity-84",
+    objectPosition: "46% 42%",
   },
   {
     src: "/images/home/cherry-blossom-high-cover.png",
     className:
-      "right-[6%] bottom-[8%] h-[34%] w-[28%] rotate-[-4deg] opacity-72",
+      "right-[2%] top-[27%] h-[34%] w-[27%] rotate-[6deg] opacity-82",
+    objectPosition: "48% 28%",
+  },
+  {
+    src: "/images/home/the-last-kingdom-hero.png",
+    className:
+      "left-[39%] top-[-8%] h-[40%] w-[31%] rotate-[-2deg] opacity-70",
+    objectPosition: "50% 18%",
+  },
+  {
+    src: "/images/home/wild-hearts-cover.png",
+    className:
+      "right-[7%] bottom-[7%] h-[31%] w-[29%] rotate-[5deg] opacity-72",
+    objectPosition: "50% 38%",
   },
 ];
 
-function BrandMark({ compact = false }) {
+function BrandMark() {
   return (
     <Link
       href="/"
       aria-label="Gush home"
-      className="inline-flex min-h-11 flex-col justify-center tracking-tight text-white"
+      className="inline-flex min-h-9 flex-col justify-center text-white sm:min-h-11"
     >
-      <span
-        className={
-          compact
-            ? "text-2xl font-black leading-none"
-            : "text-[42px] font-black italic leading-none"
-        }
-      >
+      <span className="text-[1.55rem] font-black italic leading-none tracking-[-0.06em] sm:text-[2.45rem]">
         <span>G</span>
-        <span className="text-[#EC4899]">U</span>
+        <span className="bg-[linear-gradient(135deg,#EC4899,#A855F7)] bg-clip-text text-transparent">
+          U
+        </span>
         <span>SH</span>
       </span>
-      <span className="mt-1 text-[10px] font-black uppercase tracking-[0.18em] text-white/78">
+      <span className="mt-1 text-[0.5rem] font-black uppercase tracking-[0.16em] text-white/82 sm:text-[0.72rem]">
         Comics & Novels
       </span>
     </Link>
-  );
-}
-
-function DecorativeCollage() {
-  return (
-    <div
-      className="pointer-events-none relative hidden min-h-[470px] overflow-hidden rounded-[32px] border border-white/8 bg-white/[0.025] lg:block"
-      aria-hidden="true"
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_62%_35%,rgba(236,72,153,0.20),transparent_34%),radial-gradient(circle_at_48%_78%,rgba(124,58,237,0.20),transparent_34%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,19,0.82)_0%,rgba(7,10,19,0.24)_48%,rgba(7,10,19,0.76)_100%)]" />
-      {COLLAGE_IMAGES.map((image) => (
-        <div
-          key={image.src}
-          className={`absolute overflow-hidden rounded-[24px] border border-white/10 bg-white/5 shadow-[0_28px_80px_rgba(0,0,0,0.55)] ${image.className}`}
-        >
-          <img
-            src={image.src}
-            alt=""
-            aria-hidden="true"
-            role="presentation"
-            className="h-full w-full object-cover saturate-[1.04]"
-          />
-          <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,10,19,0.05),rgba(7,10,19,0.42))]" />
-        </div>
-      ))}
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_58%,#070A13_100%)]" />
-    </div>
-  );
-}
-
-function ValueStrip() {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {VALUE_POINTS.map((label) => (
-        <span
-          key={label}
-          className="inline-flex min-h-11 items-center rounded-full border border-white/10 bg-white/[0.045] px-4 text-xs font-black text-white/88 shadow-[0_14px_34px_rgba(0,0,0,0.20)] backdrop-blur-xl sm:px-5 sm:text-sm"
-        >
-          {label}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function LegalFooter() {
-  const legalLinks = [
-    { href: "/terms-of-service", label: "Terms of Service" },
-    { href: "/privacy-policy", label: "Privacy Policy" },
-    { href: "/support", label: "Contact" },
-  ];
-
-  return (
-    <footer className="mx-auto flex w-full max-w-[1480px] flex-col gap-4 px-5 pb-6 text-xs text-white/46 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-12">
-      <p>Copyright 2026 {siteConfig.companyName}</p>
-      <nav className="flex flex-wrap gap-x-7 gap-y-2">
-        {legalLinks.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="min-h-11 transition-colors hover:text-white"
-          >
-            {link.label}
-          </Link>
-        ))}
-      </nav>
-    </footer>
   );
 }
 
@@ -156,10 +107,7 @@ function AuthRouteChrome() {
   return (
     <style jsx global>{`
       body.gush-auth-route .gush-app-shell > header,
-      body.gush-auth-route .gush-app-shell > footer {
-        display: none;
-      }
-
+      body.gush-auth-route .gush-app-shell > footer,
       body.gush-auth-route [data-mobile-bottom-nav="1"] {
         display: none;
       }
@@ -175,6 +123,166 @@ function AuthRouteChrome() {
   );
 }
 
+function HeroCollage() {
+  return (
+    <div
+      className="pointer-events-none absolute inset-x-[-2rem] bottom-[6.5rem] top-0 hidden lg:block"
+      aria-hidden="true"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_20%,rgba(168,85,247,0.25),transparent_32%),radial-gradient(circle_at_75%_48%,rgba(236,72,153,0.18),transparent_30%)]" />
+      {COLLAGE_IMAGES.map((image) => (
+        <div
+          key={image.src}
+          className={`absolute overflow-hidden rounded-[1.35rem] border border-white/10 bg-white/[0.035] shadow-[0_2rem_5rem_rgba(0,0,0,0.62)] ${image.className}`}
+        >
+          <img
+            src={image.src}
+            alt=""
+            aria-hidden="true"
+            role="presentation"
+            className="h-full w-full object-cover saturate-[1.08]"
+            style={{ objectPosition: image.objectPosition }}
+          />
+          <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,10,19,0.02),rgba(7,10,19,0.54))]" />
+        </div>
+      ))}
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,#070A13_0%,rgba(7,10,19,0.40)_43%,#070A13_98%)]" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(180deg,transparent,#070A13_84%)]" />
+    </div>
+  );
+}
+
+function MobileHeroArt() {
+  return (
+    <div
+      className="pointer-events-none absolute right-[-2.2rem] top-0 h-[14rem] w-[15rem] overflow-hidden rounded-b-[2rem] opacity-54 sm:hidden"
+      aria-hidden="true"
+    >
+      <img
+        src="/images/home/cherry-blossom-high-cover.png"
+        alt=""
+        aria-hidden="true"
+        role="presentation"
+        className="h-full w-full object-cover"
+        style={{ objectPosition: "50% 22%" }}
+      />
+      <span className="absolute inset-0 bg-[linear-gradient(90deg,#070A13_4%,rgba(7,10,19,0.36)_54%,#070A13_100%)]" />
+      <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,10,19,0.04),#070A13_96%)]" />
+    </div>
+  );
+}
+
+function DesktopValueCards() {
+  return (
+    <div className="grid grid-cols-3 gap-7 border-t border-white/8 pt-8">
+      {VALUE_POINTS.map((item) => {
+        const Icon = item.icon;
+        return (
+          <div
+            key={item.label}
+            className="grid min-w-0 grid-cols-[2.65rem_minmax(0,1fr)] gap-4"
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#EC4899]/45 bg-[#EC4899]/8 text-[#D946EF]">
+              <Icon className="h-5 w-5" strokeWidth={1.9} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-black text-white">{item.label}</p>
+              <p className="mt-1 max-w-[10rem] text-sm leading-6 text-white/62">
+                {item.detail}
+              </p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function MobileValueStrip() {
+  const getMobileLabel = (label) =>
+    label === "Reading progress" ? "Progress" : label;
+
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {VALUE_POINTS.map((item) => {
+        const Icon = item.icon;
+        return (
+          <div
+            key={item.label}
+            className="flex min-h-8 items-center justify-center gap-1.5 rounded-md border border-white/10 bg-white/[0.055] px-2 text-[0.62rem] font-black text-white/82 backdrop-blur-xl"
+          >
+            <Icon className="h-3 w-3 text-[#C084FC]" strokeWidth={2} />
+            <span className="truncate">{getMobileLabel(item.label)}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function LegalFooter() {
+  const legalLinks = [
+    { href: "/terms-of-service", label: "Terms of Service" },
+    { href: "/privacy-policy", label: "Privacy Policy" },
+    { href: "/support", label: "Contact" },
+  ];
+
+  return (
+    <footer className="relative z-10 mx-auto flex w-full max-w-[1480px] flex-col gap-3 px-5 pb-5 text-[0.68rem] text-white/46 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-12">
+      <p>Copyright 2026 {siteConfig.companyName}</p>
+      <nav className="flex flex-wrap gap-x-6 gap-y-2">
+        {legalLinks.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="min-h-11 transition-colors hover:text-white"
+          >
+            {link.label}
+          </Link>
+        ))}
+      </nav>
+    </footer>
+  );
+}
+
+function Divider() {
+  return (
+    <div className="flex items-center gap-6 text-sm text-white/50">
+      <span className="h-px flex-1 bg-white/10" />
+      <span>or</span>
+      <span className="h-px flex-1 bg-white/10" />
+    </div>
+  );
+}
+
+function SecondaryAction({ icon: Icon, children, onClick, href }) {
+  const className =
+    "group flex min-h-[3.25rem] items-center justify-between rounded-lg border border-white/10 bg-black/10 px-4 text-sm font-black text-[#E879F9] transition hover:border-[#EC4899]/35 hover:bg-white/[0.045] sm:min-h-[4rem] sm:rounded-xl sm:px-5 sm:text-base";
+  const content = (
+    <>
+      <span className="flex items-center gap-3">
+        <Icon className="h-5 w-5 text-[#E879F9]" strokeWidth={1.9} />
+        {children}
+      </span>
+      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {content}
+    </button>
+  );
+}
+
 function AuthCard({
   mode,
   setMode,
@@ -184,10 +292,14 @@ function AuthCard({
   setPassword,
   showPassword,
   setShowPassword,
+  rememberMe,
+  setRememberMe,
   loading,
   error,
   handleSubmit,
 }) {
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
   const isRegister = mode === "register";
   const title = isRegister ? "Create your reader pass" : "Welcome back";
   const subtitle = isRegister
@@ -195,89 +307,128 @@ function AuthCard({
     : "Continue your stories.";
   const ctaLabel = isRegister ? "Create account" : "Sign in";
 
+  useEffect(() => {
+    const clearBrowserAutofill = () => {
+      if (
+        document.activeElement === emailRef.current ||
+        document.activeElement === passwordRef.current
+      ) {
+        return;
+      }
+      if (emailRef.current) {
+        emailRef.current.value = "";
+      }
+      if (passwordRef.current) {
+        passwordRef.current.value = "";
+      }
+      setEmail("");
+      setPassword("");
+    };
+
+    clearBrowserAutofill();
+    const timers = [80, 320, 900].map((delay) =>
+      window.setTimeout(clearBrowserAutofill, delay),
+    );
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [mode, setEmail, setPassword]);
+
   return (
-    <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.045] p-5 text-white shadow-[0_34px_120px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:p-8 lg:rounded-[32px] lg:p-12">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(236,72,153,0.20),transparent_34%)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(236,72,153,0.85),transparent)]" />
+    <section className="relative overflow-hidden rounded-[1.65rem] border border-white/10 bg-white/[0.045] p-[1.35rem] text-white shadow-[0_2rem_7rem_rgba(0,0,0,0.48)] backdrop-blur-2xl sm:rounded-[2rem] sm:p-10 lg:min-h-[42rem] lg:p-12 xl:p-14">
+      <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_top_right,rgba(236,72,153,0.22),transparent_34%)]" />
+      <div className="pointer-events-none absolute inset-[1px] rounded-[calc(1.65rem-1px)] border border-white/5 sm:rounded-[calc(2rem-1px)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(236,72,153,0.92),rgba(168,85,247,0.72),transparent)]" />
 
       <div className="relative">
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-[32px] font-black leading-tight tracking-[-0.04em] sm:text-[40px]">
-              {title}
-            </h2>
-            <p className="mt-3 text-base leading-7 text-white/64">{subtitle}</p>
-          </div>
-          <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.055] text-[#F472B6] sm:flex">
-            <ShieldCheck className="h-5 w-5" />
-          </div>
+        <div>
+          <h2 className="text-[2rem] font-black leading-tight tracking-[-0.045em] sm:text-[2.85rem]">
+            {title}
+          </h2>
+          <p className="mt-1.5 text-sm leading-6 text-white/64 sm:mt-3 sm:text-lg">
+            {subtitle}
+          </p>
         </div>
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form
+          className="mt-7 space-y-5 sm:mt-10 sm:space-y-7"
+          onSubmit={handleSubmit}
+          autoComplete="off"
+        >
           <div>
             <label
               htmlFor="gush-login-email"
-              className="mb-2 block text-sm font-bold text-white/82"
+              className="mb-2 block text-[0.7rem] font-black text-white/88 sm:mb-3 sm:text-sm"
             >
               Email
             </label>
-            <div className="relative">
-              <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/34" />
-              <input
-                id="gush-login-email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="you@example.com"
-                autoComplete={isRegister ? "email" : "username"}
-                className="h-12 w-full rounded-xl border border-white/10 bg-[#111421]/82 pl-12 pr-4 text-base font-semibold text-white outline-none transition placeholder:text-white/34 focus:border-[#EC4899]/70 focus:ring-2 focus:ring-[#EC4899]/18 sm:h-14 sm:rounded-2xl"
-              />
-            </div>
+            <input
+              ref={emailRef}
+              id="gush-login-email"
+              name="gush-reader-email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@example.com"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              className="gush-auth-input h-12 w-full rounded-lg border border-white/10 bg-[#10131f] px-4 text-sm font-semibold text-white outline-none transition placeholder:text-white/35 focus:border-[#EC4899]/70 focus:ring-2 focus:ring-[#EC4899]/18 sm:h-14 sm:rounded-xl sm:px-5 sm:text-base"
+            />
           </div>
 
           <div>
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <label
-                htmlFor="gush-login-password"
-                className="block text-sm font-bold text-white/82"
-              >
-                Password
-              </label>
-              <Link
-                href="/auth/reset"
-                className="inline-flex min-h-11 items-center text-sm font-bold text-[#F472B6] transition-colors hover:text-white"
-              >
-                Forgot password?
-              </Link>
-            </div>
+            <label
+              htmlFor="gush-login-password"
+              className="mb-2 block text-[0.7rem] font-black text-white/88 sm:mb-3 sm:text-sm"
+            >
+              Password
+            </label>
             <div className="relative">
-              <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/34" />
               <input
+                ref={passwordRef}
                 id="gush-login-password"
+                name="gush-reader-passcode"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Enter your password"
-                autoComplete={isRegister ? "new-password" : "current-password"}
-                className="h-12 w-full rounded-xl border border-white/10 bg-[#111421]/82 pl-12 pr-12 text-base font-semibold text-white outline-none transition placeholder:text-white/34 focus:border-[#EC4899]/70 focus:ring-2 focus:ring-[#EC4899]/18 sm:h-14 sm:rounded-2xl"
+                autoComplete="new-password"
+                className="gush-auth-input h-12 w-full rounded-lg border border-white/10 bg-[#10131f] px-4 pr-12 text-sm font-semibold text-white outline-none transition placeholder:text-white/35 focus:border-[#EC4899]/70 focus:ring-2 focus:ring-[#EC4899]/18 sm:h-14 sm:rounded-xl sm:px-5 sm:pr-14 sm:text-base"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
-                className="absolute inset-y-0 right-0 flex min-h-11 w-12 items-center justify-center text-white/46 transition-colors hover:text-white"
+                className="absolute inset-y-0 right-0 flex min-h-11 w-12 items-center justify-center text-white/52 transition hover:text-white sm:w-14"
               >
                 {showPassword ? (
-                  <EyeOff className="h-5 w-5" />
+                  <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" />
                 ) : (
-                  <Eye className="h-5 w-5" />
+                  <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
                 )}
               </button>
             </div>
           </div>
 
+          <div className="flex items-center justify-between gap-4">
+            <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-xs font-black text-white/82 sm:text-sm">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(event) => setRememberMe(event.target.checked)}
+                className="h-4 w-4 rounded border-white/20 accent-[#8B5CF6] sm:h-5 sm:w-5"
+              />
+              Remember me
+            </label>
+            <Link
+              href="/auth/reset"
+              className="inline-flex min-h-11 items-center text-xs font-black text-[#F472B6] transition hover:text-white sm:text-sm"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
           {error ? (
-            <div className="rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">
+            <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">
               {error}
             </div>
           ) : null}
@@ -285,42 +436,32 @@ function AuthCard({
           <button
             type="submit"
             disabled={loading}
-            className="flex h-[52px] w-full items-center justify-center gap-3 rounded-xl bg-[linear-gradient(90deg,#EC4899_0%,#A855F7_52%,#7C3AED_100%)] px-5 text-sm font-black text-white shadow-[0_18px_44px_rgba(168,85,247,0.28)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-65 sm:h-[60px] sm:rounded-2xl sm:text-base"
+            className="flex h-[3.25rem] w-full items-center justify-center gap-3 rounded-lg bg-[linear-gradient(90deg,#EC4899_0%,#A855F7_52%,#7C3AED_100%)] px-5 text-sm font-black text-white shadow-[0_1.3rem_3.2rem_rgba(168,85,247,0.28)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-65 sm:h-[3.75rem] sm:rounded-xl sm:text-base"
           >
             {loading ? "Preparing your reader pass..." : ctaLabel}
-            {!loading ? <ArrowRight className="h-5 w-5" /> : null}
+            {!loading ? <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6" /> : null}
           </button>
         </form>
 
-        <div className="my-6 flex items-center gap-4 text-sm text-white/42">
-          <span className="h-px flex-1 bg-white/10" />
-          <span>or</span>
-          <span className="h-px flex-1 bg-white/10" />
+        <div className="my-5 sm:my-8">
+          <Divider />
         </div>
 
-        <div className="grid gap-3">
-          <button
-            type="button"
+        <div className="grid gap-3 sm:gap-4">
+          <SecondaryAction
+            icon={UserPlus}
             onClick={() => setMode(isRegister ? "login" : "register")}
-            className="group flex min-h-[52px] items-center justify-between rounded-xl border border-white/10 bg-white/[0.025] px-4 text-sm font-black text-[#F0ABFC] transition hover:border-[#EC4899]/35 hover:bg-white/[0.055] sm:min-h-[58px] sm:rounded-2xl sm:px-5"
           >
-            <span className="flex items-center gap-3">
-              <UserPlus className="h-5 w-5" />
-              {isRegister ? "Already have a reader pass? Sign in" : "Create account"}
-            </span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </button>
-          <Link
-            href="/"
-            className="group flex min-h-[52px] items-center justify-between rounded-xl border border-white/10 bg-white/[0.025] px-4 text-sm font-black text-[#D8B4FE] transition hover:border-[#A855F7]/35 hover:bg-white/[0.055] sm:min-h-[58px] sm:rounded-2xl sm:px-5"
-          >
-            <span className="flex items-center gap-3">
-              <Compass className="h-5 w-5" />
-              Continue browsing
-            </span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+            {isRegister ? "Already have a reader pass? Sign in" : "Create account"}
+          </SecondaryAction>
+          <SecondaryAction icon={Compass} href="/">
+            Continue browsing
+          </SecondaryAction>
         </div>
+
+        <p className="mt-5 text-center text-[0.68rem] font-medium text-white/52 sm:hidden">
+          Private shelf &bull; Reading progress &bull; Mode-aware
+        </p>
       </div>
     </section>
   );
@@ -331,6 +472,7 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const { signIn } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [mode, setMode] = useState(
     searchParams?.get("mode") === "register" ? "register" : "login",
   );
@@ -364,46 +506,59 @@ function LoginContent() {
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-[#070A13] font-[Inter,Geist,Satoshi,'SF_Pro_Display',system-ui,sans-serif] text-white">
       <AuthRouteChrome />
+      <style jsx global>{`
+        .gush-auth-input:-webkit-autofill,
+        .gush-auth-input:-webkit-autofill:hover,
+        .gush-auth-input:-webkit-autofill:focus {
+          -webkit-box-shadow: 0 0 0 1000px #10131f inset !important;
+          -webkit-text-fill-color: #ffffff !important;
+          caret-color: #ffffff;
+          transition: background-color 9999s ease-out;
+        }
+      `}</style>
+      <MobileHeroArt />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-[-14rem] top-[-12rem] h-[34rem] w-[34rem] rounded-full bg-[#EC4899]/12 blur-3xl" />
-        <div className="absolute right-[-10rem] top-12 h-[32rem] w-[32rem] rounded-full bg-[#7C3AED]/14 blur-3xl" />
-        <div className="absolute bottom-[-16rem] left-[30%] h-[30rem] w-[30rem] rounded-full bg-[#38BDF8]/6 blur-3xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,11,22,0.12),rgba(7,10,19,0.96))]" />
+        <div className="absolute left-[-12rem] top-[-12rem] h-[32rem] w-[32rem] rounded-full bg-[#EC4899]/10 blur-3xl" />
+        <div className="absolute right-[-8rem] top-4 h-[30rem] w-[30rem] rounded-full bg-[#7C3AED]/12 blur-3xl" />
+        <div className="absolute bottom-[-16rem] left-[30%] h-[30rem] w-[30rem] rounded-full bg-[#38BDF8]/5 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,11,22,0.08),rgba(7,10,19,0.98))]" />
       </div>
 
-      <main className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1480px] items-center gap-8 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(520px,0.92fr)] lg:px-12 lg:py-12 xl:gap-14">
-        <section className="flex min-w-0 flex-col gap-6 lg:min-h-[760px] lg:justify-between">
-          <div className="space-y-7 sm:space-y-8">
-            <BrandMark compact />
+      <main className="relative z-10 mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-[1480px] items-center gap-5 px-5 py-7 sm:gap-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_620px] lg:gap-12 lg:px-12 lg:py-12">
+        <section className="relative flex min-w-0 flex-col gap-3 sm:gap-7 lg:min-h-[45.5rem] lg:justify-between">
+          <HeroCollage />
+          <div className="relative z-10 space-y-3 sm:space-y-7 lg:space-y-28">
+            <BrandMark />
 
-            <div className="max-w-[650px]">
-              <h1 className="text-[42px] font-black leading-[0.98] tracking-[-0.06em] text-white sm:text-[58px] lg:text-[72px] xl:text-[84px]">
+            <div className="max-w-[44rem]">
+              <h1 className="text-[1.8rem] font-black leading-[1.04] tracking-[-0.055em] text-white sm:text-[4rem] lg:text-[5.25rem]">
                 Your shelf,
                 <br />
                 always{" "}
-                <span className="bg-[linear-gradient(90deg,#F9A8D4_0%,#A855F7_74%)] bg-clip-text text-transparent">
+                <span className="bg-[linear-gradient(90deg,#F9A8D4_0%,#EC4899_36%,#A855F7_100%)] bg-clip-text text-transparent">
                   with you.
                 </span>
               </h1>
-              <p className="mt-5 max-w-[520px] text-base leading-7 text-white/72 sm:text-lg sm:leading-8 lg:text-xl">
+              <p className="mt-2 max-w-[34rem] text-xs leading-5 text-white/72 sm:mt-4 sm:text-xl sm:leading-9">
                 Continue comics, novels, and routes from where you left off.
               </p>
-              <div className="mt-7 hidden h-1.5 w-16 rounded-full bg-[linear-gradient(90deg,#EC4899,#A855F7)] lg:block" />
+              <div className="mt-3 flex items-center gap-2 sm:mt-6">
+                <span className="h-1.5 w-10 rounded-full bg-[#EC4899] sm:w-12" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#C084FC]" />
+              </div>
             </div>
-
-            <div className="lg:hidden">
-              <ValueStrip />
-            </div>
-
-            <DecorativeCollage />
           </div>
 
-          <div className="hidden lg:block">
-            <ValueStrip />
+          <div className="relative z-10 hidden lg:block">
+            <DesktopValueCards />
+          </div>
+
+          <div className="relative z-10 lg:hidden">
+            <MobileValueStrip />
           </div>
         </section>
 
-        <div className="min-w-0 lg:pl-2 xl:pl-6">
+        <div className="relative z-10 min-w-0">
           <AuthCard
             mode={mode}
             setMode={setMode}
@@ -413,6 +568,8 @@ function LoginContent() {
             setPassword={setPassword}
             showPassword={showPassword}
             setShowPassword={setShowPassword}
+            rememberMe={rememberMe}
+            setRememberMe={setRememberMe}
             loading={loading}
             error={error}
             handleSubmit={handleSubmit}
