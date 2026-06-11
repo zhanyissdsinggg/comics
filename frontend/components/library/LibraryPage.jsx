@@ -1108,13 +1108,14 @@ export default function LibraryPage({
                       Saved Series
                     </button>
                   ) : (
-                    <Link
-                      href="/login"
+                    <button
+                      type="button"
+                      onClick={openAuthPrompt}
                       data-testid="library-entry-cta"
                       className={primaryButtonClass}
                     >
                       Sign in
-                    </Link>
+                    </button>
                   )}
                   {viewerSignedIn ? (
                     <button
@@ -1225,9 +1226,13 @@ export default function LibraryPage({
                   </>
                 ) : (
                   <>
-                    <Link href="/login" className={primaryButtonClass}>
+                    <button
+                      type="button"
+                      onClick={openAuthPrompt}
+                      className={primaryButtonClass}
+                    >
                       Sign in
-                    </Link>
+                    </button>
                     <Link href="/comics" className={secondaryButtonClass}>
                       Browse free chapters
                     </Link>

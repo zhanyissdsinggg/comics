@@ -8,7 +8,6 @@ import { trackEvent } from "../../lib/trackEvent";
 import LoginGateModal from "./LoginGateModal";
 import AgeGateModal from "./AgeGateModal";
 import WalletTopUpPrompt from "../wallet/WalletTopUpPrompt";
-import { LOGIN_GATE_DESCRIPTION } from "../../lib/adultGateCopy";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import HeaderMenuModal from "./HeaderMenuModal";
 
@@ -134,12 +133,6 @@ export default function HeaderModals({
         }}
         allowRegister
         initialMode={authMode}
-        title="Sign in"
-        description={
-          pendingAdultToggle
-            ? LOGIN_GATE_DESCRIPTION
-            : "Enter your email and password."
-        }
         errorMessage={authError}
         onSubmit={handleLogin}
       />

@@ -1,23 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import ModalBase from "../common/ModalBase";
-import {
-  LOGIN_GATE_DESCRIPTION,
-  LOGIN_GATE_TITLE,
-} from "../../lib/adultGateCopy";
+import { useCallback, useEffect, useId, useState } from "react";
+import { X } from "lucide-react";
 import { apiPost } from "../../lib/apiClient";
 import { useAuthStore } from "../../store/useAuthStore";
 import { getCookie, setCookie } from "../../lib/cookies";
 import { useRegionStore } from "../../store/useRegionStore";
 import { isGoogleAuthEnabled } from "../../lib/socialAuthConfig";
 import SocialAuthButton from "../auth/SocialAuthButton";
-import {
-  storefrontInputClass,
-  storefrontNoticeClass,
-  storefrontPrimaryButtonClass,
-  storefrontSecondaryButtonClass,
-} from "../common/StorefrontPagePrimitives";
 
 export default function LoginGateModal({
   open,
@@ -25,10 +15,9 @@ export default function LoginGateModal({
   onSubmit,
   allowRegister = false,
   initialMode = "login",
-  title = LOGIN_GATE_TITLE,
-  description = LOGIN_GATE_DESCRIPTION,
   errorMessage = "",
 }) {
+  const titleId = useId();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState("login");
@@ -43,10 +32,18 @@ export default function LoginGateModal({
   const { refresh } = useAuthStore();
   const { config } = useRegionStore();
   const googleAuthEnabled = isGoogleAuthEnabled();
-  const inputClass = storefrontInputClass.replace("mt-2 ", "");
-  const secondaryPillClass = storefrontSecondaryButtonClass;
+  const isRegister = mode === "register";
+  const title = isRegister ? "Create your reader pass" : "Welcome back";
+  const subtitle = isRegister
+    ? "Start a shelf for comics, novels, and interactive routes."
+    : "Continue your stories.";
+  const primaryLabel = isRegister ? "Create account" : "Sign in";
+  const inputClass =
+    "h-12 w-full rounded-2xl border border-white/10 bg-[#10131f]/88 px-4 text-base font-semibold text-white outline-none transition placeholder:text-white/34 focus:border-[#EC4899]/70 focus:ring-2 focus:ring-[#EC4899]/18 sm:h-14";
+  const secondaryPillClass =
+    "rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-black text-white/72 transition hover:border-white/20 hover:bg-white/[0.06] hover:text-white";
   const activePillClass =
-    "rounded-full border border-[rgba(255,214,130,0.24)] bg-[linear-gradient(135deg,#f6c25f_0%,#ffd77a_100%)] text-[#241608] shadow-[0_16px_30px_rgba(246,194,95,0.24)]";
+    "rounded-full border border-white/16 bg-white/[0.08] px-4 py-2 text-xs font-black text-white shadow-[0_12px_26px_rgba(0,0,0,0.2)]";
   const dividerClass = "h-px flex-1 bg-white/10";
 
   useEffect(() => {
@@ -171,15 +168,60 @@ export default function LoginGateModal({
     setSocialError(message || "Social sign-in failed.");
   }, []);
 
+  if (!open) {
+    return null;
+  }
+
   return (
-    <ModalBase open={open} title={title} onClose={onClose}>
-      <form onSubmit={handleSubmit}>
-        {description ? (
-          <p className={storefrontNoticeClass}>
-            {description}
-          </p>
-        ) : null}
-        <div className="mt-6 space-y-4">
+    <div
+      role="presentation"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#070A13]/86 px-4 py-6 font-[Inter,Geist,Satoshi,'SF_Pro_Display',system-ui,sans-serif] text-white backdrop-blur-xl"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="relative w-full max-w-[480px] overflow-hidden rounded-[30px] border border-white/12 bg-white/[0.045] p-5 shadow-[0_30px_90px_rgba(0,0,0,0.48)] backdrop-blur-2xl sm:p-7"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(236,72,153,0.16),transparent_34%),radial-gradient(circle_at_100%_12%,rgba(168,85,247,0.14),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.07),transparent_40%)]" />
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close sign in"
+          className="absolute right-4 top-4 z-10 inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/12 bg-white/[0.055] text-white/78 shadow-[0_12px_30px_rgba(0,0,0,0.26)] transition hover:border-white/24 hover:bg-white/[0.09] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#EC4899]/45"
+        >
+          <X size={18} aria-hidden="true" />
+        </button>
+
+        <form onSubmit={handleSubmit} className="relative">
+          <div className="pr-12">
+            <h3
+              id={titleId}
+              className="text-[2.15rem] font-black leading-none tracking-[-0.055em] text-white sm:text-[2.65rem]"
+            >
+              {title}
+            </h3>
+            <p className="mt-3 text-sm font-semibold leading-6 text-white/66 sm:text-base">
+              {subtitle}
+            </p>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            {["Private shelf", "Reading progress", "Mode-aware"].map(
+              (item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-white/10 bg-white/[0.045] px-3 py-2 text-[11px] font-black text-white/72"
+                >
+                  {item}
+                </span>
+              ),
+            )}
+          </div>
+
+          <div className="mt-6 space-y-4">
           <input
             type="email"
             value={email}
@@ -282,7 +324,7 @@ export default function LoginGateModal({
               />
             </div>
           ) : null}
-        </div>
+          </div>
 
         {errorMessage ? (
           <p className="mt-4 rounded-[22px] border border-rose-300/22 bg-[rgba(255,79,154,0.12)] px-4 py-2.5 text-xs font-semibold text-white shadow-[0_16px_32px_rgba(255,79,154,0.14)]">
@@ -309,30 +351,35 @@ export default function LoginGateModal({
           </div>
         ) : null}
 
+        <button
+          type="submit"
+          className="mt-6 inline-flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-[linear-gradient(90deg,#EC4899_0%,#A855F7_52%,#7C3AED_100%)] px-5 text-sm font-black text-white shadow-[0_18px_44px_rgba(168,85,247,0.28)] transition hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-[#EC4899]/45 sm:min-h-[60px]"
+        >
+          {primaryLabel}
+        </button>
+
         {allowRegister ? (
-          <div className="mt-6 flex items-center gap-3 text-xs">
+          <div className="mt-4 flex justify-center">
             <button
               type="button"
-              onClick={() => setMode("login")}
-              className={`flex-1 px-4 py-2 font-semibold transition-all duration-300 ${
-                mode === "login" ? activePillClass : secondaryPillClass
-              }`}
+              onClick={() => setMode(isRegister ? "login" : "register")}
+              className="min-h-11 rounded-full px-4 text-sm font-black text-white/72 transition hover:bg-white/[0.05] hover:text-white"
             >
-              Sign in
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("register")}
-              className={`flex-1 px-4 py-2 font-semibold transition-all duration-300 ${
-                mode === "register" ? activePillClass : secondaryPillClass
-              }`}
-            >
-              Register
+              {isRegister
+                ? "Already have a reader pass? Sign in"
+                : "Create account"}
             </button>
           </div>
         ) : null}
 
-        <div className="mt-4 text-xs">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <button
+            type="button"
+            onClick={onClose}
+            className="font-semibold tracking-[0.01em] text-white/55 transition-colors duration-300 hover:text-white"
+          >
+            Continue browsing
+          </button>
           <button
             type="button"
             onClick={handleReset}
@@ -347,24 +394,8 @@ export default function LoginGateModal({
             {resetStatus}
           </div>
         ) : null}
-
-        <p className="mt-4 text-[11px] font-medium tracking-[0.04em] text-white/40">
-          Need email verification? Use the link in your inbox.
-        </p>
-
-        <div className="mt-6 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className={storefrontSecondaryButtonClass}
-          >
-            Cancel
-          </button>
-          <button type="submit" className={storefrontPrimaryButtonClass}>
-            {mode === "register" ? "Register" : "Sign in"}
-          </button>
-        </div>
-      </form>
-    </ModalBase>
+        </form>
+      </div>
+    </div>
   );
 }
