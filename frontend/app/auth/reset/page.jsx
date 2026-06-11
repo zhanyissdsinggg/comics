@@ -3,35 +3,90 @@
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  storefrontInputClass,
-  storefrontNoticeClass,
-  storefrontPrimaryButtonClass,
-  storefrontSecondaryButtonClass,
-} from "../../../components/common/StorefrontPagePrimitives";
 import { apiPost } from "../../../lib/apiClient";
-import { StorefrontPage } from "../../../components/storefront/StorefrontScaffold";
+import { siteConfig } from "../../../lib/siteConfig";
+
+const inputClass =
+  "h-12 w-full rounded-2xl border border-white/10 bg-[#111421]/82 px-4 text-base font-semibold text-white outline-none transition placeholder:text-white/34 focus:border-[#EC4899]/70 focus:ring-2 focus:ring-[#EC4899]/18 sm:h-14";
+const primaryButtonClass =
+  "inline-flex items-center justify-center rounded-2xl bg-[linear-gradient(90deg,#EC4899_0%,#A855F7_52%,#7C3AED_100%)] px-5 text-sm font-black text-white shadow-[0_18px_44px_rgba(168,85,247,0.28)] transition hover:scale-[1.01]";
+const secondaryButtonClass =
+  "inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.035] px-5 text-sm font-black text-white/78 transition hover:border-white/20 hover:bg-white/[0.06] hover:text-white";
+const noticeBaseClass =
+  "rounded-2xl border px-4 py-3.5 shadow-[0_18px_44px_rgba(0,0,0,0.22)]";
+
+function ResetRouteChrome() {
+  useEffect(() => {
+    document.body.classList.add("gush-auth-reset-route");
+
+    return () => {
+      document.body.classList.remove("gush-auth-reset-route");
+    };
+  }, []);
+
+  return (
+    <style jsx global>{`
+      body.gush-auth-reset-route .gush-app-shell > header,
+      body.gush-auth-reset-route .gush-app-shell > footer {
+        display: none;
+      }
+
+      body.gush-auth-reset-route [data-mobile-bottom-nav="1"] {
+        display: none;
+      }
+
+      body.gush-auth-reset-route.has-mobile-bottom-nav {
+        padding-bottom: 0;
+      }
+    `}</style>
+  );
+}
 
 function ResetActionShell({ children }) {
   return (
-    <StorefrontPage
-      contentClassName="flex min-h-[calc(100vh-220px)] items-center"
-    >
-      <div className="mx-auto grid w-full max-w-[1040px] gap-6 py-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(360px,0.78fr)] lg:items-center lg:py-12">
-        <section className="min-w-0">
-          <h1 className="max-w-[560px] text-[2.45rem] font-black leading-[0.98] tracking-[-0.06em] text-white sm:text-[3.8rem]">
-            Reset your password
-          </h1>
-          <p className="mt-5 max-w-[560px] text-base leading-7 text-white/68 sm:text-lg sm:leading-8">
-            Request a fresh reset email or set a new password from the secure link in your URL.
-          </p>
-        </section>
-
-        <section className="min-w-0 rounded-[28px] border border-white/12 bg-white/[0.045] p-5 text-white shadow-[0_30px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl sm:p-8">
-          {children}
-        </section>
+    <div className="relative min-h-screen overflow-x-hidden bg-[#070A13] font-[Inter,Geist,Satoshi,'SF_Pro_Display',system-ui,sans-serif] text-white">
+      <ResetRouteChrome />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-[-12rem] top-[-10rem] h-[30rem] w-[30rem] rounded-full bg-[#EC4899]/12 blur-3xl" />
+        <div className="absolute right-[-10rem] bottom-[-12rem] h-[32rem] w-[32rem] rounded-full bg-[#7C3AED]/12 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,11,22,0.18),rgba(7,10,19,0.98))]" />
       </div>
-    </StorefrontPage>
+
+      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1120px] flex-col justify-center px-5 py-8 sm:px-8 lg:px-12">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,0.72fr)] lg:items-center">
+          <section className="min-w-0">
+            <p className="text-[10px] font-black uppercase tracking-[0.26em] text-white/46">
+              Account access
+            </p>
+            <h1 className="mt-4 max-w-[560px] text-[2.45rem] font-black leading-[0.98] tracking-[-0.06em] text-white sm:text-[3.8rem]">
+              Reset your password
+            </h1>
+            <p className="mt-5 max-w-[560px] text-base leading-7 text-white/68 sm:text-lg sm:leading-8">
+              Request a fresh reset email or set a new password from the secure link in your URL.
+            </p>
+          </section>
+
+          <section className="min-w-0 rounded-[28px] border border-white/12 bg-white/[0.045] p-5 text-white shadow-[0_30px_90px_rgba(0,0,0,0.34)] backdrop-blur-2xl sm:p-8">
+            {children}
+          </section>
+        </div>
+
+        <footer className="mt-8 flex flex-col gap-3 text-xs text-white/46 sm:flex-row sm:items-center sm:justify-between">
+          <p>Copyright 2026 {siteConfig.companyName}</p>
+          <nav className="flex flex-wrap gap-x-6 gap-y-2">
+            <Link href="/support" className="min-h-11 transition-colors hover:text-white">
+              Support
+            </Link>
+            <Link href="/terms-of-service" className="min-h-11 transition-colors hover:text-white">
+              Terms
+            </Link>
+            <Link href="/privacy-policy" className="min-h-11 transition-colors hover:text-white">
+              Privacy
+            </Link>
+          </nav>
+        </footer>
+      </main>
+    </div>
   );
 }
 
@@ -51,7 +106,7 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
 
   return (
     <div
-      className={`${storefrontNoticeClass} px-4 py-3.5 ${toneMap[tone] || toneMap.neutral}`}
+      className={`${noticeBaseClass} ${toneMap[tone] || toneMap.neutral}`}
     >
       {title ? (
         <p className="text-sm font-semibold tracking-[-0.02em]">{title}</p>
@@ -171,14 +226,14 @@ function ResetPageContent() {
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Choose a new password"
                 autoComplete="new-password"
-                className={storefrontInputClass}
+                className={inputClass}
               />
             </label>
             <button
               type="button"
               disabled={submitting}
               onClick={handleResetPassword}
-              className={`w-full min-h-[48px] disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass}`}
+              className={`min-h-[52px] w-full disabled:cursor-not-allowed disabled:opacity-60 ${primaryButtonClass}`}
             >
               {submitting ? "Saving..." : "Save new password"}
             </button>
@@ -190,7 +245,7 @@ function ResetPageContent() {
                 setPassword("");
                 setStatus(null);
               }}
-              className={`w-full min-h-[48px] disabled:cursor-not-allowed disabled:opacity-60 ${storefrontSecondaryButtonClass}`}
+              className={`min-h-[52px] w-full disabled:cursor-not-allowed disabled:opacity-60 ${secondaryButtonClass}`}
             >
               Send a new email
             </button>
@@ -207,14 +262,14 @@ function ResetPageContent() {
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="name@example.com"
                 autoComplete="email"
-                className={storefrontInputClass}
+                className={inputClass}
               />
             </label>
             <button
               type="button"
               disabled={submitting}
               onClick={handleSendResetLink}
-              className={`w-full min-h-[48px] disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass}`}
+              className={`min-h-[52px] w-full disabled:cursor-not-allowed disabled:opacity-60 ${primaryButtonClass}`}
             >
               {submitting ? "Sending..." : "Email me a reset link"}
             </button>
@@ -231,17 +286,24 @@ function ResetPageContent() {
           <p className="text-sm font-semibold text-white">Account links</p>
           <p className="mt-3 text-sm leading-6 text-white/64">
             <Link
-              href="/account"
+              href="/support"
               className="font-semibold text-[#00E5FF] underline decoration-[#00E5FF]/35 underline-offset-4 hover:text-[#7DF4FF]"
             >
-              Account
+              Support
             </Link>
             .{" "}
             <Link
-              href="/support"
+              href="/terms-of-service"
               className="font-semibold text-[#FFE500] underline decoration-[#FFE500]/35 underline-offset-4 hover:text-[#FFF27A]"
             >
-              Support
+              Terms
+            </Link>
+            .{" "}
+            <Link
+              href="/privacy-policy"
+              className="font-semibold text-[#F0ABFC] underline decoration-[#F0ABFC]/35 underline-offset-4 hover:text-[#F5D0FE]"
+            >
+              Privacy
             </Link>
             .
           </p>
@@ -255,11 +317,9 @@ export default function ResetPage() {
   return (
     <Suspense
       fallback={
-        <StorefrontPage accentClass="from-[rgba(103,232,249,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(255,79,154,0.1)]">
-          <div className="mx-auto w-full max-w-[960px]">
-            <div className="h-56 animate-pulse rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(22,18,30,0.92)_0%,rgba(13,12,23,0.86)_100%)] shadow-[0_24px_58px_rgba(8,6,20,0.34)]" />
-          </div>
-        </StorefrontPage>
+        <div className="min-h-screen bg-[#070A13] px-5 py-8 text-white">
+          <div className="mx-auto mt-24 h-56 w-full max-w-[640px] animate-pulse rounded-[32px] border border-white/10 bg-white/[0.045]" />
+        </div>
       }
     >
       <ResetPageContent />
