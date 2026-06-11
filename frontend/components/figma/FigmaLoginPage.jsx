@@ -1,54 +1,388 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowRight,
-  CheckCircle2,
+  Bookmark,
+  Compass,
   Eye,
   EyeOff,
+  Library,
   Lock,
   Mail,
   ShieldCheck,
-  Sparkles,
+  UserPlus,
 } from "lucide-react";
-import EditorialHero from "../common/EditorialHero";
-import SurfacePanel from "../common/SurfacePanel";
-import {
-  storefrontInfoCardClass,
-  storefrontInputClass,
-  storefrontPrimaryButtonClass,
-  storefrontSecondaryButtonClass,
-  storefrontSoftCardClass,
-  StorefrontInfoCard,
-  StorefrontSectionHeading,
-} from "../common/StorefrontPagePrimitives";
 import { siteConfig } from "../../lib/siteConfig";
-import { getFallbackImageUrl } from "../../lib/fallbackImage";
 import { useAuthStore } from "../../store/useAuthStore";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
-import { cn } from "./figma-utils";
 
-const TRUST_POINTS = [
+const VALUE_POINTS = [
   {
-    title: "Reader profile",
-    body: "Keep progress, bookmarks, and wallet state attached to the same reader identity.",
+    label: "Private shelf",
+    detail: "Your favorites, always saved.",
+    icon: Bookmark,
   },
   {
-    title: "Fast return",
-    body: "Reopen the exact chapter or branch you left on another device.",
+    label: "Reading progress",
+    detail: "Pick up right where you left off.",
+    icon: Library,
   },
   {
-    title: "Protected access",
-    body: "Account gating keeps mature visibility and purchase state tied to your profile.",
+    label: "Mode-aware",
+    detail: "Content that fits your mode.",
+    icon: ShieldCheck,
   },
 ];
+
+const COLLAGE_IMAGES = [
+  {
+    src: "/images/home/crimson-tide-cover.png",
+    className:
+      "left-[38%] top-[-4%] h-[34%] w-[34%] rotate-[-3deg] opacity-80",
+  },
+  {
+    src: "/images/home/solar-wind-cover.png",
+    className:
+      "right-[8%] top-[15%] h-[36%] w-[30%] rotate-[5deg] opacity-82",
+  },
+  {
+    src: "/images/home/the-last-kingdom-hero.png",
+    className:
+      "left-[8%] bottom-[7%] h-[38%] w-[31%] rotate-[-6deg] opacity-76",
+  },
+  {
+    src: "/images/home/wild-hearts-cover.png",
+    className:
+      "left-[37%] bottom-[2%] h-[42%] w-[32%] rotate-[4deg] opacity-82",
+  },
+  {
+    src: "/images/home/cherry-blossom-high-cover.png",
+    className:
+      "right-[6%] bottom-[8%] h-[34%] w-[28%] rotate-[-4deg] opacity-72",
+  },
+];
+
+function BrandMark({ compact = false }) {
+  return (
+    <Link
+      href="/"
+      aria-label="Gush home"
+      className="inline-flex min-h-11 flex-col justify-center tracking-tight text-white"
+    >
+      <span
+        className={
+          compact
+            ? "text-2xl font-black leading-none"
+            : "text-[42px] font-black italic leading-none"
+        }
+      >
+        <span>G</span>
+        <span className="text-[#EC4899]">U</span>
+        <span>SH</span>
+      </span>
+      <span className="mt-1 text-[10px] font-black uppercase tracking-[0.18em] text-white/78">
+        Comics & Novels
+      </span>
+    </Link>
+  );
+}
+
+function DecorativeCollage({ isAdultMode }) {
+  return (
+    <div
+      className="pointer-events-none relative hidden min-h-[470px] overflow-hidden rounded-[32px] border border-white/8 bg-white/[0.025] lg:block"
+      aria-hidden="true"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_62%_35%,rgba(236,72,153,0.20),transparent_34%),radial-gradient(circle_at_48%_78%,rgba(124,58,237,0.20),transparent_34%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,19,0.82)_0%,rgba(7,10,19,0.24)_48%,rgba(7,10,19,0.76)_100%)]" />
+      {COLLAGE_IMAGES.map((image) => (
+        <div
+          key={image.src}
+          className={`absolute overflow-hidden rounded-[24px] border border-white/10 bg-white/5 shadow-[0_28px_80px_rgba(0,0,0,0.55)] ${image.className}`}
+        >
+          <img
+            src={image.src}
+            alt=""
+            aria-hidden="true"
+            role="presentation"
+            className="h-full w-full object-cover saturate-[1.04]"
+          />
+          <span className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,10,19,0.05),rgba(7,10,19,0.42))]" />
+        </div>
+      ))}
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_58%,#070A13_100%)]" />
+      {isAdultMode ? (
+        <div className="absolute right-5 top-5 rounded-full border border-[#EC4899]/25 bg-[#EC4899]/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#F9A8D4]">
+          18+ mode
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ValueStrip({ compact = false }) {
+  return (
+    <div
+      className={
+        compact
+          ? "grid grid-cols-3 gap-2"
+          : "grid gap-4 sm:grid-cols-3 lg:gap-6"
+      }
+    >
+      {VALUE_POINTS.map(({ label, detail, icon: Icon }) => (
+        <div
+          key={label}
+          className={
+            compact
+              ? "rounded-xl border border-white/10 bg-white/[0.045] px-3 py-2 text-center"
+              : "flex gap-4 border-t border-white/10 pt-6"
+          }
+        >
+          <span
+            className={
+              compact
+                ? "mx-auto mb-1 flex h-5 w-5 items-center justify-center text-[#EC4899]"
+                : "mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#EC4899]/30 bg-[#EC4899]/10 text-[#EC4899]"
+            }
+          >
+            <Icon className={compact ? "h-3.5 w-3.5" : "h-5 w-5"} />
+          </span>
+          <span className="block min-w-0">
+            <span
+              className={
+                compact
+                  ? "block truncate text-[10px] font-black text-white"
+                  : "block text-base font-black text-white"
+              }
+            >
+              {compact ? label.replace("Reading ", "") : label}
+            </span>
+            {!compact ? (
+              <span className="mt-1 block text-sm leading-6 text-white/58">
+                {detail}
+              </span>
+            ) : null}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LegalFooter() {
+  const legalLinks = [
+    { href: "/terms-of-service", label: "Terms of Service" },
+    { href: "/privacy-policy", label: "Privacy Policy" },
+    { href: "/support", label: "Contact" },
+  ];
+
+  return (
+    <footer className="mx-auto flex w-full max-w-[1480px] flex-col gap-4 px-5 pb-6 text-xs text-white/46 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-12">
+      <p>Copyright 2026 {siteConfig.companyName}</p>
+      <nav className="flex flex-wrap gap-x-7 gap-y-2">
+        {legalLinks.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="min-h-11 transition-colors hover:text-white"
+          >
+            {link.label}
+          </Link>
+        ))}
+      </nav>
+    </footer>
+  );
+}
+
+function AuthRouteChrome() {
+  useEffect(() => {
+    document.body.classList.add("gush-auth-route");
+
+    return () => {
+      document.body.classList.remove("gush-auth-route");
+    };
+  }, []);
+
+  return (
+    <style jsx global>{`
+      body.gush-auth-route .gush-app-shell > header,
+      body.gush-auth-route .gush-app-shell > footer {
+        display: none;
+      }
+
+      body.gush-auth-route [data-mobile-bottom-nav="1"] {
+        display: none;
+      }
+
+      body.gush-auth-route.has-mobile-bottom-nav {
+        padding-bottom: 0;
+      }
+
+      body.gush-auth-route .gush-app-shell-content {
+        min-width: 0;
+      }
+    `}</style>
+  );
+}
+
+function AuthCard({
+  mode,
+  setMode,
+  email,
+  setEmail,
+  password,
+  setPassword,
+  showPassword,
+  setShowPassword,
+  loading,
+  error,
+  handleSubmit,
+}) {
+  const isRegister = mode === "register";
+  const title = isRegister ? "Create your reader pass" : "Welcome back";
+  const subtitle = isRegister
+    ? "Start a shelf for comics, novels, and interactive routes."
+    : "Continue your stories.";
+  const ctaLabel = isRegister ? "Create account" : "Sign in";
+
+  return (
+    <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.045] p-5 text-white shadow-[0_34px_120px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:p-8 lg:rounded-[32px] lg:p-12">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(236,72,153,0.20),transparent_34%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(236,72,153,0.85),transparent)]" />
+
+      <div className="relative">
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-[32px] font-black leading-tight tracking-[-0.04em] sm:text-[40px]">
+              {title}
+            </h2>
+            <p className="mt-3 text-base leading-7 text-white/64">{subtitle}</p>
+          </div>
+          <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.055] text-[#F472B6] sm:flex">
+            <ShieldCheck className="h-5 w-5" />
+          </div>
+        </div>
+
+        <form className="space-y-5" onSubmit={handleSubmit}>
+          <div>
+            <label
+              htmlFor="gush-login-email"
+              className="mb-2 block text-sm font-bold text-white/82"
+            >
+              Email
+            </label>
+            <div className="relative">
+              <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/34" />
+              <input
+                id="gush-login-email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@example.com"
+                autoComplete={isRegister ? "email" : "username"}
+                className="h-12 w-full rounded-xl border border-white/10 bg-[#111421]/82 pl-12 pr-4 text-base font-semibold text-white outline-none transition placeholder:text-white/34 focus:border-[#EC4899]/70 focus:ring-2 focus:ring-[#EC4899]/18 sm:h-14 sm:rounded-2xl"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <label
+                htmlFor="gush-login-password"
+                className="block text-sm font-bold text-white/82"
+              >
+                Password
+              </label>
+              <Link
+                href="/auth/reset"
+                className="inline-flex min-h-11 items-center text-sm font-bold text-[#F472B6] transition-colors hover:text-white"
+              >
+                Forgot password?
+              </Link>
+            </div>
+            <div className="relative">
+              <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/34" />
+              <input
+                id="gush-login-password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Enter your password"
+                autoComplete={isRegister ? "new-password" : "current-password"}
+                className="h-12 w-full rounded-xl border border-white/10 bg-[#111421]/82 pl-12 pr-12 text-base font-semibold text-white outline-none transition placeholder:text-white/34 focus:border-[#EC4899]/70 focus:ring-2 focus:ring-[#EC4899]/18 sm:h-14 sm:rounded-2xl"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute inset-y-0 right-0 flex min-h-11 w-12 items-center justify-center text-white/46 transition-colors hover:text-white"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {error ? (
+            <div className="rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">
+              {error}
+            </div>
+          ) : null}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex h-[52px] w-full items-center justify-center gap-3 rounded-xl bg-[linear-gradient(90deg,#EC4899_0%,#A855F7_52%,#7C3AED_100%)] px-5 text-sm font-black text-white shadow-[0_18px_44px_rgba(168,85,247,0.28)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-65 sm:h-[60px] sm:rounded-2xl sm:text-base"
+          >
+            {loading ? "Preparing your reader pass..." : ctaLabel}
+            {!loading ? <ArrowRight className="h-5 w-5" /> : null}
+          </button>
+        </form>
+
+        <div className="my-6 flex items-center gap-4 text-sm text-white/42">
+          <span className="h-px flex-1 bg-white/10" />
+          <span>or</span>
+          <span className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <div className="grid gap-3">
+          <button
+            type="button"
+            onClick={() => setMode(isRegister ? "login" : "register")}
+            className="group flex min-h-[52px] items-center justify-between rounded-xl border border-white/10 bg-white/[0.025] px-4 text-sm font-black text-[#F0ABFC] transition hover:border-[#EC4899]/35 hover:bg-white/[0.055] sm:min-h-[58px] sm:rounded-2xl sm:px-5"
+          >
+            <span className="flex items-center gap-3">
+              <UserPlus className="h-5 w-5" />
+              {isRegister ? "Already have a reader pass? Sign in" : "Create account"}
+            </span>
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </button>
+          <Link
+            href="/"
+            className="group flex min-h-[52px] items-center justify-between rounded-xl border border-white/10 bg-white/[0.025] px-4 text-sm font-black text-[#D8B4FE] transition hover:border-[#A855F7]/35 hover:bg-white/[0.055] sm:min-h-[58px] sm:rounded-2xl sm:px-5"
+          >
+            <span className="flex items-center gap-3">
+              <Compass className="h-5 w-5" />
+              Continue browsing
+            </span>
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { palette, isAdultMode } = useFigmaSite();
+  const { isAdultMode } = useFigmaSite();
   const { signIn } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [mode, setMode] = useState(
@@ -63,17 +397,7 @@ function LoginContent() {
     () => searchParams?.get("returnTo") || "/",
     [searchParams],
   );
-
-  const title =
-    mode === "register" ? "Create your reader pass" : "Welcome back";
-  const subtitle =
-    mode === "register"
-      ? "Create one reader pass for history, bookmarks, and wallet state."
-      : "Pick up your shelf without losing your place.";
-  const accentTone = isAdultMode
-    ? "bg-red-500/10 text-red-300"
-    : "bg-cyan-400/10 text-cyan-300";
-  const accent = isAdultMode ? "rose" : "blue";
+  const isRegister = mode === "register";
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -93,319 +417,81 @@ function LoginContent() {
   };
 
   return (
-    <div
-      className={cn("relative min-h-screen overflow-hidden", palette.rootBg)}
-    >
-      <div className="absolute inset-0 z-0">
-        <img
-          src={
-            isAdultMode
-              ? getFallbackImageUrl({ kind: "banner", adult: true })
-              : getFallbackImageUrl({ kind: "banner", adult: false })
-          }
-          alt=""
-          aria-hidden="true"
-          role="presentation"
-          className="h-full w-full scale-105 object-cover opacity-20 blur-md"
-        />
-        <div
-          className={cn(
-            "absolute inset-0 bg-gradient-to-b from-transparent via-black/45 to-black/85",
-            palette.heroOverlay,
-          )}
-        />
+    <div className="relative min-h-screen overflow-x-hidden bg-[#070A13] font-[Inter,Geist,Satoshi,'SF_Pro_Display',system-ui,sans-serif] text-white">
+      <AuthRouteChrome />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-[-14rem] top-[-12rem] h-[34rem] w-[34rem] rounded-full bg-[#EC4899]/12 blur-3xl" />
+        <div className="absolute right-[-10rem] top-12 h-[32rem] w-[32rem] rounded-full bg-[#7C3AED]/14 blur-3xl" />
+        <div className="absolute bottom-[-16rem] left-[30%] h-[30rem] w-[30rem] rounded-full bg-[#38BDF8]/6 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,11,22,0.12),rgba(7,10,19,0.96))]" />
       </div>
 
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl items-center px-4 py-10 sm:py-12 md:px-8 md:py-16">
-        <div className="grid w-full gap-4 md:gap-5 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
-          <div className="space-y-4">
-            <EditorialHero
-              accent={accent}
-              appearance="dark"
-              eyebrow={mode === "register" ? "Reader Access" : "Account Return"}
-              title={title}
-              description={subtitle}
-              secondary={isAdultMode ? "18+ mode active" : "Core mode active"}
-              stats={[
-                {
-                  label: "Shelf sync",
-                  value: "Active",
-                  hint: "Progress, bookmarks, and purchases stay tied to one identity.",
-                },
-                {
-                  label: "Return path",
-                  value: returnTo,
-                  hint: "After auth we send readers back where they came from.",
-                },
-                {
-                  label: "Gate safety",
-                  value: isAdultMode ? "Adult profile" : "Normal profile",
-                  hint: "Mode state stays attached to the same account flow.",
-                },
-              ]}
-              actions={
-                <>
-                  <Link href="/" className={storefrontSecondaryButtonClass}>
-                    {siteConfig.siteName.toUpperCase()}
-                  </Link>
-                  <span
-                    className={cn(
-                      "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-[10px] font-black uppercase tracking-[0.22em] md:text-xs",
-                      accentTone,
-                    )}
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    {mode === "register" ? "Create account" : "Sign in"}
-                  </span>
-                </>
-              }
-            />
+      <main className="relative z-10 mx-auto grid min-h-screen w-full max-w-[1480px] items-center gap-8 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(520px,0.92fr)] lg:px-12 lg:py-12 xl:gap-14">
+        <section className="flex min-w-0 flex-col gap-6 lg:min-h-[760px] lg:justify-between">
+          <div className="space-y-7 sm:space-y-8">
+            <BrandMark compact />
 
-            <SurfacePanel
-              tone="muted"
-              accent={accent}
-              appearance="dark"
-              className="space-y-5"
-            >
-              <StorefrontSectionHeading
-                eyebrow="Reader Access"
-                title="Email access for your shelf"
-                description="The current account flow stays simple: email, password, and a clean return path."
-              />
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                {[
-                  "Sign in and reopen the exact chapter you left on.",
-                  "Keep your shelf, bookmarks, and purchases tied to one account.",
-                  "Adult mode stays attached to the same reader profile and gate checks.",
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className={`${storefrontSoftCardClass} px-4 py-4 text-sm leading-6 text-white/66`}
-                  >
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </SurfacePanel>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              {TRUST_POINTS.map((item) => (
-                <StorefrontInfoCard
-                  key={item.title}
-                  title={item.title}
-                  description={item.body}
-                  className="h-full"
-                >
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-2xl bg-white/5 text-white">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                  </div>
-                </StorefrontInfoCard>
-              ))}
+            <div className="max-w-[650px]">
+              <p className="mb-3 text-[11px] font-black uppercase tracking-[0.24em] text-white/40 lg:hidden">
+                {isAdultMode ? "18+ mode active" : "Core mode active"}
+              </p>
+              <h1 className="text-[42px] font-black leading-[0.98] tracking-[-0.06em] text-white sm:text-[58px] lg:text-[72px] xl:text-[84px]">
+                Your shelf,
+                <br />
+                always{" "}
+                <span className="bg-[linear-gradient(90deg,#F9A8D4_0%,#A855F7_74%)] bg-clip-text text-transparent">
+                  with you.
+                </span>
+              </h1>
+              <p className="mt-5 max-w-[520px] text-base leading-7 text-white/72 sm:text-lg sm:leading-8 lg:text-xl">
+                Continue comics, novels, and routes from where you left off.
+              </p>
+              <div className="mt-7 hidden h-1.5 w-16 rounded-full bg-[linear-gradient(90deg,#EC4899,#A855F7)] lg:block" />
             </div>
+
+            <div className="lg:hidden">
+              <ValueStrip compact />
+            </div>
+
+            <DecorativeCollage isAdultMode={isAdultMode} />
           </div>
 
-          <SurfacePanel
-            tone="muted"
-            accent={accent}
-            appearance="dark"
-            className="rounded-[34px] p-4 md:p-8"
-          >
-            <div className="mb-5 flex items-start justify-between gap-4 md:mb-6">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
-                  {mode === "register" ? "Create account" : "Sign in"}
-                </p>
-                <h2 className="mt-2 text-2xl font-black tracking-tight text-white md:text-3xl">
-                  {mode === "register"
-                    ? "Create account"
-                    : "Email sign in"}
-                </h2>
-              </div>
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 text-white">
-                <ShieldCheck className={cn("h-5 w-5", palette.primaryText)} />
-              </div>
-            </div>
+          <div className="hidden lg:block">
+            <ValueStrip />
+          </div>
+        </section>
 
-            <div className={`${storefrontInfoCardClass} mb-5 px-4 py-4 md:mb-6`}>
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
-                Email access
-              </p>
-              <p className="mt-2 text-sm leading-6 text-gray-300">
-                Use the account email and password flow currently connected to this storefront.
-              </p>
-            </div>
-
-            <form className="space-y-3.5 md:space-y-4" onSubmit={handleSubmit}>
-              <div>
-                <label className="mb-2 block text-sm font-bold text-gray-400">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500">
-                    <Mail className="h-5 w-5" />
-                  </div>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="you@example.com"
-                    className={cn(
-                      `${storefrontInputClass} mt-0 pl-12 pr-4`,
-                      isAdultMode
-                        ? "border-gray-800 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                        : "border-gray-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400",
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="mb-2 flex justify-between">
-                  <label className="block text-sm font-bold text-gray-400">
-                    Password
-                  </label>
-                  <Link
-                    href="/auth/reset"
-                    className={cn(
-                      "text-sm font-semibold transition-colors hover:underline",
-                      palette.primaryText,
-                    )}
-                  >
-                    Forgot?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500">
-                    <Lock className="h-5 w-5" />
-                  </div>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    placeholder="Enter your password"
-                    className={cn(
-                      `${storefrontInputClass} mt-0 pl-12 pr-12`,
-                      isAdultMode
-                        ? "border-gray-800 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                        : "border-gray-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400",
-                    )}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 transition-colors hover:text-gray-300"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {error ? (
-                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300">
-                  {error}
-                </div>
-              ) : null}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className={cn(
-                  `mt-1 w-full md:mt-2 ${storefrontPrimaryButtonClass}`,
-                  "justify-center gap-2 rounded-2xl py-3.5 text-sm font-black uppercase tracking-[0.22em] text-white hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60 md:py-4",
-                )}
-              >
-                {loading
-                  ? mode === "register"
-                    ? "Creating..."
-                    : "Signing in..."
-                  : mode === "register"
-                    ? "Create account"
-                    : "Sign in"}
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </form>
-
-            <div className={`mt-5 md:mt-6 ${storefrontInfoCardClass}`}>
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
-                Reader flow
-              </p>
-              <p className="mt-2 text-sm leading-6 text-gray-400">
-                {mode === "register"
-                  ? "After account creation we return you to your original page and keep the session warm."
-                  : "After sign-in we send you back to the page that requested authentication."}
-              </p>
-            </div>
-
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              {[
-                {
-                  label: "Reader Shelf",
-                  text: "Progress, favorites, and saved titles stay together.",
-                },
-                {
-                  label: "Fast Return",
-                  text: "Jump back into the same chapter or branch on another device.",
-                },
-                {
-                  label: "Mode Safe",
-                  text: isAdultMode
-                    ? "Adult gate state stays attached to this signed-in profile."
-                    : "Normal mode stays clean with the current content filters.",
-                },
-              ].map((item) => (
-                <div key={item.label} className={`${storefrontSoftCardClass} px-3 py-3`}>
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
-                    {item.label}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-gray-300">
-                    {item.text}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <p className="mt-5 text-center text-sm font-medium text-gray-400 md:mt-6">
-              {mode === "register"
-                ? "Already have an account?"
-                : "Don't have an account?"}{" "}
-              <button
-                type="button"
-                onClick={() =>
-                  setMode(mode === "register" ? "login" : "register")
-                }
-                className={cn(
-                  "-mx-1 -my-3 inline-flex min-h-11 items-center px-1 font-bold transition-colors hover:underline",
-                  palette.primaryText,
-                )}
-              >
-                {mode === "register" ? "Sign in" : "Sign up"}
-              </button>
-            </p>
-          </SurfacePanel>
+        <div className="min-w-0 lg:pl-2 xl:pl-6">
+          <AuthCard
+            mode={mode}
+            setMode={setMode}
+            email={email}
+            setEmail={setEmail}
+            password={password}
+            setPassword={setPassword}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
+            loading={loading}
+            error={error}
+            handleSubmit={handleSubmit}
+          />
+          <p className="mt-5 text-center text-xs leading-6 text-white/42 lg:hidden">
+            Private shelf <span className="mx-1">/</span> Reading progress{" "}
+            <span className="mx-1">/</span> Mode-aware
+          </p>
         </div>
-      </div>
+      </main>
+
+      <LegalFooter />
     </div>
   );
 }
 
 function LoginFallback() {
-  const { palette } = useFigmaSite();
-
   return (
-    <div className={cn("min-h-screen", palette.rootBg)}>
+    <div className="min-h-screen bg-[#070A13]">
       <div className="flex min-h-screen items-center justify-center px-4 text-white">
-        <div
-          className={cn(
-            "rounded-3xl border px-6 py-5",
-            palette.surface,
-            palette.border,
-          )}
-        >
+        <div className="rounded-3xl border border-white/10 bg-white/[0.045] px-6 py-5 shadow-[0_24px_80px_rgba(0,0,0,0.38)] backdrop-blur-xl">
           Preparing your reader pass...
         </div>
       </div>
