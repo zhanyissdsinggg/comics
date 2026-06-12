@@ -40,7 +40,7 @@ function ResetAuthShell({ children }) {
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,0.72fr)] lg:items-center">
           <section className="min-w-0">
             <p className="text-[10px] font-black tracking-[0.18em] text-white/46">
-              Account access
+              Password help
             </p>
             <h1 className="mt-4 max-w-[560px] text-[2.45rem] font-black leading-[0.98] tracking-[-0.06em] text-white sm:text-[3.8rem]">
               Reset your password
