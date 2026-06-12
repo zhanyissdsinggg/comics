@@ -290,9 +290,9 @@ export default function AdultHubPage() {
               </div>
 
               <p className="mt-4 max-w-[40rem] text-sm leading-[1.72] text-white/72 sm:text-[15px]">
-                Normal mode shows standard content only. Adult mode switches
-                home, search, rankings, library, and reader surfaces to 18+
-                content only. The two modes never mix.
+                Standard browsing keeps all-ages stories visible. Mature Mode
+                switches home, search, rankings, library, and reader surfaces to
+                18+ content only. The two shelves never mix.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">

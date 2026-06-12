@@ -58,7 +58,7 @@ export default function ReaderBottomBar({
             className={centerButtonClassName}
           >
             <List className="h-4 w-4" />
-            Episode list
+            {isComic ? "Chapter list" : "Episode list"}
           </button>
           <button
             type="button"

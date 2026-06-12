@@ -39,6 +39,7 @@ import {
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
 import { normalizeReadingPercent } from "../../lib/readingPercent";
+import { openAuthPrompt } from "../../lib/openAuthPrompt";
 import { StorefrontPage } from "../storefront/StorefrontScaffold";
 
 function PanelLoadingSkeleton({ rows = 3 }) {
@@ -945,12 +946,15 @@ export default function LibraryPage({
     [recommendedItems, seriesList],
   );
   const hasSignedOutStoryCards = signedOutRecommendedStarts.length > 0;
+  const usesSignedOutFallback = recommendedItems.length === 0;
   const signedOutRecommendationEyebrow = hasSignedOutStoryCards
-    ? "Pick up next"
+    ? "Start a new read"
     : "Start here";
   const signedOutRecommendationTitle = hasSignedOutStoryCards
-    ? "Recommended reads"
-    : "Browse starting points";
+    ? usesSignedOutFallback
+      ? "Choose a channel while your shelf gets started."
+      : "Fresh updates"
+    : "Start a new read";
   const primaryButtonClass = storefrontPrimaryButtonClass;
   const secondaryButtonClass = storefrontSecondaryButtonClass;
   const signedInHeroDescription = viewerSignedIn
@@ -959,24 +963,24 @@ export default function LibraryPage({
         ? "Jump back in."
         : "Saved series and recent reads."
       : "Start a shelf with a story that fits tonight."
-    : "Sign in to sync progress, or keep browsing the shelf picks below.";
+    : "Your shelf follows the stories you open.";
   const signedOutHeroSecondary =
     "";
   const libraryDeskTitle = viewerSignedIn
     ? resumeSpotlightReadHref
-      ? "Your next read."
+      ? "Keep reading"
       : hasLibrarySignals
-        ? "Your shelf."
-        : "Your shelf starts here."
-    : "Reader desk";
-  const heroEyebrow = viewerSignedIn ? "Library Hub" : "Saved Stories";
+        ? "My Shelf"
+        : "Start a new read"
+    : "My Shelf";
+  const heroEyebrow = "My Shelf";
   const resumeSpotlightPanelTitle = resumeSpotlight?.seriesId
     ? resumeSpotlight?.title || "Continue reading"
     : "Continue reading";
   const overviewCards = viewerSignedIn
     ? [
         {
-          label: "Continue",
+          label: "Keep reading",
           title: resumeSpotlight?.title || "Pick up a story",
           body:
             resumeSpotlightMeta ||
@@ -985,7 +989,7 @@ export default function LibraryPage({
           tone: "cyan",
         },
         {
-          label: "Shelf Mood",
+          label: "Saved for later",
           title:
             visibleLibraryItems.length > 0 ? "Saved and stacked" : "Ready to build",
           body:
@@ -996,7 +1000,7 @@ export default function LibraryPage({
           tone: "rose",
         },
         {
-          label: "Bookmarks",
+          label: "Recently opened",
           title:
             bookmarkCountTotal > 0
               ? `${bookmarkCountTotal} markers ready`
@@ -1011,23 +1015,23 @@ export default function LibraryPage({
       ]
     : [
         {
-          label: "Reader desk",
-          title: "Browse now",
-          body: "Open a story first, then sign in when you want the shelf to follow you.",
+          label: "My Shelf",
+          title: "Keep reading",
+          body: "Your shelf follows the stories you open.",
           icon: Sparkles,
           tone: "cyan",
         },
         {
-          label: "Pick up next",
-          title: "Recommended reads",
-          body: "Fresh picks stay available below, even before you create a shelf.",
+          label: "Saved for later",
+          title: "Start a new read",
+          body: "Choose a channel while your shelf gets started.",
           icon: LibraryIcon,
           tone: "rose",
         },
         {
-          label: "Catalog mode",
-          title: "Mode-aware shelf",
-          body: "The library view follows the active normal or adult catalog mode.",
+          label: "Recently opened",
+          title: "Fresh updates",
+          body: "Open a story and your recent reads will start building here.",
           icon: ArrowRight,
           tone: "amber",
         },
@@ -1108,13 +1112,14 @@ export default function LibraryPage({
                       Saved Series
                     </button>
                   ) : (
-                    <Link
-                      href="/login?returnTo=%2Flibrary"
+                    <button
+                      type="button"
+                      onClick={() => openAuthPrompt("/library")}
                       data-testid="library-entry-cta"
                       className={primaryButtonClass}
                     >
                       Sign in
-                    </Link>
+                    </button>
                   )}
                   {viewerSignedIn ? (
                     <button
@@ -1165,13 +1170,13 @@ export default function LibraryPage({
               </div>
               <div className={`${storefrontInsetCardClass} hidden p-5 text-white lg:block`}>
                 <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
-                  Pick up next
+                  Start a new read
                 </p>
                 <h2 className="mt-3 font-display text-[2rem] font-semibold leading-[0.96] tracking-[-0.05em] text-white">
-                  Recommended reads
+                  Choose a channel
                 </h2>
                 <p className="mt-3 text-sm leading-6 text-white/66">
-                  Start with a story card below, or sign in when you want this desk to keep your place.
+                  Choose a channel while your shelf gets started.
                 </p>
               </div>
             </div>
@@ -1187,14 +1192,14 @@ export default function LibraryPage({
               <div className="max-w-[40rem]">
                 <p className={`${storefrontBadgeClass} gap-2 text-white/64`}>
                   <Sparkles className="size-3.5" />
-                  Reader Snapshot
+                  My Shelf
                 </p>
                 <h2 className="mt-3 font-display text-[1.85rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.35rem]">
-                  Your saved reads, progress, and next-open signals live here
+                  Your shelf follows the stories you open.
                 </h2>
                 <p className="mt-2 text-sm leading-7 text-white/66">
-                  Continue rails, saved titles, bookmarks, and recent reading all
-                  respect the current content mode and stay attached to your live shelf.
+                  Keep reading, saved stories, bookmarks, and recent reads stay
+                  attached to your shelf.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -1209,7 +1214,7 @@ export default function LibraryPage({
                       }
                       className={primaryButtonClass}
                     >
-                      {hasLibrarySignals ? "Open Continue Rail" : "Find a Story"}
+                      {hasLibrarySignals ? "Keep reading" : "Start a new read"}
                     </button>
                     <button
                       type="button"
@@ -1220,17 +1225,18 @@ export default function LibraryPage({
                       }
                       className={secondaryButtonClass}
                     >
-                      {visibleLibraryItems.length > 0 ? "Open Saved Shelf" : "Collections"}
+                      {visibleLibraryItems.length > 0 ? "Saved for later" : "Collections"}
                     </button>
                   </>
                 ) : (
                   <>
-                    <Link
-                      href="/login?returnTo=%2Flibrary"
+                    <button
+                      type="button"
+                      onClick={() => openAuthPrompt("/library")}
                       className={primaryButtonClass}
                     >
                       Sign in
-                    </Link>
+                    </button>
                     <Link href="/comics" className={secondaryButtonClass}>
                       Browse free chapters
                     </Link>

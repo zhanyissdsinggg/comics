@@ -178,9 +178,9 @@ export default function AdultGatePage() {
               </div>
 
               <p className="mt-4 text-sm leading-[1.68] text-white/54">
-                Normal mode shows normal content only. After access is complete,
-                adult mode switches home, search, rankings, library, and reader
-                to adult-only content.
+                Standard browsing keeps all-ages stories visible. After access
+                is complete, Mature Mode switches home, search, rankings,
+                library, and reader to adult-only content.
               </p>
             </div>
           </SurfacePanel>

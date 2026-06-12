@@ -100,14 +100,14 @@ function SettingsContent() {
               accent={accent}
               appearance="dark"
               eyebrow="Preferences"
-              title="Reading, safety, and device behavior stay in one control room."
-              description="This page keeps the existing reader settings, adult gate controls, and sign-in hooks. The UI now matches the rest of the dark storefront system."
-              secondary={isAdultMode ? "18+ mode active" : "Standard mode active"}
+              title="Reading, safety, and device preferences for your stories."
+              description="Tune the reader experience while keeping the dark GushComics storefront feel."
+              secondary={isAdultMode ? "18+ shelf active" : "Standard shelf active"}
               stats={[
                 {
-                  label: "Content mode",
-                  value: isAdultMode ? "Adult mode" : "Normal mode",
-                  hint: "Still driven by the current mutual exclusion gate.",
+                  label: "Content shelf",
+                  value: isAdultMode ? "Mature shelf" : "All-ages shelf",
+                  hint: "Follows the current mature-content gate.",
                 },
                 {
                   label: "Reader layout",
@@ -115,7 +115,7 @@ function SettingsContent() {
                     layoutMode === "horizontal"
                       ? "Horizontal paged"
                       : "Vertical scroll",
-                  hint: "Uses the existing reader settings store.",
+                  hint: "Keeps your selected reading flow.",
                 },
                 {
                   label: "Night mode",
@@ -132,22 +132,22 @@ function SettingsContent() {
               className="space-y-4"
             >
               <StorefrontSectionHeading
-                eyebrow="Reader Snapshot"
-                title="What this device is using right now"
-                description="Every switch below still writes into the same stores and handlers already wired into the app."
+                eyebrow="Reading setup"
+                title="Your current story settings"
+                description="These preferences stay connected to the reader controls already in the app."
               />
 
               <div className="grid gap-3">
                 <div className={storefrontSoftCardClass}>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
-                    Adult gate
+                    Mature access
                   </p>
                   <p className="mt-2 font-display text-[1.4rem] font-semibold tracking-[-0.04em] text-white">
-                    {isAdultMode ? `${legalAge}+ unlocked` : "Normal only"}
+                    {isAdultMode ? `${legalAge}+ unlocked` : "All-ages shelf"}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-white/64">
-                    Catalog visibility remains split by the existing normal and
-                    adult mode filter logic.
+                    Catalog visibility keeps mature and all-ages stories
+                    separate.
                   </p>
                 </div>
 
@@ -159,8 +159,7 @@ function SettingsContent() {
                     {isSignedIn ? "Signed in" : "Guest reader"}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-white/64">
-                    Login prompts still route through the existing auth entry
-                    flow when synced settings are needed.
+                    Sign in when you want settings saved across devices.
                   </p>
                 </div>
               </div>
@@ -188,8 +187,8 @@ function SettingsContent() {
                   </div>
                   <StorefrontSectionHeading
                     eyebrow="Content Safety"
-                    title="Gate mature visibility the same way, just cleaner"
-                    description={`Normal mode stays normal-only. Adult mode stays ${legalAge}+ only. No business logic was rewritten here.`}
+                    title="Choose when mature stories appear"
+                    description={`All-ages browsing stays separate from ${legalAge}+ stories.`}
                     className="space-y-2"
                   />
                 </div>
@@ -197,7 +196,7 @@ function SettingsContent() {
                 <div className="space-y-4">
                   <SettingsToggle
                     label={`${legalAge}+ mode`}
-                    description="Enable access to mature titles from the public catalog using the current adult gate handler."
+                    description="Enable mature titles in the public catalog after age verification."
                     checked={isAdultMode}
                     onClick={handleAdultToggle}
                     accentClass={accentClass}

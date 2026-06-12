@@ -166,10 +166,10 @@ function ChoiceBranchMap({ compact = false, className = "" }) {
         <div className="mb-4 flex items-center justify-between gap-3">
           <span className="inline-flex min-h-[32px] items-center gap-2 rounded-full border border-cyan-200/18 bg-cyan-200/10 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100">
             <GitBranch className="size-3.5" />
-            Route Map
+            Story Paths
           </span>
           <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/42">
-            Live branch
+            Choose a path
           </span>
         </div>
 
@@ -261,7 +261,7 @@ function PathCard({ story, index, continueProgress = null, compact = false }) {
                 {genre}
               </span>
               <span className="rounded-full border border-white/10 bg-white/8 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/62">
-                {isResume ? "Resume" : "Route"}
+                {isResume ? "Resume" : "Path"}
               </span>
             </div>
             <div>
@@ -390,7 +390,7 @@ export default function InteractiveLandingPage({
                 Interactive Stories
               </span>
               <span className={`${storefrontBadgeClass} px-3 py-1 text-[10px] tracking-[0.18em] text-white/64`}>
-                {initialContentMode === "adult" ? "Adult mode" : "Normal mode"}
+                {initialContentMode === "adult" ? "Mature picks" : "Story picks"}
               </span>
             </div>
             <h1 className="mt-5 max-w-[11ch] font-display text-[3.1rem] font-semibold leading-[0.88] tracking-[-0.075em] text-white sm:text-[4.7rem]">
@@ -423,9 +423,11 @@ export default function InteractiveLandingPage({
               <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
                 {totalEndings} endings
               </span>
-              <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-                {resumeCount} saved
-              </span>
+              {resumeCount > 0 ? (
+                <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
+                  {resumeCount} saved routes
+                </span>
+              ) : null}
             </div>
           </div>
 
