@@ -166,7 +166,7 @@ function ChoiceBranchMap({ compact = false, className = "" }) {
         <div className="mb-4 flex items-center justify-between gap-3">
           <span className="inline-flex min-h-[32px] items-center gap-2 rounded-full border border-cyan-200/18 bg-cyan-200/10 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100">
             <GitBranch className="size-3.5" />
-            Story Paths
+            Story map
           </span>
           <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/42">
             Choose a path
