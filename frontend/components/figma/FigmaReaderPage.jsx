@@ -63,6 +63,33 @@ function parseInstallmentNumberFromId(value) {
   return match ? Number(match[1]) || null : null;
 }
 
+function resolveReaderSeriesType(...sources) {
+  for (const source of sources) {
+    if (!source) {
+      continue;
+    }
+
+    const rawValue =
+      typeof source === "string"
+        ? source
+        : source.type ||
+          source.seriesType ||
+          source.format ||
+          source.contentType ||
+          source.kind ||
+          source.series?.type ||
+          source.series?.seriesType ||
+          source.series?.format;
+    const normalizedValue = String(rawValue || "").trim().toLowerCase();
+
+    if (normalizedValue) {
+      return normalizedValue;
+    }
+  }
+
+  return "";
+}
+
 function formatMetaDate(value, seriesType = "comic") {
   void value;
   const installmentName = getInstallmentLabel(seriesType || "comic")
@@ -194,9 +221,7 @@ function withFallbackAdultFlag(item, fallbackAdult = false) {
 }
 
 function detectComicReaderContent(episode, seriesType, pages, paragraphs) {
-  const normalizedType = String(episode?.type || seriesType || "")
-    .trim()
-    .toLowerCase();
+  const normalizedType = resolveReaderSeriesType(episode, seriesType);
   const hasImagePages = Array.isArray(pages) && pages.length > 0;
   const hasParagraphs = Array.isArray(paragraphs) && paragraphs.length > 0;
   const comicSignals = new Set([
@@ -261,9 +286,7 @@ function extractNarrativeParagraphs(episode, paragraphs) {
 }
 
 function detectNovelReaderContent(episode, seriesType, paragraphs) {
-  const normalizedType = String(episode?.type || seriesType || "")
-    .trim()
-    .toLowerCase();
+  const normalizedType = resolveReaderSeriesType(episode, seriesType);
   const hasParagraphs = Array.isArray(paragraphs) && paragraphs.length > 0;
   const novelSignals = new Set([
     "novel",
@@ -725,7 +748,13 @@ function ReaderContent({
     currentIndex >= 0 && currentIndex < episodes.length - 1
       ? episodes[currentIndex + 1]
       : null;
-  const seriesType = seriesData?.series?.type || episodeData?.type || "comic";
+  const seriesType =
+    resolveReaderSeriesType(
+      seriesData?.series,
+      currentEpisode,
+      episodeData,
+      fallbackData?.seriesType,
+    ) || "comic";
   const currentNumber =
     currentEpisode?.number ||
     episodeData?.number ||
