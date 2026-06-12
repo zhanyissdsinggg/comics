@@ -26,17 +26,14 @@ import { FigmaSiteProvider } from "./FigmaSiteContext";
 const VALUE_POINTS = [
   {
     label: "Private shelf",
-    detail: "Your favorites, always saved.",
     icon: Bookmark,
   },
   {
     label: "Reading progress",
-    detail: "Pick up right where you left off.",
     icon: BarChart3,
   },
   {
     label: "Mode-aware",
-    detail: "Content that fits your mode.",
     icon: ShieldCheck,
   },
 ];
@@ -172,47 +169,21 @@ function MobileHeroArt() {
   );
 }
 
-function DesktopValueCards() {
+function ValueStrip() {
   return (
-    <div className="grid grid-cols-3 gap-7 border-t border-white/8 pt-8">
+    <div className="grid grid-cols-3 gap-2 border-t border-white/8 pt-4 sm:gap-3 sm:pt-6">
       {VALUE_POINTS.map((item) => {
         const Icon = item.icon;
         return (
           <div
             key={item.label}
-            className="grid min-w-0 grid-cols-[2.65rem_minmax(0,1fr)] gap-4"
+            className="flex min-h-10 min-w-0 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.055] px-2 text-center text-[0.66rem] font-black text-white/82 backdrop-blur-xl sm:min-h-12 sm:px-3 sm:text-xs lg:justify-start lg:px-4"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#EC4899]/45 bg-[#EC4899]/8 text-[#D946EF]">
-              <Icon className="h-5 w-5" strokeWidth={1.9} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-black text-white">{item.label}</p>
-              <p className="mt-1 max-w-[10rem] text-sm leading-6 text-white/62">
-                {item.detail}
-              </p>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function MobileValueStrip() {
-  const getMobileLabel = (label) =>
-    label === "Reading progress" ? "Progress" : label;
-
-  return (
-    <div className="grid grid-cols-3 gap-2">
-      {VALUE_POINTS.map((item) => {
-        const Icon = item.icon;
-        return (
-          <div
-            key={item.label}
-            className="flex min-h-8 items-center justify-center gap-1.5 rounded-md border border-white/10 bg-white/[0.055] px-2 text-[0.62rem] font-black text-white/82 backdrop-blur-xl"
-          >
-            <Icon className="h-3 w-3 text-[#C084FC]" strokeWidth={2} />
-            <span className="truncate">{getMobileLabel(item.label)}</span>
+            <Icon
+              className="h-3.5 w-3.5 shrink-0 text-[#C084FC] sm:h-4 sm:w-4"
+              strokeWidth={2}
+            />
+            <span className="truncate">{item.label}</span>
           </div>
         );
       })}
@@ -457,9 +428,6 @@ function AuthCard({
           </SecondaryAction>
         </div>
 
-        <p className="mt-5 text-center text-[0.68rem] font-medium text-white/52 sm:hidden">
-          Private shelf &bull; Reading progress &bull; Story picks
-        </p>
       </div>
     </section>
   );
@@ -547,12 +515,8 @@ function LoginContent() {
             </div>
           </div>
 
-          <div className="relative z-10 hidden lg:block">
-            <DesktopValueCards />
-          </div>
-
-          <div className="relative z-10 lg:hidden">
-            <MobileValueStrip />
+          <div className="relative z-10">
+            <ValueStrip />
           </div>
         </section>
 
