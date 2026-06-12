@@ -147,7 +147,7 @@ function VerifyPageContent() {
 
   return (
     <EmailLinkActionShell
-      eyebrow="Account access"
+      eyebrow="Email verification"
       title="Confirm your email"
       description="Confirm the secure token in your URL or request a fresh verification email."
       minimal
