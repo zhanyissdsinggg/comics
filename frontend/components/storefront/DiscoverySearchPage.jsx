@@ -600,21 +600,21 @@ export default function DiscoverySearchPage({
   const heroTitle = query ? `"${query}"` : "Find your next read";
   const heroInsights = [
     {
-      label: "Catalog Mode",
-      value: includeAdult ? "Adult only" : "Standard only",
+      label: "Trending searches",
+      value: includeAdult ? "Mature stories" : "Reader favorites",
       description: includeAdult
-        ? "Search stays locked to 18+ stories in the active mode."
-        : "Search stays locked to the normal catalog in the active mode.",
+        ? "Find the stories readers are opening in mature channels."
+        : "Find the stories readers keep opening tonight.",
     },
     {
-      label: "Discovery Mode",
-      value: "Active",
+      label: "Start with a vibe",
+      value: "Mood, genre, format",
       description: "Search by title, genre, mood, or format.",
     },
     {
-      label: "Fresh Picks",
-      value: "Ready",
-      description: "Stories are ready to open tonight.",
+      label: "Fresh updates",
+      value: "New chapters",
+      description: "New story updates are ready to open tonight.",
     },
   ];
 
@@ -635,7 +635,7 @@ export default function DiscoverySearchPage({
               {heroTitle}
             </h1>
             <p className="mt-3 max-w-[42rem] text-[0.98rem] leading-7 text-white/68">
-              Find a story by mood, genre, format, or whatever you're craving tonight.
+              Search by title, genre, mood, or format.
             </p>
           </div>
 

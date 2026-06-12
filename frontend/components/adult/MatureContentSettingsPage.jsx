@@ -237,9 +237,9 @@ export default function MatureContentSettingsPage() {
                 </Link>
               </div>
               <p className="text-sm leading-6 text-white/62">
-                Normal mode shows normal content only. Adult mode switches home,
-                search, rankings, library, and reader to adult-only content, and
-                the two modes stay mutually exclusive.
+                Standard browsing keeps all-ages stories visible. Mature Mode
+                switches home, search, rankings, library, and reader to
+                adult-only content, and the two shelves stay separate.
               </p>
             </div>
           </SurfacePanel>

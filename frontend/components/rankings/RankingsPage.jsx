@@ -593,10 +593,10 @@ export default function RankingsPage({
     [seriesList],
   );
   const hasBoardData = rankingPreviewSeries.length > 0;
-  const modeLabel = isAdultMode ? "Adult mode" : "Normal mode";
+  const modeLabel = isAdultMode ? "Mature stories" : "All-ages stories";
   const heroStats = [
     {
-      label: "Tracked Titles",
+      label: "Stories tracked",
       value: `${seriesList.length}`,
       icon: Flame,
       tone: "rose",
@@ -675,7 +675,7 @@ export default function RankingsPage({
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`${storefrontAccentChipClass} px-3 py-1 text-[10px] tracking-[0.24em] text-fuchsia-50`}>
-                  Reading Signals
+                  Trending Now
                 </span>
                 <span className={`${storefrontBadgeClass} px-3 py-1 text-[10px] tracking-[0.18em] text-white/64`}>
                   {modeLabel}
@@ -722,7 +722,7 @@ export default function RankingsPage({
 
       <section className="space-y-4">
         <SectionHeader
-          title="View Filters"
+          title="Browse rankings"
           subtitle="Switch the board without changing the current content mode."
         />
         <div className="-mx-4 overflow-x-auto px-4 pb-1 no-scrollbar sm:mx-0 sm:px-0">

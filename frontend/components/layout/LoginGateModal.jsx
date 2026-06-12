@@ -163,10 +163,8 @@ export default function LoginGateModal({
   const { config } = useRegionStore();
   const googleAuthEnabled = isGoogleAuthEnabled();
   const isRegister = mode === "register";
-  const title = isRegister ? "Create your reader pass" : "Welcome back";
-  const subtitle = isRegister
-    ? "Start a shelf for comics, novels, and interactive routes."
-    : "Continue your stories.";
+  const title = isRegister ? "Create account" : "Welcome back";
+  const subtitle = "Continue your stories.";
   const primaryLabel = isRegister ? "Create account" : "Sign in";
   const inputClass =
     "gush-auth-modal-input h-12 w-full rounded-lg border border-white/10 bg-[#10131f] px-4 text-sm font-semibold text-white outline-none transition placeholder:text-white/35 focus:border-[#EC4899]/70 focus:ring-2 focus:ring-[#EC4899]/18 sm:h-14 sm:rounded-xl sm:px-5 sm:text-base";
@@ -615,9 +613,7 @@ export default function LoginGateModal({
                   strokeWidth={1.9}
                   aria-hidden="true"
                 />
-                {isRegister
-                  ? "Already have a reader pass? Sign in"
-                  : "Create account"}
+                {isRegister ? "Sign in" : "Create account"}
               </span>
               <ArrowRight
                 className="h-4 w-4 transition-transform group-hover:translate-x-1"

@@ -301,10 +301,8 @@ function AuthCard({
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
   const isRegister = mode === "register";
-  const title = isRegister ? "Create your reader pass" : "Welcome back";
-  const subtitle = isRegister
-    ? "Start a shelf for comics, novels, and interactive routes."
-    : "Continue your stories.";
+  const title = isRegister ? "Create account" : "Welcome back";
+  const subtitle = "Continue your stories.";
   const ctaLabel = isRegister ? "Create account" : "Sign in";
 
   useEffect(() => {
@@ -438,7 +436,7 @@ function AuthCard({
             disabled={loading}
             className="flex h-[3.25rem] w-full items-center justify-center gap-3 rounded-lg bg-[linear-gradient(90deg,#EC4899_0%,#A855F7_52%,#7C3AED_100%)] px-5 text-sm font-black text-white shadow-[0_1.3rem_3.2rem_rgba(168,85,247,0.28)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-65 sm:h-[3.75rem] sm:rounded-xl sm:text-base"
           >
-            {loading ? "Preparing your reader pass..." : ctaLabel}
+            {loading ? "Please wait..." : ctaLabel}
             {!loading ? <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6" /> : null}
           </button>
         </form>
@@ -452,7 +450,7 @@ function AuthCard({
             icon={UserPlus}
             onClick={() => setMode(isRegister ? "login" : "register")}
           >
-            {isRegister ? "Already have a reader pass? Sign in" : "Create account"}
+            {isRegister ? "Sign in" : "Create account"}
           </SecondaryAction>
           <SecondaryAction icon={Compass} href="/">
             Continue browsing
@@ -460,7 +458,7 @@ function AuthCard({
         </div>
 
         <p className="mt-5 text-center text-[0.68rem] font-medium text-white/52 sm:hidden">
-          Private shelf &bull; Reading progress &bull; Mode-aware
+          Private shelf &bull; Reading progress &bull; Story picks
         </p>
       </div>
     </section>
@@ -587,7 +585,7 @@ function LoginFallback() {
     <div className="min-h-screen bg-[#070A13]">
       <div className="flex min-h-screen items-center justify-center px-4 text-white">
         <div className="rounded-3xl border border-white/10 bg-white/[0.045] px-6 py-5 shadow-[0_24px_80px_rgba(0,0,0,0.38)] backdrop-blur-xl">
-          Preparing your reader pass...
+          Loading sign in...
         </div>
       </div>
     </div>
