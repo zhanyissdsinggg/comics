@@ -205,7 +205,7 @@ function NotificationsContent() {
               eyebrow="Inbox"
               title="Everything worth opening lands here first."
               description="Episode drops, time-to-free unlocks, and store prompts all stay in one reading lane so the jump back into the catalog remains fast."
-              secondary={isAdultMode ? "18+ mode active" : "Core mode active"}
+              secondary={isAdultMode ? "18+ mode active" : "Standard mode active"}
               stats={[
                 {
                   label: "Unread",

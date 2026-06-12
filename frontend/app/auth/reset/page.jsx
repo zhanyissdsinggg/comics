@@ -39,7 +39,7 @@ function ResetAuthShell({ children }) {
       <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1120px] flex-col justify-center px-5 py-8 sm:px-8 lg:px-12">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,0.72fr)] lg:items-center">
           <section className="min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-[0.26em] text-white/46">
+            <p className="text-[10px] font-black tracking-[0.18em] text-white/46">
               Account access
             </p>
             <h1 className="mt-4 max-w-[560px] text-[2.45rem] font-black leading-[0.98] tracking-[-0.06em] text-white sm:text-[3.8rem]">
@@ -58,13 +58,13 @@ function ResetAuthShell({ children }) {
         <footer className="mt-8 flex flex-col gap-3 text-xs text-white/46 sm:flex-row sm:items-center sm:justify-between">
           <p>Copyright 2026 {siteConfig.companyName}</p>
           <nav className="flex flex-wrap gap-x-6 gap-y-2">
-            <Link href="/support" className="min-h-11 transition-colors hover:text-white">
+            <Link href="/support" className="inline-flex min-h-11 items-center transition-colors hover:text-white">
               Support
             </Link>
-            <Link href="/terms-of-service" className="min-h-11 transition-colors hover:text-white">
+            <Link href="/terms-of-service" className="inline-flex min-h-11 items-center transition-colors hover:text-white">
               Terms
             </Link>
-            <Link href="/privacy-policy" className="min-h-11 transition-colors hover:text-white">
+            <Link href="/privacy-policy" className="inline-flex min-h-11 items-center transition-colors hover:text-white">
               Privacy
             </Link>
           </nav>

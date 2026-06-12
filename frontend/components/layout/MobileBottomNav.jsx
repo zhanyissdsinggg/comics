@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import {
   Bookmark,
@@ -74,6 +75,11 @@ const TAB_ITEMS = [
 export default function MobileBottomNav() {
   const pathname = usePathname() || "/";
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [portalRoot, setPortalRoot] = useState(null);
+
+  useEffect(() => {
+    setPortalRoot(document.body);
+  }, []);
 
   useEffect(() => {
     if (
@@ -109,11 +115,11 @@ export default function MobileBottomNav() {
     return () => document.body.classList.remove("has-mobile-bottom-nav");
   }, [isMobileViewport]);
 
-  if (!isMobileViewport) {
+  if (!isMobileViewport || !portalRoot) {
     return null;
   }
 
-  return (
+  return createPortal(
     <nav
       aria-label="Mobile bottom navigation"
       data-mobile-bottom-nav="1"
@@ -177,6 +183,7 @@ export default function MobileBottomNav() {
           );
         })}
       </div>
-    </nav>
+    </nav>,
+    portalRoot,
   );
 }

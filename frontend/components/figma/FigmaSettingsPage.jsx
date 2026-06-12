@@ -102,7 +102,7 @@ function SettingsContent() {
               eyebrow="Preferences"
               title="Reading, safety, and device behavior stay in one control room."
               description="This page keeps the existing reader settings, adult gate controls, and sign-in hooks. The UI now matches the rest of the dark storefront system."
-              secondary={isAdultMode ? "18+ mode active" : "Core mode active"}
+              secondary={isAdultMode ? "18+ mode active" : "Standard mode active"}
               stats={[
                 {
                   label: "Content mode",

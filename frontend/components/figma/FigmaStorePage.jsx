@@ -305,7 +305,7 @@ function StoreContent({
                   ? "Preview the pack structure, compare membership, and keep browsing free chapters until checkout opens."
                   : "Buy points for locked episodes, or switch to membership if you want the cleaner long-haul reading deal."
               }
-              secondary={isAdultMode ? "18+ mode active" : "Core mode active"}
+              secondary={isAdultMode ? "18+ mode active" : "Standard mode active"}
               stats={heroStats}
               actions={
                 <>
