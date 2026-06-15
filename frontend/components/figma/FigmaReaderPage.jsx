@@ -928,47 +928,33 @@ function ReaderContent({
       }),
     [activeAttribution, seriesData?.series],
   );
-  const readerStatCards = useMemo(
+  const readerDetailItems = useMemo(
     () => [
       {
         label: "Progress",
-        value: `${progressPercent}%`,
-        hint: unlocked
-          ? `Live reading progress in this ${installmentNoun}.`
-          : "Preview progress before unlock.",
+        value: `${progressPercent}% read`,
       },
       {
         label: "Access",
-        value: unlocked ? "Unlocked" : formatPriceLabel(currentPricePts),
-        hint: unlocked
-          ? `Full ${installmentNoun} is open right now.`
-          : `${safeVisibleUnits} free ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} before the gate.`,
+        value: unlocked ? "Open" : formatPriceLabel(currentPricePts),
       },
       {
-        label: "Creator",
+        label: "By",
         value: creatorName,
-        hint: seriesData?.series?.title || "Story credit",
       },
       {
-        label: "Up Next",
+        label: "Next",
         value: nextEpisode
           ? formatInstallmentLabel(seriesType, nextEpisode?.number || currentNumber + 1)
           : "Series page",
-        hint: nextEpisode
-          ? "Keep momentum without leaving the reader."
-          : "You are at the end of the available run.",
       },
     ],
     [
       creatorName,
       currentNumber,
       currentPricePts,
-      isComic,
-      installmentNoun,
       nextEpisode,
       progressPercent,
-      safeVisibleUnits,
-      seriesData?.series?.title,
       seriesType,
       unlocked,
     ],
@@ -1724,29 +1710,14 @@ function ReaderContent({
                       readerMutedClass,
                     )}
                   >
-                    {creatorName}{" / "}
                     {formatMetaDate(
                       currentEpisode?.releasedAt ||
                         episodeData?.releasedAt ||
                         seriesData.series.updatedAt,
                       seriesType,
                     )}{" / "}
-                    {unlocked
-                      ? `Full ${installmentNoun} unlocked.`
-                      : `${safeVisibleUnits} free ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} open now.`}
+                    Start reading below.
                   </p>
-
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    {readerStatCards.map((card) => (
-                      <ReaderStatCard
-                        key={card.label}
-                        label={card.label}
-                        value={card.value}
-                        hint={card.hint}
-                        className="border-white/10 bg-[rgba(255,255,255,0.035)]"
-                      />
-                    ))}
-                  </div>
                 </div>
 
               </div>
@@ -1948,6 +1919,33 @@ function ReaderContent({
           </div>
         </section>
       ) : null}
+
+      <section className="px-4 pt-4 md:px-6">
+        <div
+          className={cn(
+            "mx-auto w-full",
+            isComic ? "max-w-5xl" : "max-w-[760px]",
+          )}
+        >
+          <div
+            className={cn(
+              "flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[24px] border px-4 py-3 text-xs",
+              isComic
+                ? "border-white/10 bg-white/[0.035] text-white/58"
+                : `${novelBorderClass} bg-white/[0.035] text-current/58`,
+            )}
+          >
+            {readerDetailItems.map((item) => (
+              <span key={item.label} className="inline-flex items-center gap-2">
+                <span className="font-semibold uppercase tracking-[0.14em] opacity-60">
+                  {item.label}
+                </span>
+                <span className="font-semibold text-current/82">{item.value}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <ReaderEndPanel
         isComic={isComic}

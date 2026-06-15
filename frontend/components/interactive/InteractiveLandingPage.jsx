@@ -418,14 +418,14 @@ export default function InteractiveLandingPage({
             </div>
             <div className="mt-7 flex flex-wrap gap-2">
               <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-                {stories.length} routes
+                {stories.length} paths
               </span>
               <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
                 {totalEndings} endings
               </span>
               {resumeCount > 0 ? (
                 <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-                  {resumeCount} saved routes
+                  {resumeCount} saved paths
                 </span>
               ) : null}
             </div>
@@ -592,7 +592,7 @@ export default function InteractiveLandingPage({
         <section className="space-y-4">
           <SectionHeader
             title="More Interactive Stories"
-            subtitle="More routes waiting on the shelf."
+            subtitle="More story paths waiting on the shelf."
           />
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {moreStories.map((story, index) => (

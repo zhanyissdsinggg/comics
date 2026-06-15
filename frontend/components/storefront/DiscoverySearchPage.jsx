@@ -642,7 +642,6 @@ export default function DiscoverySearchPage({
           <div className={`${storefrontInfoCardClass} p-4`}>
             <SearchPageInput
               initialQuery={draftQuery}
-              includeAdult={includeAdult}
               persistedParams={{
                 type,
                 format,

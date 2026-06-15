@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Search, Sparkles } from "lucide-react";
+import { Search } from "lucide-react";
 import {
-  storefrontBadgeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
@@ -16,7 +15,6 @@ function buildTrackedParams(params = {}) {
 
 export default function SearchPageInput({
   initialQuery = "",
-  includeAdult = false,
   persistedParams = {},
   onQueryChange,
   onTrackSearch,
@@ -48,15 +46,6 @@ export default function SearchPageInput({
         <input key={key} type="hidden" name={key} value={String(currentValue)} />
       ))}
       <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.04))] px-4 py-3.5 shadow-[0_18px_40px_rgba(8,6,20,0.24)] backdrop-blur-xl">
-        <div className="mb-2 flex items-center justify-between gap-3">
-          <span className={`${storefrontBadgeClass} gap-2 text-white/64`}>
-            <Sparkles className="size-3.5" />
-            Search
-          </span>
-          <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/40">
-            {includeAdult ? "Mature stories" : "Story picks"}
-          </span>
-        </div>
         <div className="flex items-center gap-3">
           <span className={`${storefrontSecondaryButtonClass} h-10 w-10 shrink-0 px-0 text-white/72`}>
             <Search className="size-4.5" />
@@ -65,8 +54,8 @@ export default function SearchPageInput({
             type="search"
             name="q"
             value={value}
-            placeholder="Search titles, creators, or genres..."
-            aria-label="Search series, creators, or genres"
+            placeholder="Search stories"
+            aria-label="Search by title, genre, mood, or format"
             autoComplete="off"
             onChange={(event) => {
               const nextValue = event.target.value;
@@ -80,7 +69,7 @@ export default function SearchPageInput({
       </div>
       <div className="flex flex-wrap gap-2">
         <button type="submit" className={storefrontPrimaryButtonClass}>
-          Search stories
+          Find stories
         </button>
       </div>
     </form>

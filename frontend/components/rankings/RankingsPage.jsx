@@ -5,12 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowUpRight,
-  BookOpen,
   CheckCircle2,
-  Crown,
-  Flame,
   Star,
-  Trophy,
 } from "lucide-react";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import Cover from "../common/Cover";
@@ -248,27 +244,6 @@ function ToneIcon({ icon: Icon, tone = "rose" }) {
   );
 }
 
-function StatCard({ label, value, icon, tone, className = "" }) {
-  return (
-    <div
-      className={`relative overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.045] p-4 shadow-[0_18px_48px_rgba(0,0,0,0.22)] backdrop-blur-xl ${className}`}
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.08),transparent_28%)]" />
-      <div className="relative flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/46">
-            {label}
-          </p>
-          <p className="mt-2 truncate font-display text-[1.45rem] font-semibold tracking-[-0.045em] text-white">
-            {value}
-          </p>
-        </div>
-        <ToneIcon icon={icon} tone={tone} />
-      </div>
-    </div>
-  );
-}
-
 function CoverFrame({ series, label, className = "" }) {
   return (
     <Cover
@@ -318,7 +293,7 @@ function TopLeadCard({ series, onSeriesLinkClick }) {
       <div className="relative grid gap-5 lg:grid-cols-[250px_minmax(0,1fr)] lg:items-end">
         <div className="relative">
           <span className="absolute left-4 top-4 z-10 inline-flex size-14 items-center justify-center rounded-full border border-amber-200/24 bg-amber-200/12 font-display text-[1.6rem] font-semibold text-amber-100 shadow-[0_0_34px_rgba(251,191,36,0.2)]">
-            #1
+            01
           </span>
           <CoverFrame
             series={series}
@@ -329,7 +304,7 @@ function TopLeadCard({ series, onSeriesLinkClick }) {
         <div className="min-w-0 pb-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`${storefrontAccentChipClass} px-3 py-1 text-[10px] tracking-[0.22em] text-fuchsia-50`}>
-              Leading Now
+              Top Story
             </span>
             <span className={`${storefrontBadgeClass} px-3 py-1 text-[10px] tracking-[0.16em] text-white/68`}>
               {meta.format}
@@ -376,7 +351,7 @@ function SupportingCard({ series, rank, onSeriesLinkClick }) {
       />
       <div className="min-w-0 self-end">
         <span className="font-display text-[2rem] font-semibold tracking-[-0.06em] text-white/42">
-          #{rank}
+          {String(rank).padStart(2, "0")}
         </span>
         <h3 className="mt-2 font-display text-[1.75rem] font-semibold leading-[0.95] tracking-[-0.055em] text-white">
           {normalizeText(series?.title)}
@@ -448,7 +423,7 @@ function LeaderCard({ series, rank, section, onSeriesLinkClick }) {
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/42">
-            #{rank}
+            {String(rank).padStart(2, "0")}
           </span>
           <span className="h-px flex-1 bg-white/10" />
         </div>
@@ -594,37 +569,11 @@ export default function RankingsPage({
   );
   const hasBoardData = rankingPreviewSeries.length > 0;
   const modeLabel = isAdultMode ? "Mature stories" : "All-ages stories";
-  const heroStats = [
-    {
-      label: "Stories tracked",
-      value: `${seriesList.length}`,
-      icon: Flame,
-      tone: "rose",
-    },
-    {
-      label: "Comics",
-      value: `${comicLeaders.length}`,
-      icon: Trophy,
-      tone: "amber",
-    },
-    {
-      label: "Novels",
-      value: `${novelLeaders.length}`,
-      icon: BookOpen,
-      tone: "cyan",
-    },
-    {
-      label: "Completed",
-      value: `${completedRuns.length}`,
-      icon: CheckCircle2,
-      tone: "amber",
-    },
-    {
-      label: "Leading Now",
-      value: leadEntry ? normalizeText(leadEntry.title) : modeLabel,
-      icon: Crown,
-      tone: "rose",
-    },
+  const storyMixLabels = [
+    `${seriesList.length} stories`,
+    `${comicLeaders.length} comics`,
+    `${novelLeaders.length} novels`,
+    `${completedRuns.length} completed`,
   ];
 
   const handleSeriesClick = useCallback(
@@ -670,8 +619,8 @@ export default function RankingsPage({
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_16%,rgba(255,79,154,0.26),transparent_24%),radial-gradient(circle_at_78%_20%,rgba(103,232,249,0.16),transparent_26%),radial-gradient(circle_at_50%_90%,rgba(251,191,36,0.12),transparent_30%)]" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,79,154,0.6),rgba(103,232,249,0.38),transparent)]" />
         </div>
-        <div className="relative grid gap-7 xl:grid-cols-[minmax(0,0.86fr)_minmax(420px,1fr)] xl:items-stretch">
-          <div className="flex min-h-[360px] flex-col justify-between">
+        <div className="relative grid gap-7 xl:grid-cols-[minmax(0,0.78fr)_minmax(420px,1fr)] xl:items-stretch">
+          <div className="flex min-h-[320px] flex-col justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`${storefrontAccentChipClass} px-3 py-1 text-[10px] tracking-[0.24em] text-fuchsia-50`}>
@@ -687,6 +636,9 @@ export default function RankingsPage({
               <p className="mt-5 max-w-[39rem] text-base leading-[1.75] text-white/72">
                 The stories readers are opening, saving, and finishing tonight.
               </p>
+              <p className="mt-4 text-sm font-semibold leading-6 text-white/48">
+                {storyMixLabels.join(" / ")}
+              </p>
             </div>
             {leadEntry ? (
               <button
@@ -697,7 +649,7 @@ export default function RankingsPage({
                 <ToneIcon icon={Star} tone="amber" />
                 <div className="min-w-0">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46">
-                    Leading Now
+                    Tonight's leader
                   </p>
                   <p className="mt-1 truncate font-display text-[1.75rem] font-semibold tracking-[-0.055em] text-white">
                     {normalizeText(leadEntry.title)}
@@ -708,15 +660,12 @@ export default function RankingsPage({
             ) : null}
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            {heroStats.map((stat, index) => (
-              <StatCard
-                key={stat.label}
-                {...stat}
-                className={index === heroStats.length - 1 ? "sm:col-span-2" : ""}
-              />
-            ))}
-          </div>
+          {leadEntry ? (
+            <TopLeadCard
+              series={leadEntry}
+              onSeriesLinkClick={handleSeriesLinkClick}
+            />
+          ) : null}
         </div>
       </section>
 
@@ -758,16 +707,12 @@ export default function RankingsPage({
       {leadEntry ? (
         <section className="space-y-4">
           <SectionHeader
-            title="Top Stories Now"
+            title="Top Stories"
             subtitle="The stories leading the board tonight."
           />
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-            <TopLeadCard
-              series={leadEntry}
-              onSeriesLinkClick={handleSeriesLinkClick}
-            />
+          <div className="grid gap-4">
             {supportingEntries.length > 0 ? (
-              <div className="grid gap-4">
+              <div className="grid gap-4 md:grid-cols-2">
                 {supportingEntries.map((series, index) => (
                   <SupportingCard
                     key={series.id}
@@ -785,7 +730,7 @@ export default function RankingsPage({
       {boardEntries.length > 0 ? (
         <section className="space-y-4">
           <SectionHeader
-            title="Live Board"
+            title="More Top Stories"
             subtitle="Fast-moving stories readers keep opening."
           />
           <div className="space-y-3">
@@ -804,7 +749,7 @@ export default function RankingsPage({
       {comicLeaders.length > 0 ? (
         <section className="space-y-4">
           <SectionHeader
-            title="Comics Leaders"
+            title="Comics"
             subtitle="Top comics readers keep opening first."
           />
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -824,7 +769,7 @@ export default function RankingsPage({
       {novelLeaders.length > 0 ? (
         <section className="space-y-4">
           <SectionHeader
-            title="Novel Leaders"
+            title="Novels"
             subtitle="Novels readers are opening tonight."
           />
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -844,7 +789,7 @@ export default function RankingsPage({
       {completedRuns.length > 0 ? (
         <section className="space-y-4">
           <SectionHeader
-            title="Completed Runs"
+            title="Completed"
             subtitle="Finished stories readers keep bingeing."
           />
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

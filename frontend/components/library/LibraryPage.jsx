@@ -947,14 +947,9 @@ export default function LibraryPage({
   );
   const hasSignedOutStoryCards = signedOutRecommendedStarts.length > 0;
   const usesSignedOutFallback = recommendedItems.length === 0;
-  const signedOutRecommendationEyebrow = hasSignedOutStoryCards
-    ? "Start a new read"
-    : "Start here";
-  const signedOutRecommendationTitle = hasSignedOutStoryCards
-    ? usesSignedOutFallback
-      ? "Choose a channel while your shelf gets started."
-      : "Fresh updates"
-    : "Start a new read";
+  const signedOutRecommendationTitle = usesSignedOutFallback
+    ? "Choose a channel while your shelf gets started."
+    : "Fresh updates";
   const primaryButtonClass = storefrontPrimaryButtonClass;
   const secondaryButtonClass = storefrontSecondaryButtonClass;
   const signedInHeroDescription = viewerSignedIn
@@ -964,16 +959,9 @@ export default function LibraryPage({
         : "Saved series and recent reads."
       : "Start a shelf with a story that fits tonight."
     : "Your shelf follows the stories you open.";
-  const signedOutHeroSecondary =
-    "";
-  const libraryDeskTitle = viewerSignedIn
-    ? resumeSpotlightReadHref
-      ? "Keep reading"
-      : hasLibrarySignals
-        ? "My Shelf"
-        : "Start a new read"
+  const libraryDeskTitle = viewerSignedIn && resumeSpotlightReadHref
+    ? "Keep reading"
     : "My Shelf";
-  const heroEyebrow = "My Shelf";
   const resumeSpotlightPanelTitle = resumeSpotlight?.seriesId
     ? resumeSpotlight?.title || "Continue reading"
     : "Continue reading";
@@ -1015,15 +1003,15 @@ export default function LibraryPage({
       ]
     : [
         {
-          label: "My Shelf",
+          label: "Keep reading",
           title: "Keep reading",
-          body: "Your shelf follows the stories you open.",
+          body: "Open a story and this shelf will remember your place.",
           icon: Sparkles,
           tone: "cyan",
         },
         {
           label: "Saved for later",
-          title: "Start a new read",
+          title: "Saved for later",
           body: "Choose a channel while your shelf gets started.",
           icon: LibraryIcon,
           tone: "rose",
@@ -1075,19 +1063,8 @@ export default function LibraryPage({
             tone="highlight"
             className="overflow-hidden p-0"
           >
-            <div className="relative grid gap-5 px-5 py-5 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
-              <div className="max-w-4xl">
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <p className={`${storefrontBadgeClass} gap-2 text-white/74`}>
-                    <Sparkles className="size-3.5" />
-                    {heroEyebrow}
-                  </p>
-                  {signedOutHeroSecondary ? (
-                    <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/44">
-                      {signedOutHeroSecondary}
-                    </p>
-                  ) : null}
-                </div>
+              <div className="relative px-5 py-5 sm:px-6 sm:py-6">
+                <div className="max-w-4xl">
                 <h1 className="mt-4 max-w-4xl font-display text-[2.35rem] font-semibold leading-[0.92] tracking-[-0.05em] text-white sm:text-[2.9rem] xl:text-[4rem]">
                   {libraryDeskTitle}
                 </h1>
@@ -1168,17 +1145,6 @@ export default function LibraryPage({
                   </div>
                 ) : null}
               </div>
-              <div className={`${storefrontInsetCardClass} hidden p-5 text-white lg:block`}>
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
-                  Start a new read
-                </p>
-                <h2 className="mt-3 font-display text-[2rem] font-semibold leading-[0.96] tracking-[-0.05em] text-white">
-                  Choose a channel
-                </h2>
-                <p className="mt-3 text-sm leading-6 text-white/66">
-                  Choose a channel while your shelf gets started.
-                </p>
-              </div>
             </div>
           </SurfacePanel>
 
@@ -1188,18 +1154,14 @@ export default function LibraryPage({
             tone="muted"
             className="space-y-5"
           >
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-[40rem]">
-                <p className={`${storefrontBadgeClass} gap-2 text-white/64`}>
-                  <Sparkles className="size-3.5" />
-                  My Shelf
-                </p>
-                <h2 className="mt-3 font-display text-[1.85rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.35rem]">
-                  Your shelf follows the stories you open.
+                <h2 className="font-display text-[1.85rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.35rem]">
+                  Keep reading
                 </h2>
                 <p className="mt-2 text-sm leading-7 text-white/66">
-                  Keep reading, saved stories, bookmarks, and recent reads stay
-                  attached to your shelf.
+                  Saved stories, bookmarks, and recent reads stay attached to
+                  your shelf.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -1228,20 +1190,7 @@ export default function LibraryPage({
                       {visibleLibraryItems.length > 0 ? "Saved for later" : "Collections"}
                     </button>
                   </>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => openAuthPrompt("/library")}
-                      className={primaryButtonClass}
-                    >
-                      Sign in
-                    </button>
-                    <Link href="/comics" className={secondaryButtonClass}>
-                      Browse free chapters
-                    </Link>
-                  </>
-                )}
+                ) : null}
               </div>
             </div>
 
@@ -1407,12 +1356,12 @@ export default function LibraryPage({
                 tone="muted"
               >
                 <div className="space-y-1">
-                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
-                    {signedOutRecommendationEyebrow}
-                  </p>
                   <h2 className="text-lg font-black uppercase tracking-[-0.03em] text-white">
-                    {signedOutRecommendationTitle}
+                    Start a new read
                   </h2>
+                  <p className="text-sm leading-6 text-white/66">
+                    {signedOutRecommendationTitle}
+                  </p>
                 </div>
                 {hasSignedOutStoryCards ? (
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
