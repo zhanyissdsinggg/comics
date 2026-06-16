@@ -1815,13 +1815,15 @@ function ReaderContent({
             : `${novelBorderClass} bg-white/5 text-white hover:bg-white/10`,
         )}
         heading={
-          unlocked
+          unlocked && isEpisodeComplete
             ? `You finished ${currentInstallmentLabel}`
             : "Continue the story"
         }
         description={
-          unlocked
-            ? `Keep reading, revisit the previous ${installmentNoun}, or open reader reactions below.`
+          unlocked && isEpisodeComplete
+            ? `Keep reading, revisit the previous ${installmentNoun}, or open reactions below.`
+            : unlocked
+              ? `Keep reading to the end of this ${installmentNoun}.`
             : `The free preview stops here. Unlock the rest of this ${installmentNoun} to keep reading.`
         }
         nextEpisodeTitle={
@@ -1885,7 +1887,10 @@ function ReaderContent({
       <section
         ref={commentsRef}
         data-testid="reader-reactions"
-        className="px-4 pb-20 pt-6 md:px-6"
+        className={cn(
+          "px-4 pb-20 md:px-6",
+          isComic ? "pt-12 md:pt-14" : "pt-6",
+        )}
       >
         <div
           className={cn(

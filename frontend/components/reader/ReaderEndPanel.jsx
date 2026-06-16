@@ -34,7 +34,13 @@ export default function ReaderEndPanel({
 }) {
   const checkoutEnabled = siteConfig.monetization.checkoutEnabled === true;
   return (
-    <section data-testid="reader-end-panel" className="px-4 pb-4 pt-8 md:px-6">
+    <section
+      data-testid="reader-end-panel"
+      className={cn(
+        "px-4 pb-4 md:px-6",
+        isComic ? "pt-16 md:pt-20" : "pt-8",
+      )}
+    >
       <div className={cn("mx-auto", isComic ? "max-w-5xl" : "max-w-[760px]")}>
         <div className="grid gap-4">
           <div className={shellClassName}>

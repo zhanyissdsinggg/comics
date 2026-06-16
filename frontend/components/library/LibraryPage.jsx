@@ -785,10 +785,10 @@ export default function LibraryPage({
     [recommendedItems, seriesList],
   );
   const hasSignedOutStoryCards = signedOutRecommendedStarts.length > 0;
-  const usesSignedOutFallback = recommendedItems.length === 0;
-  const signedOutRecommendationTitle = usesSignedOutFallback
-    ? "Choose a channel while your shelf gets started."
-    : "Fresh updates";
+  const signedOutFallbackCopy = "Choose a channel while your shelf gets started.";
+  const signedOutRecommendationTitle = hasSignedOutStoryCards
+    ? signedOutFallbackCopy
+    : "Comics, novels, and rankings are ready to browse.";
   const primaryButtonClass = storefrontPrimaryButtonClass;
   const secondaryButtonClass = storefrontSecondaryButtonClass;
   const signedInHeroDescription = "Your shelf follows the stories you open.";
@@ -1012,7 +1012,7 @@ export default function LibraryPage({
                 ) : (
                   <div className={`${storefrontInfoCardClass} p-4`}>
                     <p className="text-sm font-semibold leading-6 text-white/72">
-                      Comics, novels, and rankings are ready to browse.
+                      {signedOutFallbackCopy}
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <Link href="/comics" className={secondaryButtonClass}>

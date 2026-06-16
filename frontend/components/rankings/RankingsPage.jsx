@@ -70,6 +70,10 @@ function normalizeText(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
 }
 
+function formatRankLabel(rank) {
+  return `#${Number(rank) || 1}`;
+}
+
 function normalizeStatus(value) {
   return normalizeText(value).toLowerCase();
 }
@@ -293,7 +297,7 @@ function TopLeadCard({ series, onSeriesLinkClick }) {
       <div className="relative grid gap-5 lg:grid-cols-[250px_minmax(0,1fr)] lg:items-end">
         <div className="relative">
           <span className="absolute left-4 top-4 z-10 inline-flex size-14 items-center justify-center rounded-full border border-amber-200/24 bg-amber-200/12 font-display text-[1.6rem] font-semibold text-amber-100 shadow-[0_0_34px_rgba(251,191,36,0.2)]">
-            #1
+            {formatRankLabel(1)}
           </span>
           <CoverFrame
             series={series}
@@ -350,8 +354,8 @@ function SupportingCard({ series, rank, onSeriesLinkClick }) {
         className="aspect-[3/4] w-full rounded-[20px] transition-transform duration-500 group-hover:scale-[1.02]"
       />
       <div className="min-w-0 self-end">
-        <span className="font-display text-[2rem] font-semibold tracking-[-0.06em] text-white/42">
-          #{rank}
+        <span className="font-display text-[2rem] font-semibold tracking-[-0.02em] text-white/42">
+          {formatRankLabel(rank)}
         </span>
         <h3 className="mt-2 font-display text-[1.75rem] font-semibold leading-[0.95] tracking-[-0.055em] text-white">
           {normalizeText(series?.title)}
@@ -381,8 +385,8 @@ function BoardRow({ series, rank, onSeriesLinkClick }) {
       onSeriesLinkClick={onSeriesLinkClick}
       className="group grid grid-cols-[52px_64px_minmax(0,1fr)_auto] items-center gap-3 rounded-[22px] border border-white/10 bg-white/[0.035] p-3 text-white shadow-[0_14px_36px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-fuchsia-200/24 hover:bg-white/[0.055]"
     >
-      <span className="font-display text-[2rem] font-semibold leading-none tracking-[-0.06em] text-white/42">
-        #{rank}
+      <span className="font-display text-[2rem] font-semibold leading-none tracking-[-0.02em] text-white/42">
+        {formatRankLabel(rank)}
       </span>
       <CoverFrame
         series={series}
@@ -422,8 +426,8 @@ function LeaderCard({ series, rank, section, onSeriesLinkClick }) {
       />
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/42">
-            #{rank}
+          <span className="text-[11px] font-semibold uppercase tracking-normal text-white/42">
+            {formatRankLabel(rank)}
           </span>
           <span className="h-px flex-1 bg-white/10" />
         </div>
