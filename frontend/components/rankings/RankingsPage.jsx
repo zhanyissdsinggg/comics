@@ -24,6 +24,7 @@ import {
   filterContentByMode,
   getContentModeQueryParam,
 } from "../../lib/contentFilters";
+import { siteMaterialImages } from "../../lib/siteMaterialAssets";
 import {
   storefrontAccentChipClass,
   storefrontBadgeClass,
@@ -613,6 +614,13 @@ export default function RankingsPage({
     >
       <section className="relative overflow-hidden rounded-[36px] border border-white/10 bg-[linear-gradient(135deg,rgba(13,9,24,0.98)_0%,rgba(31,15,48,0.96)_48%,rgba(8,15,26,0.98)_100%)] p-5 shadow-[0_34px_110px_rgba(0,0,0,0.42)] sm:p-7 lg:p-8">
         <div className="absolute inset-0" aria-hidden="true">
+          <img
+            src={siteMaterialImages.rankingsTrendingBg}
+            alt=""
+            role="presentation"
+            className="h-full w-full scale-[1.02] object-cover object-[center_right] opacity-58"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,19,0.96)_0%,rgba(13,9,24,0.84)_52%,rgba(8,15,26,0.52)_100%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_16%,rgba(255,79,154,0.26),transparent_24%),radial-gradient(circle_at_78%_20%,rgba(103,232,249,0.16),transparent_26%),radial-gradient(circle_at_50%_90%,rgba(251,191,36,0.12),transparent_30%)]" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,79,154,0.6),rgba(103,232,249,0.38),transparent)]" />
         </div>

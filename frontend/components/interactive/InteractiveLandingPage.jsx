@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { apiGet } from "../../lib/apiClient";
 import { trackEvent } from "../../lib/trackEvent";
+import { siteMaterialImages } from "../../lib/siteMaterialAssets";
 import { useAuthStore } from "../../store/useAuthStore";
 import {
   storefrontAccentChipClass,
@@ -379,7 +380,13 @@ export default function InteractiveLandingPage({
     >
       <section className="relative overflow-hidden rounded-[36px] border border-white/10 bg-[linear-gradient(135deg,rgba(11,9,24,0.98)_0%,rgba(29,16,55,0.98)_42%,rgba(9,18,31,0.98)_100%)] p-5 shadow-[0_34px_110px_rgba(0,0,0,0.42)] sm:p-7 lg:p-8">
         <div className="absolute inset-0" aria-hidden="true">
-          <div className={`absolute inset-0 ${spotlightVisual.posterClass} opacity-55`} />
+          <img
+            src={siteMaterialImages.interactiveTonightsRouteHero}
+            alt=""
+            aria-hidden="true"
+            role="presentation"
+            className="h-full w-full scale-[1.02] object-cover object-[center_right] opacity-68"
+          />
           <div className={`absolute inset-0 ${spotlightVisual.glowClass}`} />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(255,79,154,0.26),transparent_24%),radial-gradient(circle_at_76%_20%,rgba(103,232,249,0.18),transparent_24%),linear-gradient(90deg,rgba(8,7,18,0.98)_0%,rgba(13,9,27,0.88)_48%,rgba(8,12,24,0.72)_100%)]" />
         </div>

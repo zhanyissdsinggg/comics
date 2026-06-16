@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { resolveDisplayImageUrl } from "../../../lib/fallbackImage";
+import { siteMaterialImages } from "../../../lib/siteMaterialAssets";
 import { trackEvent } from "../../../lib/trackEvent";
 import {
   storefrontHomeSectionEyebrowClass,
@@ -37,6 +38,7 @@ function buildEntryCards(items = [], rankings = []) {
       href: "/comics",
       series: comic,
       gradient: "linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%)",
+      backgroundImageUrl: siteMaterialImages.homeReadTonightComics,
       glow:
         "radial-gradient(circle at 84% 18%, rgba(255,255,255,0.24), transparent 28%), radial-gradient(circle at 72% 78%, rgba(129,140,248,0.34), transparent 32%)",
       eyebrow: "Tonight's comic",
@@ -48,6 +50,7 @@ function buildEntryCards(items = [], rankings = []) {
       href: "/novels",
       series: novel,
       gradient: "linear-gradient(135deg, #EC4899 0%, #FB7185 100%)",
+      backgroundImageUrl: siteMaterialImages.homeReadTonightNovels,
       glow:
         "radial-gradient(circle at 86% 20%, rgba(255,255,255,0.22), transparent 26%), radial-gradient(circle at 76% 80%, rgba(251,191,202,0.3), transparent 34%)",
       eyebrow: "Tonight's novel",
@@ -59,6 +62,7 @@ function buildEntryCards(items = [], rankings = []) {
       href: "/search",
       series: discovery,
       gradient: "linear-gradient(135deg, #2563EB 0%, #38BDF8 100%)",
+      backgroundImageUrl: siteMaterialImages.homeReadTonightDiscovery,
       glow:
         "radial-gradient(circle at 82% 18%, rgba(255,255,255,0.22), transparent 28%), radial-gradient(circle at 72% 80%, rgba(125,211,252,0.3), transparent 34%)",
       eyebrow: "Fresh discovery",
@@ -82,7 +86,10 @@ function ReadTonightCard({ entry, position }) {
       href={entry.href}
       className="group relative block min-h-[128px] overflow-hidden rounded-[26px] p-6 shadow-[0_24px_48px_rgba(6,10,24,0.28)] transition-transform duration-200 hover:-translate-y-1"
       style={{
-        backgroundImage: `${entry.glow}, ${entry.gradient}`,
+        backgroundImage: `linear-gradient(90deg,rgba(7,10,19,0.88)_0%,rgba(7,10,19,0.58)_48%,rgba(7,10,19,0.24)_100%), url("${entry.backgroundImageUrl}"), ${entry.glow}, ${entry.gradient}`,
+        backgroundPosition: "left center, center right, center, center",
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "cover, cover, cover, cover",
       }}
       onClick={() =>
         trackEvent("story_click", {

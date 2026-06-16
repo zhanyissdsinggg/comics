@@ -8,6 +8,7 @@ import { useProgressStore } from "../../store/useProgressStore";
 import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import { trackEvent } from "../../lib/trackEvent";
 import { withHomeArtwork } from "../../lib/homeArtwork";
+import { siteMaterialImages } from "../../lib/siteMaterialAssets";
 import {
   CoverCard,
   EmptyShelf,
@@ -301,6 +302,8 @@ export default function NovelsLandingPage({
           secondaryLabel="View Series"
           statsVariant="chips"
           theme="novel"
+          backgroundImageUrl={siteMaterialImages.novelsFeaturedHero}
+          backgroundPosition="right center"
           featureLabel="Late-night atmosphere, clean hooks, and one more chapter energy"
           chips={(Array.isArray(model.featured?.genres) ? model.featured.genres : []).slice(
             0,

@@ -31,6 +31,7 @@ import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { parallelRequests2 } from "../../lib/parallelRequests";
 import { getLibraryReturnCandidates } from "../../lib/homeMerchandising";
 import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
+import { siteMaterialImages } from "../../lib/siteMaterialAssets";
 import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
@@ -852,7 +853,15 @@ export default function LibraryPage({
             className="overflow-hidden p-0"
           >
               <div className="relative px-5 py-5 sm:px-6 sm:py-6">
-                <div className="max-w-4xl">
+                <img
+                  src={siteMaterialImages.libraryReaderDeskBg}
+                  alt=""
+                  aria-hidden="true"
+                  role="presentation"
+                  className="absolute inset-0 h-full w-full scale-[1.02] object-cover object-[right_center] opacity-64"
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,19,0.96)_0%,rgba(7,10,19,0.84)_46%,rgba(7,10,19,0.42)_100%)]" />
+                <div className="relative max-w-4xl">
                 <h1 className="mt-4 max-w-4xl font-display text-[2.35rem] font-semibold leading-[0.92] tracking-[-0.05em] text-white sm:text-[2.9rem] xl:text-[4rem]">
                   {libraryDeskTitle}
                 </h1>

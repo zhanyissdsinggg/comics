@@ -235,6 +235,8 @@ export function StoryHero({
   statsVariant = "cards",
   theme = "default",
   featureLabel = "",
+  backgroundImageUrl = "",
+  backgroundPosition = "right center",
 }) {
   if (!series) {
     return null;
@@ -249,6 +251,7 @@ export function StoryHero({
     kind: "cover",
     adult: series?.adult || series?.isAdult,
   });
+  const atmosphereUrl = backgroundImageUrl || coverUrl;
   const themeClasses =
     theme === "comic"
       ? {
@@ -282,11 +285,16 @@ export function StoryHero({
     >
       <div className="absolute inset-0" aria-hidden="true">
         <img
-          src={coverUrl}
+          src={atmosphereUrl}
           alt=""
           aria-hidden="true"
           role="presentation"
-          className="h-full w-full scale-110 object-cover opacity-34 blur-2xl"
+          className={
+            backgroundImageUrl
+              ? "h-full w-full scale-[1.02] object-cover opacity-72"
+              : "h-full w-full scale-110 object-cover opacity-34 blur-2xl"
+          }
+          style={backgroundImageUrl ? { objectPosition: backgroundPosition } : undefined}
         />
         <div className={`absolute inset-0 ${themeClasses.overlay}`} />
       </div>

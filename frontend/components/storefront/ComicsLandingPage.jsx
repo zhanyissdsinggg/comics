@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { trackEvent } from "../../lib/trackEvent";
 import { withHomeArtwork } from "../../lib/homeArtwork";
+import { siteMaterialImages } from "../../lib/siteMaterialAssets";
 import {
   CoverCard,
   EmptyShelf,
@@ -193,6 +194,8 @@ export default function ComicsLandingPage({
           secondaryLabel="View Series"
           statsVariant="chips"
           theme="comic"
+          backgroundImageUrl={siteMaterialImages.comicsFeaturedHero}
+          backgroundPosition="right center"
           featureLabel="Dark fantasy heat, large covers, and a cliffhanger worth the tap"
           chips={(Array.isArray(model.featured?.genres) ? model.featured.genres : []).slice(
             0,

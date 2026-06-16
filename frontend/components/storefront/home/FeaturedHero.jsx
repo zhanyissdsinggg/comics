@@ -5,7 +5,7 @@ import {
   storefrontHomeGlassCardClass,
   storefrontHomeSectionEyebrowClass,
 } from "../../common/StorefrontPagePrimitives";
-import { resolveDisplayImageUrl } from "../../../lib/fallbackImage";
+import { siteMaterialImages } from "../../../lib/siteMaterialAssets";
 import { trackEvent } from "../../../lib/trackEvent";
 import GradientButton from "./GradientButton";
 import IconButton from "./IconButton";
@@ -21,13 +21,7 @@ export default function FeaturedHero({
 
   const title = String(series?.title || "").trim();
   const description = "Open a story you'll keep thinking about.";
-  const backgroundUrl = resolveDisplayImageUrl(
-    series?.bannerUrl || series?.coverUrl,
-    {
-      kind: series?.bannerUrl ? "banner" : "cover",
-      adult: series?.adult || series?.isAdult,
-    },
-  );
+  const backgroundUrl = siteMaterialImages.homeFeaturedTodayHero;
 
   return (
     <section

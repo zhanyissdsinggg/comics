@@ -10,6 +10,7 @@ import { getContentModeQueryParam, isAdultContent } from "../../lib/contentFilte
 import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
+import { siteMaterialImages } from "../../lib/siteMaterialAssets";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import SurfacePanel from "../common/SurfacePanel";
 import {
@@ -626,6 +627,15 @@ export default function DiscoverySearchPage({
         appearance="dark"
         className="sm:p-6 lg:p-8"
       >
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          <img
+            src={siteMaterialImages.searchDiscoveryBg}
+            alt=""
+            role="presentation"
+            className="h-full w-full scale-[1.02] object-cover object-[right_center] opacity-58"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,19,0.97)_0%,rgba(7,10,19,0.84)_48%,rgba(7,10,19,0.46)_100%)]" />
+        </div>
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-end">
           <div>
             <p className={`${storefrontBadgeClass} normal-case tracking-[0.02em]`}>
