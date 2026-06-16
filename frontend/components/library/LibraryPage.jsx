@@ -832,7 +832,7 @@ export default function LibraryPage({
         {
           label: "Saved for later",
           title: "Pick a channel",
-          body: "Choose a channel while your shelf gets started.",
+          body: "Comics, novels, and rankings are ready when you are.",
         },
         {
           label: "Recently opened",
@@ -1012,7 +1012,7 @@ export default function LibraryPage({
                 ) : (
                   <div className={`${storefrontInfoCardClass} p-4`}>
                     <p className="text-sm font-semibold leading-6 text-white/72">
-                      Choose a channel while your shelf gets started.
+                      Comics, novels, and rankings are ready to browse.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <Link href="/comics" className={secondaryButtonClass}>

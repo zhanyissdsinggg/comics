@@ -607,9 +607,9 @@ export default function DiscoverySearchPage({
         : "Find the stories readers keep opening tonight.",
     },
     {
-      label: "Start with a vibe",
+      label: "Reader moods",
       value: "Mood, genre, format",
-      description: "Search by title, genre, mood, or format.",
+      description: "Browse by tone, genre, or format.",
     },
     {
       label: "Fresh updates",

@@ -68,7 +68,7 @@ export default function ReaderEndPanel({
                     mutedClassName,
                   )}
                 >
-                  Up Next
+                  {isComic ? "Next chapter" : "Next episode"}
                 </p>
                 <p
                   className={cn(
@@ -152,7 +152,7 @@ export default function ReaderEndPanel({
 
             <div className="mt-4 flex flex-wrap gap-2 text-xs uppercase tracking-[0.16em] text-white/42">
               {hasNextEpisode ? <span>{nextReadyLabel}</span> : null}
-              {currentBookmark ? <span>Progress saved</span> : null}
+              {currentBookmark ? <span>Place saved</span> : null}
               {liked ? <span>Liked</span> : null}
             </div>
           </div>

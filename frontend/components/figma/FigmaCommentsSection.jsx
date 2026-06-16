@@ -288,7 +288,7 @@ export default function FigmaCommentsSection({
           )}
         >
           <p className="text-base font-bold text-white">
-            Reader reactions
+            Reactions
           </p>
           <p className="mt-2 text-sm text-gray-400">
             Reactions will appear here as readers join the thread.

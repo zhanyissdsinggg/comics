@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiGet } from "../../lib/apiClient";
-import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import {
   formatInstallmentLabel,
   getInstallmentLabel,
@@ -860,10 +859,6 @@ function ReaderContent({
   const installmentTitle =
     installmentNoun.charAt(0).toUpperCase() + installmentNoun.slice(1);
   const isEpisodeComplete = Boolean(unlocked && hasReachedChapterEnd);
-  const creatorName =
-    resolveSeriesCreatorName(seriesData?.series) ||
-    String(seriesData?.series?.author || "").trim() ||
-    "Editorial Crew";
   const walletBalance = Number(paidPts || 0) + Number(bonusPts || 0);
   const shortfallPts = Math.max(0, currentPricePts - walletBalance);
   const backToSeriesHref =
@@ -928,38 +923,6 @@ function ReaderContent({
       }),
     [activeAttribution, seriesData?.series],
   );
-  const readerDetailItems = useMemo(
-    () => [
-      {
-        label: "Progress",
-        value: `${progressPercent}% read`,
-      },
-      {
-        label: "Access",
-        value: unlocked ? "Open" : formatPriceLabel(currentPricePts),
-      },
-      {
-        label: "By",
-        value: creatorName,
-      },
-      {
-        label: "Next",
-        value: nextEpisode
-          ? formatInstallmentLabel(seriesType, nextEpisode?.number || currentNumber + 1)
-          : "Series page",
-      },
-    ],
-    [
-      creatorName,
-      currentNumber,
-      currentPricePts,
-      nextEpisode,
-      progressPercent,
-      seriesType,
-      unlocked,
-    ],
-  );
-
   useEffect(() => {
     if (typeof document === "undefined") {
       return undefined;
@@ -1824,33 +1787,6 @@ function ReaderContent({
         </section>
       ) : null}
 
-      <section className="px-4 pt-4 md:px-6">
-        <div
-          className={cn(
-            "mx-auto w-full",
-            isComic ? "max-w-5xl" : "max-w-[760px]",
-          )}
-        >
-          <div
-            className={cn(
-              "flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[24px] border px-4 py-3 text-xs",
-              isComic
-                ? "border-white/10 bg-white/[0.035] text-white/58"
-                : `${novelBorderClass} bg-white/[0.035] text-current/58`,
-            )}
-          >
-            {readerDetailItems.map((item) => (
-              <span key={item.label} className="inline-flex items-center gap-2">
-                <span className="font-semibold uppercase tracking-[0.14em] opacity-60">
-                  {item.label}
-                </span>
-                <span className="font-semibold text-current/82">{item.value}</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <ReaderEndPanel
         isComic={isComic}
         shellClassName={cn(
@@ -1969,7 +1905,7 @@ function ReaderContent({
                 readerMutedClass,
               )}
             >
-              Reader reactions
+              Reactions
             </p>
             <h3
               className={cn(
