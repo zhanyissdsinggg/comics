@@ -1889,7 +1889,7 @@ function ReaderContent({
         data-testid="reader-reactions"
         className={cn(
           "px-4 pb-20 md:px-6",
-          isComic ? "pt-12 md:pt-14" : "pt-6",
+          isComic ? "mt-8 pt-16 md:mt-10 md:pt-20" : "pt-6",
         )}
       >
         <div

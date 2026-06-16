@@ -38,7 +38,7 @@ export default function ReaderEndPanel({
       data-testid="reader-end-panel"
       className={cn(
         "px-4 pb-4 md:px-6",
-        isComic ? "pt-16 md:pt-20" : "pt-8",
+        isComic ? "pt-32 md:pt-40" : "pt-8",
       )}
     >
       <div className={cn("mx-auto", isComic ? "max-w-5xl" : "max-w-[760px]")}>
