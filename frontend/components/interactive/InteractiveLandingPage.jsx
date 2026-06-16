@@ -128,7 +128,7 @@ function getStoryStatus(story) {
   if (status) {
     return status;
   }
-  return Number(story?.endingsCount || 0) > 1 ? "Replayable" : "Route ready";
+  return Number(story?.endingsCount || 0) > 1 ? "Replayable" : "Ready to read";
 }
 
 function buildStoryHref(story) {
@@ -261,7 +261,7 @@ function PathCard({ story, index, continueProgress = null, compact = false }) {
                 {genre}
               </span>
               <span className="rounded-full border border-white/10 bg-white/8 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/62">
-                {isResume ? "Resume" : "Path"}
+                {isResume ? "Resume" : "Story"}
               </span>
             </div>
             <div>
@@ -286,7 +286,7 @@ function PathCard({ story, index, continueProgress = null, compact = false }) {
         </div>
 
         <div className={`mt-5 ${storefrontChipClass} w-full justify-center text-xs uppercase tracking-[0.16em] text-white/78 group-hover:border-cyan-200/30 group-hover:text-cyan-100`}>
-          Start Route
+          Start Story
         </div>
       </article>
     </Link>
@@ -386,11 +386,11 @@ export default function InteractiveLandingPage({
         <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(300px,440px)] lg:items-center">
           <div className="max-w-3xl">
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className={`${storefrontAccentChipClass} min-h-[34px] px-3 py-1 text-[10px] tracking-[0.24em] text-cyan-100`}>
+              <span className={`${storefrontAccentChipClass} min-h-[34px] px-3 py-1 text-[10px] tracking-[0.02em] text-cyan-100`}>
                 Interactive Stories
               </span>
-              <span className={`${storefrontBadgeClass} px-3 py-1 text-[10px] tracking-[0.18em] text-white/64`}>
-                {initialContentMode === "adult" ? "Mature picks" : "Story picks"}
+              <span className={`${storefrontBadgeClass} px-3 py-1 text-[10px] tracking-[0.02em] text-white/64`}>
+                {initialContentMode === "adult" ? "Mature picks" : "Story routes"}
               </span>
             </div>
             <h1 className="mt-5 max-w-[11ch] font-display text-[3.1rem] font-semibold leading-[0.88] tracking-[-0.075em] text-white sm:text-[4.7rem]">
@@ -412,20 +412,20 @@ export default function InteractiveLandingPage({
                 href={startRouteHref}
                 className={`${storefrontSecondaryButtonClass} min-h-[48px] px-6 text-white/84`}
               >
-                Start a Route
+                Start a Story
                 <Play className="size-4" />
               </Link>
             </div>
             <div className="mt-7 flex flex-wrap gap-2">
               <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-                {stories.length} paths
+                {stories.length} stories
               </span>
               <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
                 {totalEndings} endings
               </span>
               {resumeCount > 0 ? (
                 <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-                  {resumeCount} saved paths
+                  {resumeCount} saved stories
                 </span>
               ) : null}
             </div>
@@ -439,7 +439,7 @@ export default function InteractiveLandingPage({
         <section className="space-y-4">
           <SectionHeader
             title="Tonight's Route"
-            subtitle="One route readers are replaying tonight."
+            subtitle="One story readers are replaying tonight."
           />
           <Link href={buildStoryHref(tonightStory)} className="group block">
             <article className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[rgba(255,255,255,0.035)] p-4 shadow-[var(--gush-shadow-panel)] transition-all duration-200 hover:-translate-y-1 hover:border-cyan-200/24 sm:p-5">
@@ -469,7 +469,7 @@ export default function InteractiveLandingPage({
                         )}
                       </p>
                       <div className={`mt-5 ${storefrontPrimaryButtonClass} min-h-[46px] px-5 text-[#190d18]`}>
-                        Start Route
+                        Start Story
                         <Play className="size-4" />
                       </div>
                     </div>
@@ -486,7 +486,7 @@ export default function InteractiveLandingPage({
         <section className="space-y-4">
           <SectionHeader
             title="Featured Paths"
-            subtitle="Routes with choices worth replaying."
+            subtitle="Stories with choices worth replaying."
           />
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {featuredStories.map((story, index) => (
@@ -572,7 +572,7 @@ export default function InteractiveLandingPage({
                   <div className={`flex size-12 items-center justify-center rounded-2xl border ${toneClass}`}>
                     <Icon className="size-5" />
                   </div>
-                  <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/42">
+                  <p className="mt-5 text-xs font-semibold normal-case tracking-[0.01em] text-white/42">
                     Step {index + 1}
                   </p>
                   <h3 className="mt-2 font-display text-[1.55rem] font-semibold tracking-[-0.045em] text-white">
@@ -592,7 +592,7 @@ export default function InteractiveLandingPage({
         <section className="space-y-4">
           <SectionHeader
             title="More Interactive Stories"
-            subtitle="More story paths waiting on the shelf."
+            subtitle="More interactive stories waiting on the shelf."
           />
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {moreStories.map((story, index) => (

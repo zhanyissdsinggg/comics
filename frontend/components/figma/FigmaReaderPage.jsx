@@ -1628,103 +1628,7 @@ function ReaderContent({
         onSaveProgress={handleBookmarkToggle}
       />
 
-      <section className="relative px-4 pb-2 pt-24 md:px-6 md:pt-28">
-        <div
-          className={cn(
-            "mx-auto w-full",
-            isComic ? "max-w-[1080px]" : "max-w-[940px]",
-          )}
-        >
-          <div
-            className={cn(
-              "relative overflow-hidden border shadow-[0_26px_80px_rgba(0,0,0,0.28)]",
-              isComic
-                ? "rounded-[30px] border-white/10 bg-[linear-gradient(145deg,rgba(17,20,30,0.98)_0%,rgba(8,10,16,0.98)_48%,rgba(18,13,24,0.98)_100%)] px-5 py-5 md:px-6 md:py-6"
-                : "rounded-[30px] border-white/10 bg-[linear-gradient(145deg,rgba(17,20,30,0.96)_0%,rgba(8,10,16,0.98)_50%,rgba(20,12,26,0.94)_100%)] px-5 py-5 md:px-6 md:py-6",
-            )}
-          >
-            {isComic ? (
-              <>
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.16),transparent_26%),radial-gradient(circle_at_84%_18%,rgba(103,232,249,0.14),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent_28%,rgba(0,0,0,0.22)_100%)]" />
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.18))]" />
-              </>
-            ) : null}
-            <div className="relative">
-              <div className="grid gap-5">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <ReaderMetaPill
-                      className={cn(
-                        isComic
-                          ? cn("border-white/10", palette.primarySoft)
-                          : `${novelBorderClass} bg-transparent ${readerMutedClass}`,
-                      )}
-                    >
-                      {isComic ? "Reader" : currentInstallmentLabel}
-                    </ReaderMetaPill>
-                    {isComic ? (
-                      <ReaderMetaPill
-                        className={cn(
-                          "border-white/10 bg-[rgba(255,255,255,0.035)] text-white/72",
-                          readerMutedClass,
-                        )}
-                      >
-                        Comic
-                      </ReaderMetaPill>
-                    ) : null}
-                    <Pill
-                      className={
-                        isComic
-                          ? "border-white/10 bg-[rgba(255,255,255,0.035)] text-gray-300"
-                          : `${novelBorderClass} bg-transparent ${readerMutedClass}`
-                      }
-                    >
-                      {unlocked ? "Unlocked" : formatPriceLabel(currentPricePts)}
-                    </Pill>
-                  </div>
-
-                  <h2
-                    className={cn(
-                      "mt-4 font-display font-semibold leading-[0.95] tracking-[-0.05em]",
-                      isComic
-                        ? "text-[clamp(1.8rem,3vw,3.15rem)] text-white"
-                        : "text-[clamp(1.85rem,3vw,2.7rem)] text-current",
-                    )}
-                  >
-                    {currentEpisodeTitle}
-                  </h2>
-                  <p
-                    className={cn(
-                      "mt-3 max-w-3xl font-semibold",
-                      isComic
-                        ? "text-base text-gray-100 md:text-lg"
-                        : "text-base text-current/80 md:text-lg",
-                    )}
-                  >
-                    {seriesData.series.title}
-                  </p>
-                  <p
-                    className={cn(
-                      "mt-3 max-w-3xl text-sm",
-                      isComic ? "leading-6" : "leading-7",
-                      readerMutedClass,
-                    )}
-                  >
-                    {formatMetaDate(
-                      currentEpisode?.releasedAt ||
-                        episodeData?.releasedAt ||
-                        seriesData.series.updatedAt,
-                      seriesType,
-                    )}{" / "}
-                    Start reading below.
-                  </p>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <div className="h-[76px] md:h-[84px]" aria-hidden="true" />
 
       {isComic ? (
         <ComicReaderContent
@@ -1959,7 +1863,7 @@ function ReaderContent({
             ? "border-white/10 bg-white/5 text-white hover:bg-white/10"
             : `${novelBorderClass} bg-white/5 text-white hover:bg-white/10`
         }
-        completionLabel={`${installmentTitle} Complete`}
+        completionLabel={isEpisodeComplete ? `${installmentTitle} Complete` : "Continue the story"}
         primaryButtonClassName={cn(
           "inline-flex min-h-[56px] items-center justify-center rounded-2xl px-5 py-3 text-sm font-black text-white transition-transform active:scale-[0.98]",
           unlocked && !nextEpisode && !isComic
@@ -1981,7 +1885,7 @@ function ReaderContent({
         }
         description={
           unlocked
-            ? `${currentInstallmentLabel} is complete. Keep reading, revisit the previous ${installmentNoun}, or open reader reactions below.`
+            ? `Keep reading, revisit the previous ${installmentNoun}, or open reader reactions below.`
             : `The free preview stops here. Unlock the rest of this ${installmentNoun} to keep reading.`
         }
         nextEpisodeTitle={

@@ -628,7 +628,7 @@ export default function DiscoverySearchPage({
       >
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-end">
           <div>
-            <p className={storefrontBadgeClass}>
+            <p className={`${storefrontBadgeClass} normal-case tracking-[0.02em]`}>
               Search Stories
             </p>
             <h1 className="mt-4 max-w-[15ch] font-display text-[2.75rem] font-semibold leading-[1] tracking-[-0.018em] text-white sm:text-[3.9rem] sm:tracking-[-0.02em]">
@@ -718,7 +718,7 @@ export default function DiscoverySearchPage({
         <div className="mt-5 grid gap-3 md:grid-cols-3">
           {heroInsights.map((item) => (
             <div key={item.label} className={storefrontInfoCardClass}>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+              <p className="text-xs font-semibold normal-case tracking-[0.01em] text-white/56">
                 {item.label}
               </p>
               <p className="mt-2 font-display text-[1.3rem] font-semibold tracking-[-0.04em] text-white">

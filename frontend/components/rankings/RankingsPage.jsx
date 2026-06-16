@@ -293,7 +293,7 @@ function TopLeadCard({ series, onSeriesLinkClick }) {
       <div className="relative grid gap-5 lg:grid-cols-[250px_minmax(0,1fr)] lg:items-end">
         <div className="relative">
           <span className="absolute left-4 top-4 z-10 inline-flex size-14 items-center justify-center rounded-full border border-amber-200/24 bg-amber-200/12 font-display text-[1.6rem] font-semibold text-amber-100 shadow-[0_0_34px_rgba(251,191,36,0.2)]">
-            01
+            #1
           </span>
           <CoverFrame
             series={series}
@@ -304,7 +304,7 @@ function TopLeadCard({ series, onSeriesLinkClick }) {
         <div className="min-w-0 pb-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`${storefrontAccentChipClass} px-3 py-1 text-[10px] tracking-[0.22em] text-fuchsia-50`}>
-              Top Story
+              Reader favorite
             </span>
             <span className={`${storefrontBadgeClass} px-3 py-1 text-[10px] tracking-[0.16em] text-white/68`}>
               {meta.format}
@@ -351,7 +351,7 @@ function SupportingCard({ series, rank, onSeriesLinkClick }) {
       />
       <div className="min-w-0 self-end">
         <span className="font-display text-[2rem] font-semibold tracking-[-0.06em] text-white/42">
-          {String(rank).padStart(2, "0")}
+          #{rank}
         </span>
         <h3 className="mt-2 font-display text-[1.75rem] font-semibold leading-[0.95] tracking-[-0.055em] text-white">
           {normalizeText(series?.title)}
@@ -382,7 +382,7 @@ function BoardRow({ series, rank, onSeriesLinkClick }) {
       className="group grid grid-cols-[52px_64px_minmax(0,1fr)_auto] items-center gap-3 rounded-[22px] border border-white/10 bg-white/[0.035] p-3 text-white shadow-[0_14px_36px_rgba(0,0,0,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-fuchsia-200/24 hover:bg-white/[0.055]"
     >
       <span className="font-display text-[2rem] font-semibold leading-none tracking-[-0.06em] text-white/42">
-        {String(rank).padStart(2, "0")}
+        #{rank}
       </span>
       <CoverFrame
         series={series}
@@ -423,7 +423,7 @@ function LeaderCard({ series, rank, section, onSeriesLinkClick }) {
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/42">
-            {String(rank).padStart(2, "0")}
+            #{rank}
           </span>
           <span className="h-px flex-1 bg-white/10" />
         </div>
@@ -567,14 +567,7 @@ export default function RankingsPage({
       ).slice(0, 6),
     [seriesList],
   );
-  const hasBoardData = rankingPreviewSeries.length > 0;
   const modeLabel = isAdultMode ? "Mature stories" : "All-ages stories";
-  const storyMixLabels = [
-    `${seriesList.length} stories`,
-    `${comicLeaders.length} comics`,
-    `${novelLeaders.length} novels`,
-    `${completedRuns.length} completed`,
-  ];
 
   const handleSeriesClick = useCallback(
     (seriesId, entryPoint = "RANKINGS_SERIES") => {
@@ -623,21 +616,18 @@ export default function RankingsPage({
           <div className="flex min-h-[320px] flex-col justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`${storefrontAccentChipClass} px-3 py-1 text-[10px] tracking-[0.24em] text-fuchsia-50`}>
-                  Trending Now
+                <span className={`${storefrontAccentChipClass} px-3 py-1 text-[10px] tracking-[0.02em] text-fuchsia-50`}>
+                  Tonight's board
                 </span>
-                <span className={`${storefrontBadgeClass} px-3 py-1 text-[10px] tracking-[0.18em] text-white/64`}>
+                <span className={`${storefrontBadgeClass} px-3 py-1 text-[10px] tracking-[0.02em] text-white/64`}>
                   {modeLabel}
                 </span>
               </div>
               <h1 className="mt-5 font-display text-[4rem] font-semibold leading-[0.85] tracking-[-0.08em] text-white sm:text-[5.8rem]">
-                Rankings
+                Trending Now
               </h1>
               <p className="mt-5 max-w-[39rem] text-base leading-[1.75] text-white/72">
                 The stories readers are opening, saving, and finishing tonight.
-              </p>
-              <p className="mt-4 text-sm font-semibold leading-6 text-white/48">
-                {storyMixLabels.join(" / ")}
               </p>
             </div>
             {leadEntry ? (
@@ -648,8 +638,8 @@ export default function RankingsPage({
               >
                 <ToneIcon icon={Star} tone="amber" />
                 <div className="min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46">
-                    Tonight's leader
+                  <p className="text-xs font-semibold normal-case tracking-[0.01em] text-white/50">
+                    Leading Now
                   </p>
                   <p className="mt-1 truncate font-display text-[1.75rem] font-semibold tracking-[-0.055em] text-white">
                     {normalizeText(leadEntry.title)}
@@ -730,7 +720,7 @@ export default function RankingsPage({
       {boardEntries.length > 0 ? (
         <section className="space-y-4">
           <SectionHeader
-            title="More Top Stories"
+            title="Readers are also opening"
             subtitle="Fast-moving stories readers keep opening."
           />
           <div className="space-y-3">

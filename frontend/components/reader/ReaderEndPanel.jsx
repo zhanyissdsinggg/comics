@@ -139,7 +139,7 @@ export default function ReaderEndPanel({
                 onClick={onOpenComments}
                 className={secondaryButtonClassName}
               >
-                Reader reactions
+                Open reactions
               </button>
               <button
                 type="button"

@@ -4,19 +4,16 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowUpRight, Bookmark, Clock3, Library as LibraryIcon, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Rail from "../home/Rail";
 import Skeleton from "../common/Skeleton";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import {
-  storefrontBadgeClass,
   storefrontChipClass,
   storefrontInfoCardClass,
-  storefrontInsetCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
-  storefrontSoftCardClass,
 } from "../common/StorefrontPagePrimitives";
 import { trackEvent } from "../../lib/trackEvent";
 import { useProgressStore } from "../../store/useProgressStore";
@@ -203,37 +200,15 @@ function getReadingState({
   return { label: "Unread", badge: "" };
 }
 
-function LibraryOverviewCard({
-  label,
-  title,
-  body,
-  icon: Icon,
-  tone = "cyan",
-}) {
-  const toneClass =
-    tone === "rose"
-      ? "border-rose-200/20 bg-rose-300/12 text-rose-100"
-      : tone === "amber"
-        ? "border-amber-200/20 bg-amber-300/12 text-amber-100"
-        : "border-cyan-200/20 bg-cyan-300/12 text-cyan-100";
-
+function LibraryOverviewCard({ label, title, body }) {
   return (
     <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
-            {label}
-          </p>
-          <p className="mt-2 font-display text-[1.2rem] font-semibold tracking-[-0.04em] text-white">
-            {title}
-          </p>
-        </div>
-        <span
-          className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl border ${toneClass}`}
-        >
-          <Icon className="size-4.5" />
-        </span>
-      </div>
+      <p className="text-xs font-semibold normal-case tracking-[0.01em] text-white/56">
+        {label}
+      </p>
+      <p className="mt-2 font-display text-[1.2rem] font-semibold tracking-[-0.04em] text-white">
+        {title}
+      </p>
       <p className="mt-3 text-sm leading-6 text-white/64">{body}</p>
     </div>
   );
@@ -757,11 +732,6 @@ export default function LibraryPage({
     [recommendedItems],
   );
   const showLibraryStale = showStale || showHomepageSlotsStale;
-  const hasLibrarySignals =
-    viewerSignedIn &&
-    (continueRailItems.length > 0 ||
-      historyRail.length > 0 ||
-      visibleLibraryItems.length > 0);
   const resumeSpotlight = viewerSignedIn
     ? continueRailItems[0] || historyRail[0] || null
     : null;
@@ -774,13 +744,6 @@ export default function LibraryPage({
           "resume_spotlight",
         )
       : "";
-  const resumeSpotlightSeriesHref = resumeSpotlight?.seriesId
-    ? buildLibrarySeriesHref(
-        resumeSpotlight.seriesId,
-        "LIBRARY_RESUME_SPOTLIGHT",
-        "resume_spotlight",
-      )
-    : "";
   const resumeSpotlightProgressLabel = formatReadingPercentLabel(
     resumeSpotlight?.progressPercent,
   );
@@ -788,130 +751,6 @@ export default function LibraryPage({
     resumeSpotlight?.subtitle,
     resumeSpotlightProgressLabel,
     resumeSpotlight?.statusLabel,
-  ]);
-  const resumeSpotlightProgressWidth = Math.max(
-    0,
-    Math.min(
-      Number(resumeSpotlight?.progressPercent || 0) <= 1
-        ? Number(resumeSpotlight?.progressPercent || 0) * 100
-        : Number(resumeSpotlight?.progressPercent || 0),
-      100,
-    ),
-  );
-  const libraryStats = useMemo(
-    () =>
-      viewerSignedIn
-        ? [
-            {
-              label: "In Progress",
-              value: continueRailItems.length.toLocaleString(),
-              hint:
-                continueRailItems.length > 0
-                  ? formatReadingPercentLabel(
-                      continueRailItems[0]?.progressPercent,
-                    ) ||
-                    continueRailItems[0]?.statusLabel ||
-                    "Ready to resume"
-                  : "Your next chapter",
-            },
-            {
-              label: "Recent",
-              value: historyRail.length.toLocaleString(),
-              hint: historyRail[0]?.statusLabel || "Opened recently",
-            },
-            {
-              label: "Saved",
-              value: visibleLibraryItems.length.toLocaleString(),
-              hint:
-                bookmarkCountTotal > 0
-                  ? `${formatBookmarkCountLabel(bookmarkCountTotal)} ready`
-                  : "Saved series",
-            },
-            {
-              label: "Bookmarks",
-              value: bookmarkCountTotal.toLocaleString(),
-              hint:
-                bookmarkCountTotal > 0 ? "Bookmarks ready" : "Pin a favorite scene",
-            },
-          ]
-        : [],
-    [
-      bookmarkCountTotal,
-      continueRailItems,
-      continueRailItems.length,
-      historyRail,
-      historyRail.length,
-      viewerSignedIn,
-      visibleLibraryItems,
-      visibleLibraryItems.length,
-    ],
-  );
-  const readingSnapshotCards = useMemo(() => {
-    if (!viewerSignedIn) {
-      return [];
-    }
-
-    return [
-      {
-        id: "in-progress",
-        label: "In Progress",
-        value: continueRailItems.length.toLocaleString(),
-        description:
-          continueRailItems.length > 0
-            ? joinMetaParts([
-                formatReadingPercentLabel(
-                  continueRailItems[0]?.progressPercent,
-                ),
-                continueRailItems[0]?.statusLabel,
-              ]) || "Ready to resume"
-            : "Next read",
-        onClick: () =>
-          continueRailItems.length > 0
-            ? scrollToSection("continue-reading")
-            : router.push("/rankings?type=ttf&window=all"),
-      },
-      {
-        id: "recent",
-        label: "Recent",
-        value: historyRail.length.toLocaleString(),
-        description:
-          historyRail.length > 0
-            ? historyRail[0]?.statusLabel ||
-              historyRail[0]?.subtitle ||
-              "Opened recently"
-            : "Recent",
-        onClick: () =>
-          historyRail.length > 0
-            ? scrollToSection("recent-activity")
-            : router.push("/search"),
-      },
-      {
-        id: "saved-series",
-        label: "Saved",
-        value: visibleLibraryItems.length.toLocaleString(),
-        description:
-          visibleLibraryItems.length > 0
-            ? bookmarkCountTotal > 0
-              ? `${formatBookmarkCountLabel(bookmarkCountTotal)} ready`
-              : visibleLibraryItems[0]?.statusLabel || "Saved series"
-            : "Saved series",
-        onClick: () =>
-          visibleLibraryItems.length > 0
-            ? scrollToSection("saved-series")
-            : router.push("/rankings?type=popular&window=week"),
-      },
-    ];
-  }, [
-    bookmarkCountTotal,
-    continueRailItems,
-    continueRailItems.length,
-    historyRail,
-    historyRail.length,
-    router,
-    scrollToSection,
-    viewerSignedIn,
-    visibleLibraryItems,
-    visibleLibraryItems.length,
   ]);
   const signedOutRecommendedStarts = useMemo(
     () => {
@@ -952,19 +791,8 @@ export default function LibraryPage({
     : "Fresh updates";
   const primaryButtonClass = storefrontPrimaryButtonClass;
   const secondaryButtonClass = storefrontSecondaryButtonClass;
-  const signedInHeroDescription = viewerSignedIn
-    ? hasLibrarySignals
-      ? resumeSpotlightReadHref
-        ? "Jump back in."
-        : "Saved series and recent reads."
-      : "Start a shelf with a story that fits tonight."
-    : "Your shelf follows the stories you open.";
-  const libraryDeskTitle = viewerSignedIn && resumeSpotlightReadHref
-    ? "Keep reading"
-    : "My Shelf";
-  const resumeSpotlightPanelTitle = resumeSpotlight?.seriesId
-    ? resumeSpotlight?.title || "Continue reading"
-    : "Continue reading";
+  const signedInHeroDescription = "Your shelf follows the stories you open.";
+  const libraryDeskTitle = "My Shelf";
   const overviewCards = viewerSignedIn
     ? [
         {
@@ -973,8 +801,6 @@ export default function LibraryPage({
           body:
             resumeSpotlightMeta ||
             "When you open more stories, your active read will show up here.",
-          icon: Clock3,
-          tone: "cyan",
         },
         {
           label: "Saved for later",
@@ -984,8 +810,6 @@ export default function LibraryPage({
             visibleLibraryItems.length > 0
               ? `${visibleLibraryItems.length} saved titles are ready for tonight.`
               : "Save a few titles and this shelf turns into your personal queue.",
-          icon: LibraryIcon,
-          tone: "rose",
         },
         {
           label: "Recently opened",
@@ -997,61 +821,25 @@ export default function LibraryPage({
             bookmarkCountTotal > 0
               ? "Jump back to exact scenes and panels from your saved markers."
               : "Bookmarks appear here once you start pinning moments to return to.",
-          icon: Bookmark,
-          tone: "amber",
         },
       ]
     : [
         {
           label: "Keep reading",
-          title: "Keep reading",
+          title: "Open a story",
           body: "Open a story and this shelf will remember your place.",
-          icon: Sparkles,
-          tone: "cyan",
         },
         {
           label: "Saved for later",
-          title: "Saved for later",
+          title: "Pick a channel",
           body: "Choose a channel while your shelf gets started.",
-          icon: LibraryIcon,
-          tone: "rose",
         },
         {
           label: "Recently opened",
           title: "Fresh updates",
           body: "Open a story and your recent reads will start building here.",
-          icon: ArrowRight,
-          tone: "amber",
         },
       ];
-  const readingSnapshotCardsPanel =
-    viewerSignedIn && readingSnapshotCards.length > 0 ? (
-      <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-        {readingSnapshotCards.map((card) => (
-          <button
-            key={card.id}
-            type="button"
-            onClick={card.onClick}
-            className={`${storefrontInfoCardClass} group p-4 text-left text-white transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16`}
-          >
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/65">
-              {card.label}
-            </p>
-            <div className="mt-3 flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="font-display text-[1.7rem] font-black uppercase tracking-[-0.05em] text-white">
-                  {card.value}
-                </p>
-                <p className="mt-2 text-sm font-semibold leading-6 text-white/75">
-                  {card.description}
-                </p>
-              </div>
-              <ArrowUpRight className="mt-1 size-4 flex-shrink-0 text-white/60 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            </div>
-          </button>
-        ))}
-      </div>
-    ) : null;
 
   return (
     <StorefrontPage accentClass="from-[rgba(103,232,249,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(255,79,154,0.12)]">
@@ -1122,28 +910,6 @@ export default function LibraryPage({
                     </Link>
                   )}
                 </div>
-                {libraryStats.length > 0 ? (
-                  <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    {libraryStats.map((stat) => (
-                      <div
-                        key={stat.label}
-                        className="min-w-[10rem] rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.035)_100%)] px-4 py-4 shadow-[0_18px_40px_rgba(8,6,20,0.22)]"
-                      >
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46">
-                          {stat.label}
-                        </p>
-                        <p className="mt-2 font-display text-[1.35rem] font-semibold tracking-[-0.04em] text-white">
-                          {stat.value}
-                        </p>
-                        {stat.hint ? (
-                          <p className="mt-1.5 max-w-[16rem] text-[13px] leading-[1.58] text-white/54">
-                            {stat.hint}
-                          </p>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
               </div>
             </div>
           </SurfacePanel>
@@ -1154,46 +920,6 @@ export default function LibraryPage({
             tone="muted"
             className="space-y-5"
           >
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-[40rem]">
-                <h2 className="font-display text-[1.85rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.35rem]">
-                  Keep reading
-                </h2>
-                <p className="mt-2 text-sm leading-7 text-white/66">
-                  Saved stories, bookmarks, and recent reads stay attached to
-                  your shelf.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {viewerSignedIn ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        hasLibrarySignals
-                          ? scrollToSection("continue-reading")
-                          : router.push("/search")
-                      }
-                      className={primaryButtonClass}
-                    >
-                      {hasLibrarySignals ? "Keep reading" : "Start a new read"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        visibleLibraryItems.length > 0
-                          ? scrollToSection("saved-series")
-                          : setShowCollectionManager((value) => !value)
-                      }
-                      className={secondaryButtonClass}
-                    >
-                      {visibleLibraryItems.length > 0 ? "Saved for later" : "Collections"}
-                    </button>
-                  </>
-                ) : null}
-              </div>
-            </div>
-
             <div className="grid gap-3 md:grid-cols-3">
               {overviewCards.map((card) => (
                 <LibraryOverviewCard key={card.label} {...card} />
@@ -1217,138 +943,7 @@ export default function LibraryPage({
           </div>
         ) : (
           <>
-            {viewerSignedIn ? (
-              hasLibrarySignals ? (
-                <SurfacePanel
-                  className="space-y-5"
-                  appearance="dark"
-                  accent="blue"
-                  tone="muted"
-                >
-                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
-                    <div className={`${storefrontInsetCardClass} p-5 text-white sm:p-6`}>
-                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
-                        {resumeSpotlightReadHref
-                          ? "Continue Reading"
-                          : "Saved Series"}
-                      </p>
-                      <h2 className="mt-3 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.35rem]">
-                        {resumeSpotlightPanelTitle}
-                      </h2>
-                      {resumeSpotlightProgressWidth > 0 ? (
-                        <div className="mt-5 space-y-2.5">
-                          <div className="flex items-center justify-between gap-3 text-sm font-semibold text-white/70">
-                            <span>
-                              {resumeSpotlight?.subtitle || "Progress"}
-                            </span>
-                            <span>{resumeSpotlightProgressLabel}</span>
-                          </div>
-                          <div className="h-2 overflow-hidden rounded-full bg-white/8">
-                            <div
-                              className="h-full rounded-full bg-[linear-gradient(90deg,#56d7ff_0%,#7c5cff_100%)]"
-                              style={{
-                                width: `${Math.round(resumeSpotlightProgressWidth)}%`,
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ) : null}
-
-                      <div className="mt-6 flex flex-wrap gap-2">
-                        {visibleLibraryItems.length > 0 ? (
-                          <button
-                            type="button"
-                            onClick={() => scrollToSection("saved-series")}
-                            className={primaryButtonClass}
-                          >
-                            View shelf
-                          </button>
-                        ) : !resumeSpotlightReadHref ? (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              router.push("/rankings?type=ttf&window=all")
-                            }
-                            className={primaryButtonClass}
-                          >
-                            Start Here
-                          </button>
-                        ) : null}
-
-                        {resumeSpotlightSeriesHref ? (
-                          <button
-                            type="button"
-                            onClick={() => navigateToHref(resumeSpotlightSeriesHref)}
-                            className={secondaryButtonClass}
-                          >
-                            View title
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => router.push("/search")}
-                            className={secondaryButtonClass}
-                          >
-                            Search
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {readingSnapshotCardsPanel}
-                  </div>
-                </SurfacePanel>
-              ) : (
-                <SurfacePanel
-                  className="space-y-5"
-                  appearance="dark"
-                  accent="blue"
-                  tone="muted"
-                >
-                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
-                    <div className={`${storefrontInsetCardClass} p-5 text-white sm:p-6`}>
-                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
-                        Saved Series
-                      </p>
-                      <h2 className="mt-3 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.35rem]">
-                        {libraryDeskTitle}
-                      </h2>
-                      <div className="mt-6 flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            router.push("/rankings?type=ttf&window=all")
-                          }
-                          className={primaryButtonClass}
-                        >
-                          Start Here
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => router.push("/search")}
-                          className={secondaryButtonClass}
-                        >
-                          Search
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setShowCollectionManager((value) => !value)
-                          }
-                          className={secondaryButtonClass}
-                        >
-                          {showCollectionManager
-                            ? "Hide collections"
-                            : "Collections"}
-                        </button>
-                      </div>
-                    </div>
-
-                    {readingSnapshotCardsPanel}
-                  </div>
-                </SurfacePanel>
-              )
-            ) : (
+            {!viewerSignedIn ? (
               <SurfacePanel
                 className="space-y-4"
                 appearance="dark"
@@ -1356,7 +951,7 @@ export default function LibraryPage({
                 tone="muted"
               >
                 <div className="space-y-1">
-                  <h2 className="text-lg font-black uppercase tracking-[-0.03em] text-white">
+                  <h2 className="text-lg font-black tracking-[-0.03em] text-white">
                     Start a new read
                   </h2>
                   <p className="text-sm leading-6 text-white/66">
@@ -1417,7 +1012,7 @@ export default function LibraryPage({
                 ) : (
                   <div className={`${storefrontInfoCardClass} p-4`}>
                     <p className="text-sm font-semibold leading-6 text-white/72">
-                      Choose a channel to browse while story recommendations load for this mode.
+                      Choose a channel while your shelf gets started.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <Link href="/comics" className={secondaryButtonClass}>
@@ -1433,7 +1028,7 @@ export default function LibraryPage({
                   </div>
                 )}
               </SurfacePanel>
-            )}
+            ) : null}
 
             <div className="grid gap-6">
               {continueRailItems.length > 0 ? (
