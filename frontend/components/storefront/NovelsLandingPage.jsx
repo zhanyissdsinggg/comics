@@ -91,6 +91,20 @@ const NOVEL_SHELF_SMALL_VARIANTS = [
       "Storm light, salvage metal, and a message that sounds like it already knows the ship by name.",
   },
 ];
+const NOVEL_SHORT_READ_VARIANTS = [
+  {
+    title: "Starfall Academy: Novel Edition",
+    kicker: "Fast lane pick",
+    description:
+      "A campus courier opens the wrong note, takes the right train, and finds out one quick chapter can still ruin the whole night.",
+  },
+  {
+    title: "Midnight Library",
+    kicker: "After-hours shelf",
+    description:
+      "One closed stack, one last key, and a short run that still leaves the lights buzzing after you finish.",
+  },
+];
 const NOVEL_FEATURED_HOOKS = {
   "Solar Wind":
     "A salvage crew follows a signal that feels older than the station waiting for it.",
@@ -121,6 +135,16 @@ const FINISHED_STORY_VARIANTS = [
     genre: "Drama / Slice of Life",
     hook:
       "A coastal town keeps its calm right up to the night every held-back feeling finally breaks open.",
+  },
+];
+const NIGHTSTAND_PICK_VARIANTS = [
+  {
+    title: "Moonlight Sonata",
+    meta: "Romance / Drama / Ongoing",
+  },
+  {
+    title: "The Quiet Storm",
+    meta: "Drama / Slice of Life / Ongoing",
   },
 ];
 
@@ -608,7 +632,7 @@ function FinishedStoryCard({ series, position = 0, titleOverride = "", genreOver
   );
 }
 
-function NightstandPicks({ items = [] }) {
+function NightstandPicks({ items = [], variants = [] }) {
   if (!Array.isArray(items) || items.length === 0) {
     return null;
   }
@@ -633,12 +657,13 @@ function NightstandPicks({ items = [] }) {
             </div>
             <div className="min-w-0">
               <h3 className="truncate text-base font-semibold text-white">
-                {series.title}
+                {variants[index]?.title || series.title}
               </h3>
               <p className="truncate text-sm text-white/58">
-                {[buildGenreLabel(series, 2), buildStatusLabel(series)]
-                  .filter(Boolean)
-                  .join(" / ")}
+                {variants[index]?.meta ||
+                  [buildGenreLabel(series, 2), buildStatusLabel(series)]
+                    .filter(Boolean)
+                    .join(" / ")}
               </p>
             </div>
             <ArrowRight className="size-4 text-white/48 group-hover:text-fuchsia-100" />
@@ -885,6 +910,7 @@ export default function NovelsLandingPage({
           <NovelCardGrid
             items={model.shortReads}
             badge="Short Read"
+            variants={NOVEL_SHORT_READ_VARIANTS}
             sectionName="novels_short_reads"
           />
         </section>
@@ -919,7 +945,7 @@ export default function NovelsLandingPage({
         )}
       </section>
 
-      <NightstandPicks items={model.rankings} />
+      <NightstandPicks items={model.rankings} variants={NIGHTSTAND_PICK_VARIANTS} />
     </StorefrontPage>
   );
 }
