@@ -59,6 +59,12 @@ const NOVEL_MOOD_CHIPS = [
   "Completed",
   "One More Chapter",
 ];
+const NOVEL_SHELF_SMALL_BADGES = [
+  "After Dark",
+  "Quick Read",
+  "One More Chapter",
+  "Shelf Pick",
+];
 const NOVEL_FEATURED_HOOKS = {
   "Solar Wind":
     "A salvage crew follows a signal that feels older than the station waiting for it.",
@@ -133,24 +139,45 @@ function withCoverArtwork(series) {
   return series ? withHomeArtwork(series, "cover") : series;
 }
 
+function fillSeriesSlots(seriesList = [], limit = 4) {
+  const safeList = Array.isArray(seriesList) ? seriesList.filter(Boolean) : [];
+  if (safeList.length === 0 || limit <= 0) {
+    return [];
+  }
+
+  const filled = [];
+  for (let index = 0; index < limit; index += 1) {
+    filled.push(safeList[index % safeList.length]);
+  }
+  return filled;
+}
+
 function NovelMoodRail() {
   return (
-    <section aria-label="Novel moods" className="-mx-4 overflow-x-auto px-4 pb-1 no-scrollbar sm:mx-0 sm:px-0">
-      <div className="flex min-w-max gap-2.5">
-        {NOVEL_MOOD_CHIPS.map((chip, index) => (
-          <Link
-            key={chip}
-            href={`/search?type=novel&q=${encodeURIComponent(chip)}`}
-            className={`min-h-[44px] px-4 text-sm ${
-              index === 0
-                ? "inline-flex shrink-0 items-center gap-2 rounded-full border border-fuchsia-200/24 bg-fuchsia-300/[0.12] font-semibold text-fuchsia-50 shadow-[0_16px_34px_rgba(236,72,153,0.18)]"
-                : `${storefrontChipClass} shrink-0 text-white/76`
-            }`}
-          >
-            {index === 0 ? <Moon className="size-4" /> : null}
-            {chip}
-          </Link>
-        ))}
+    <section aria-label="Novel moods" className="space-y-3">
+      <div className="space-y-1">
+        <p className="text-sm font-semibold text-white">Read by Mood</p>
+        <p className="text-sm leading-6 text-white/58">
+          Slide into a shelf that fits tonight.
+        </p>
+      </div>
+      <div className="-mx-4 overflow-x-auto px-4 pb-1 no-scrollbar sm:mx-0 sm:px-0">
+        <div className="flex min-w-max gap-2.5">
+          {NOVEL_MOOD_CHIPS.map((chip, index) => (
+            <Link
+              key={chip}
+              href={`/search?type=novel&q=${encodeURIComponent(chip)}`}
+              className={`min-h-[44px] px-4 text-sm ${
+                index === 0
+                  ? "inline-flex shrink-0 items-center gap-2 rounded-full border border-fuchsia-200/24 bg-fuchsia-300/[0.12] font-semibold text-fuchsia-50 shadow-[0_16px_34px_rgba(236,72,153,0.18)]"
+                  : `${storefrontChipClass} shrink-0 text-white/76`
+              }`}
+            >
+              {index === 0 ? <Moon className="size-4" /> : null}
+              {chip}
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -420,7 +447,7 @@ function NovelShelfCard({ series, badge = "", sectionName = "", position = 0 }) 
   );
 }
 
-function NovelCardGrid({ items = [], badge = "", sectionName = "" }) {
+function NovelCardGrid({ items = [], badge = "", badges = [], sectionName = "" }) {
   if (!Array.isArray(items) || items.length === 0) {
     return null;
   }
@@ -429,9 +456,9 @@ function NovelCardGrid({ items = [], badge = "", sectionName = "" }) {
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       {items.map((series, index) => (
         <NovelShelfCard
-          key={series.id}
+          key={`${series.id}-${index}`}
           series={series}
-          badge={badge}
+          badge={badges[index] || badge}
           sectionName={sectionName}
           position={index + 1}
         />
@@ -535,12 +562,19 @@ export default function NovelsLandingPage({
     const latestPool = excludeSeries(buildUpdatedRail(seriesList, 12), featuredIds);
     const latest = latestPool.slice(0, 6).map((series) => withCoverArtwork(series));
     const latestIds = new Set(latest.map((series) => getSeriesId(series)));
-    const shelfSmall = excludeSeries(
-      buildUpdatedRail(seriesList, 16),
-      new Set([...featuredIds, ...novelShelfIds]),
-    )
-      .slice(0, 4)
-      .map((series) => withCoverArtwork(series));
+    const shelfSmallSeed = [
+      ...excludeSeries(buildUpdatedRail(seriesList, 16), featuredIds),
+      ...excludeSeries(buildShortReadsRail(seriesList, 12), featuredIds),
+      ...excludeSeries(buildTopTen(seriesList), featuredIds),
+      ...novelShelfBase,
+    ].filter(Boolean);
+    const shelfSmallUnique = shelfSmallSeed.filter((series, index, list) => {
+      const seriesId = getSeriesId(series);
+      return seriesId && list.findIndex((item) => getSeriesId(item) === seriesId) === index;
+    });
+    const shelfSmall = fillSeriesSlots(shelfSmallUnique, 4).map((series) =>
+      withCoverArtwork(series),
+    );
     const continueItems = buildContinueReadingItems(seriesList, bySeriesId).slice(0, 4);
     const continueIds = new Set(continueItems.map((series) => getSeriesId(series)));
     const shortReadPool = excludeSeries(
@@ -640,30 +674,39 @@ export default function NovelsLandingPage({
           <SectionHeading
             eyebrow="Editorial shelf"
             title="Novel Shelf"
-            description="Two big reads up front, then a lighter shelf for the next tap."
+            description="Two editorial leads up front, then a quieter shelf for the next chapter."
             tone="channel"
           />
-          {model.novelShelf.length > 0 ? (
-            <div className="grid gap-4 lg:grid-cols-2">
-              {model.novelShelf.slice(0, 2).map((series, index) => (
-                <NovelEditorialCard
-                  key={series.id}
-                  series={series}
-                  description={
-                    NOVEL_EDITORIAL_COPY[String(series?.title || "").trim()] ||
-                    buildCardHook(series, 156)
-                  }
-                  sectionName="novels_editorial_shelf"
-                  position={index + 1}
-                />
-              ))}
-            </div>
-          ) : null}
-          <NovelCardGrid
-            items={model.shelfSmall}
-            badge="Shelf Pick"
-            sectionName="novels_shelf_small"
-          />
+          <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045)_0%,rgba(255,255,255,0.02)_100%)] p-4 shadow-[var(--gush-shadow-panel)] sm:p-5">
+            {model.novelShelf.length > 0 ? (
+              <div className="grid gap-4 lg:grid-cols-2">
+                {model.novelShelf.slice(0, 2).map((series, index) => (
+                  <NovelEditorialCard
+                    key={series.id}
+                    series={series}
+                    description={
+                      NOVEL_EDITORIAL_COPY[String(series?.title || "").trim()] ||
+                      buildCardHook(series, 156)
+                    }
+                    sectionName="novels_editorial_shelf"
+                    position={index + 1}
+                  />
+                ))}
+              </div>
+            ) : null}
+            {model.novelShelf.length > 0 && model.shelfSmall.length > 0 ? (
+              <div
+                aria-hidden="true"
+                className="my-4 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)]"
+              />
+            ) : null}
+            <NovelCardGrid
+              items={model.shelfSmall}
+              badges={NOVEL_SHELF_SMALL_BADGES}
+              badge="Shelf Pick"
+              sectionName="novels_shelf_small"
+            />
+          </div>
         </section>
       ) : null}
 
@@ -714,8 +757,8 @@ export default function NovelsLandingPage({
           title="Finished Stories"
           description={
             model.completed.length > 0
-              ? "Full runs when waiting for the next update is not the mood."
-              : "Story picks with a clean next step while completed runs rotate in."
+              ? "Complete story runs with no waiting, clean arcs, and enough runway for a binge."
+              : "Binge-ready shelves rotate in while complete runs refresh."
           }
           tone="channel"
         />
