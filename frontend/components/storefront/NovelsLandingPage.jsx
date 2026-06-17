@@ -65,6 +65,28 @@ const NOVEL_SHELF_SMALL_BADGES = [
   "One More Chapter",
   "Shelf Pick",
 ];
+const NOVEL_SHELF_SMALL_DETAILS = [
+  {
+    kicker: "Neon city mystery",
+    description:
+      "A singer disappears, the skyline glitches, and the next clue lands after midnight.",
+  },
+  {
+    kicker: "Station signal",
+    description:
+      "A drifting transmission keeps pulling the crew back toward the cargo they should have left behind.",
+  },
+  {
+    kicker: "One last clue",
+    description:
+      "The courier is already too deep in the city to stop when the wrong answer opens the right door.",
+  },
+  {
+    kicker: "Night shift sci-fi",
+    description:
+      "Storm light, salvage metal, and a message that sounds like it already knows the ship by name.",
+  },
+];
 const NOVEL_FEATURED_HOOKS = {
   "Solar Wind":
     "A salvage crew follows a signal that feels older than the station waiting for it.",
@@ -76,6 +98,13 @@ const NOVEL_EDITORIAL_COPY = {
     "A missing singer, a glitching city, and a courier moving through the dark like she already knows the wrong answer is the only way in.",
 };
 const FINISHED_STORY_CTA_LABEL = "Start Full Story";
+const FINISHED_STORY_STATUS_LABEL = "Completed";
+const FINISHED_STORY_HOOKS = {
+  "Solar Wind":
+    "A shipboard mystery that pays off in one long run instead of making you wait for the next signal.",
+  "Neon Nights":
+    "A neon-soaked chase through the city with enough turns to carry the whole story in one sitting.",
+};
 
 function normalizeValue(value) {
   return String(value || "").trim().toLowerCase();
@@ -404,7 +433,14 @@ function NovelUpdateFeed({ items = [] }) {
   );
 }
 
-function NovelShelfCard({ series, badge = "", sectionName = "", position = 0 }) {
+function NovelShelfCard({
+  series,
+  badge = "",
+  kicker = "",
+  description = "",
+  sectionName = "",
+  position = 0,
+}) {
   if (!series) {
     return null;
   }
@@ -432,11 +468,16 @@ function NovelShelfCard({ series, badge = "", sectionName = "", position = 0 }) 
             <span className="inline-flex min-h-[28px] items-center rounded-full border border-white/10 bg-white/[0.055] px-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/62">
               {badge || buildGenreLabel(series, 1) || "Novel"}
             </span>
+            {kicker ? (
+              <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/42">
+                {kicker}
+              </p>
+            ) : null}
             <h3 className="mt-3 line-clamp-2 text-[1.08rem] font-semibold leading-tight text-white">
               {series.title}
             </h3>
             <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/62">
-              {buildCardHook(series, 82)}
+              {description || buildCardHook(series, 82)}
             </p>
           </div>
           <p className="mt-3 text-sm font-semibold text-fuchsia-100">
@@ -452,6 +493,7 @@ function NovelCardGrid({
   items = [],
   badge = "",
   badges = [],
+  details = [],
   sectionName = "",
   gridClassName = "sm:grid-cols-2 xl:grid-cols-4",
 }) {
@@ -466,6 +508,8 @@ function NovelCardGrid({
           key={`${series.id}-${index}`}
           series={series}
           badge={badges[index] || badge}
+          kicker={details[index]?.kicker || ""}
+          description={details[index]?.description || ""}
           sectionName={sectionName}
           position={index + 1}
         />
@@ -517,22 +561,22 @@ function FinishedStoryCard({ series, position = 0 }) {
               {buildGenreLabel(series, 2) || "Novel"}
             </span>
             <span className={`${storefrontBadgeClass} px-3 py-1.5 text-fuchsia-100`}>
-              Full Story
+              {FINISHED_STORY_STATUS_LABEL}
             </span>
           </div>
           <h3 className="mt-3 text-[1.22rem] font-semibold tracking-[-0.03em] text-white">
             {series.title}
           </h3>
           <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/62">
-            {buildCardHook(series, 112)}
+            {FINISHED_STORY_HOOKS[String(series?.title || "").trim()] ||
+              buildCardHook(series, 112)}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="text-sm font-semibold text-white/74">
               {buildReadingTimeLabel(series)} read
             </span>
-            <span className="text-white/28">•</span>
             <span className="text-sm font-semibold text-white/74">
-              Late-night binge
+              Full run tonight
             </span>
           </div>
           <div className={`mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-fuchsia-200/24 bg-fuchsia-300/[0.12] px-4 text-sm font-semibold text-fuchsia-50 transition-colors duration-150 group-hover:border-fuchsia-200/34 group-hover:bg-fuchsia-300/[0.16]`}>
@@ -779,9 +823,9 @@ export default function NovelsLandingPage({
             <NovelCardGrid
               items={model.shelfSmall}
               badges={NOVEL_SHELF_SMALL_BADGES}
+              details={NOVEL_SHELF_SMALL_DETAILS}
               badge="Shelf Pick"
               sectionName="novels_shelf_small"
-              gridClassName="sm:grid-cols-2 xl:grid-cols-2"
             />
           </div>
         </section>
