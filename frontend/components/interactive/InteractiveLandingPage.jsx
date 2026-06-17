@@ -315,13 +315,7 @@ function TonightRoutePreview({ story }) {
     return null;
   }
 
-  const steps = [
-    {
-      label: "Start",
-      note: "Pool gate unlocked after midnight.",
-      tone:
-        "border-white/14 bg-white/[0.08] text-white shadow-[0_0_24px_rgba(255,255,255,0.08)]",
-    },
+  const routeOptions = [
     {
       label: "Follow the light",
       note: "Step closer to the signal on the water.",
@@ -341,6 +335,18 @@ function TonightRoutePreview({ story }) {
         "border-amber-200/24 bg-amber-200/10 text-amber-100 shadow-[0_0_30px_rgba(251,191,36,0.14)]",
     },
   ];
+  const endings = [
+    {
+      label: "First Light",
+      text: "You trace the signal back before sunrise and learn who sent it.",
+      tone: "border-cyan-200/24 bg-cyan-200/10 text-cyan-100",
+    },
+    {
+      label: "Deep End Signal",
+      text: "The water answers back and turns the route into something darker.",
+      tone: "border-fuchsia-200/24 bg-fuchsia-200/10 text-fuchsia-100",
+    },
+  ];
 
   return (
     <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[rgba(7,8,18,0.74)] p-4 shadow-[0_26px_70px_rgba(0,0,0,0.34)] backdrop-blur-xl sm:p-5">
@@ -356,45 +362,74 @@ function TonightRoutePreview({ story }) {
           </span>
         </div>
 
-        <div className="relative mt-5 grid gap-3">
-          <div className="absolute bottom-10 left-5 top-5 w-px bg-[linear-gradient(180deg,rgba(255,255,255,0.34),rgba(103,232,249,0.74),rgba(255,79,154,0.54),rgba(251,191,36,0.62))]" />
-          {steps.map((step, index) => (
+        <div className="mt-5 rounded-[24px] border border-white/10 bg-white/[0.045] p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/42">
+                Start
+              </p>
+              <p className="mt-2 text-base font-semibold text-white">
+                Pool gate unlocked after midnight.
+              </p>
+            </div>
+            <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/72`}>
+              {getStoryStatus(story)}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-3">
+          {routeOptions.map((option) => (
             <div
-              key={step.label}
-              className="relative grid grid-cols-[40px_minmax(0,1fr)] items-center gap-3"
+              key={option.label}
+              className={`w-full rounded-[22px] border px-4 py-4 text-left transition-transform duration-150 hover:-translate-y-0.5 ${option.tone}`}
             >
-              <span className={`relative z-10 flex size-10 items-center justify-center rounded-full border ${step.tone}`}>
-                {index === 0 ? (
-                  <Play className="size-4 fill-current" />
-                ) : (
-                  <span className="size-2 rounded-full bg-current" />
-                )}
-              </span>
-              <div className={`min-h-[60px] rounded-[22px] border px-3 py-3 ${step.tone}`}>
-                <p className="text-sm font-semibold tracking-[-0.01em]">
-                  {step.label}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-white/62">
-                  {step.note}
-                </p>
+              <div className="flex items-start gap-3">
+                <span className="mt-1 size-2.5 shrink-0 rounded-full bg-current" />
+                <div>
+                  <p className="text-sm font-semibold tracking-[-0.01em]">
+                    {option.label}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-white/62">
+                    {option.note}
+                  </p>
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-4 rounded-[22px] border border-white/12 bg-white/[0.05] p-4">
+        <div className="mt-4 rounded-[24px] border border-white/10 bg-white/[0.045] p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/42">
                 Ending preview
               </p>
               <p className="mt-2 text-base font-semibold text-white">
-                Replay to see what the pool was trying to show you.
+                Two endings are already on the table.
               </p>
             </div>
             <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/72`}>
-              {getStoryStatus(story)}
+              Replay to unlock both
             </span>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {endings.map((ending) => (
+              <div
+                key={ending.label}
+                className={`rounded-[22px] border p-4 ${ending.tone}`}
+              >
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/48">
+                  Possible ending
+                </p>
+                <p className="mt-2 text-sm font-semibold tracking-[-0.01em]">
+                  {ending.label}
+                </p>
+                <p className="mt-2 text-xs leading-5 text-white/62">
+                  {ending.text}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -495,8 +530,8 @@ function CompactPathListItem({ story, index, continueProgress = null }) {
 
   return (
     <Link href={buildStoryHref(story)} className="group block">
-      <article className={`${storefrontInfoCardClass} grid gap-4 p-4 transition-all duration-150 hover:-translate-y-0.5 hover:border-cyan-200/24 hover:bg-white/[0.06] sm:grid-cols-[120px_minmax(0,1fr)_auto] sm:items-center`}>
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] border border-white/10 sm:aspect-[3/4]">
+      <article className={`${storefrontInfoCardClass} grid gap-3 p-3.5 transition-all duration-150 hover:-translate-y-0.5 hover:border-cyan-200/24 hover:bg-white/[0.06] sm:grid-cols-[120px_minmax(0,1fr)_auto] sm:items-center sm:gap-4 sm:p-4`}>
+        <div className="relative aspect-[4/5] overflow-hidden rounded-[20px] border border-white/10 sm:aspect-[3/4] sm:rounded-[22px]">
           <div className={`absolute inset-0 ${visual.posterClass}`} />
           <div className={`absolute inset-0 ${visual.glowClass}`} />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,10,18,0.08)_0%,rgba(8,10,18,0.28)_38%,rgba(8,10,18,0.88)_100%)]" />
@@ -530,7 +565,7 @@ function CompactPathListItem({ story, index, continueProgress = null }) {
               </span>
             ) : null}
           </div>
-          <h3 className="mt-3 text-[1.3rem] font-semibold tracking-[-0.03em] text-white">
+          <h3 className="mt-3 text-[1.15rem] font-semibold tracking-[-0.03em] text-white sm:text-[1.3rem]">
             {normalizeText(story?.title)}
           </h3>
           <p className="mt-2 line-clamp-2 max-w-[44rem] text-sm leading-6 text-white/62">
@@ -825,7 +860,7 @@ export default function InteractiveLandingPage({
             title="Featured Paths"
             subtitle="Stories with choices worth replaying."
           />
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 lg:grid-cols-2">
             {featuredStories.map((story, index) => (
               <PathCard
                 key={story.id || story.slug}

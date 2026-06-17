@@ -75,6 +75,7 @@ const NOVEL_EDITORIAL_COPY = {
   "Neon Nights":
     "A missing singer, a glitching city, and a courier moving through the dark like she already knows the wrong answer is the only way in.",
 };
+const FINISHED_STORY_CTA_LABEL = "Start Full Story";
 
 function normalizeValue(value) {
   return String(value || "").trim().toLowerCase();
@@ -447,13 +448,19 @@ function NovelShelfCard({ series, badge = "", sectionName = "", position = 0 }) 
   );
 }
 
-function NovelCardGrid({ items = [], badge = "", badges = [], sectionName = "" }) {
+function NovelCardGrid({
+  items = [],
+  badge = "",
+  badges = [],
+  sectionName = "",
+  gridClassName = "sm:grid-cols-2 xl:grid-cols-4",
+}) {
   if (!Array.isArray(items) || items.length === 0) {
     return null;
   }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div className={`grid gap-3 ${gridClassName}`}>
       {items.map((series, index) => (
         <NovelShelfCard
           key={`${series.id}-${index}`}
@@ -472,6 +479,69 @@ function ShelfFallbackNotice({ text }) {
     <div className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 text-sm leading-6 text-white/60">
       {text}
     </div>
+  );
+}
+
+function FinishedStoryCard({ series, position = 0 }) {
+  if (!series) {
+    return null;
+  }
+
+  const href = buildReadHref(series);
+
+  return (
+    <Link
+      href={href}
+      onClick={() =>
+        trackEvent("story_click", {
+          seriesId: series?.id,
+          sourceSection: "novels_finished",
+          position,
+        })
+      }
+      className="group block"
+    >
+      <article className="grid min-h-[218px] gap-4 rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.035)] p-4 transition-all duration-150 hover:-translate-y-0.5 hover:border-fuchsia-200/24 hover:bg-white/[0.06] sm:grid-cols-[108px_minmax(0,1fr)] sm:items-center">
+        <div className="aspect-[3/4] overflow-hidden rounded-[22px] border border-white/10">
+          <img
+            src={getCoverUrl(series)}
+            alt=""
+            aria-hidden="true"
+            role="presentation"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          />
+        </div>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/70`}>
+              {buildGenreLabel(series, 2) || "Novel"}
+            </span>
+            <span className={`${storefrontBadgeClass} px-3 py-1.5 text-fuchsia-100`}>
+              Full Story
+            </span>
+          </div>
+          <h3 className="mt-3 text-[1.22rem] font-semibold tracking-[-0.03em] text-white">
+            {series.title}
+          </h3>
+          <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/62">
+            {buildCardHook(series, 112)}
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="text-sm font-semibold text-white/74">
+              {buildReadingTimeLabel(series)} read
+            </span>
+            <span className="text-white/28">•</span>
+            <span className="text-sm font-semibold text-white/74">
+              Late-night binge
+            </span>
+          </div>
+          <div className={`mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-fuchsia-200/24 bg-fuchsia-300/[0.12] px-4 text-sm font-semibold text-fuchsia-50 transition-colors duration-150 group-hover:border-fuchsia-200/34 group-hover:bg-fuchsia-300/[0.16]`}>
+            {FINISHED_STORY_CTA_LABEL}
+            <ArrowRight className="size-4" />
+          </div>
+        </div>
+      </article>
+    </Link>
   );
 }
 
@@ -600,14 +670,20 @@ export default function NovelsLandingPage({
     )
       .slice(0, 4)
       .map((series) => withCoverArtwork(series));
-    const finishedStories = (completed.length > 0
+    const finishedStoriesSeed = completed.length > 0
       ? completed
-      : excludeSeries(
-          buildTopTen(seriesList),
-          new Set([...featuredIds, ...shortReadIds]),
-        )
-          .slice(0, 4)
-          .map((series) => withCoverArtwork(series)));
+      : [
+          ...buildTopTen(seriesList),
+          ...buildShortReadsRail(seriesList, 8),
+          ...novelShelfBase,
+        ];
+    const finishedStoriesUnique = finishedStoriesSeed.filter((series, index, list) => {
+      const seriesId = getSeriesId(series);
+      return seriesId && list.findIndex((item) => getSeriesId(item) === seriesId) === index;
+    });
+    const finishedStories = finishedStoriesUnique
+      .slice(0, 3)
+      .map((series) => withCoverArtwork(series));
     const rankings = excludeSeries(buildTopTen(seriesList), featuredIds)
       .slice(0, 4)
       .map((series) => withCoverArtwork(series));
@@ -705,6 +781,7 @@ export default function NovelsLandingPage({
               badges={NOVEL_SHELF_SMALL_BADGES}
               badge="Shelf Pick"
               sectionName="novels_shelf_small"
+              gridClassName="sm:grid-cols-2 xl:grid-cols-2"
             />
           </div>
         </section>
@@ -755,19 +832,23 @@ export default function NovelsLandingPage({
         <SectionHeading
           eyebrow="Complete arcs"
           title="Finished Stories"
-          description={
-            model.completed.length > 0
-              ? "Complete story runs with no waiting, clean arcs, and enough runway for a binge."
-              : "Binge-ready shelves rotate in while complete runs refresh."
-          }
+          description="No waiting, no cliffhanger gap — start and finish the full run tonight."
           tone="channel"
         />
         {model.finishedStories.length > 0 ? (
-          <NovelCardGrid
-            items={model.finishedStories}
-            badge={model.completed.length > 0 ? "Finished" : "Story Pick"}
-            sectionName="novels_finished"
-          />
+          <div
+            className={`grid gap-3 ${
+              model.finishedStories.length >= 3 ? "lg:grid-cols-3" : "lg:grid-cols-2"
+            }`}
+          >
+            {model.finishedStories.slice(0, 3).map((series, index) => (
+              <FinishedStoryCard
+                key={`${series.id}-${index}`}
+                series={series}
+                position={index + 1}
+              />
+            ))}
+          </div>
         ) : (
           <ShelfFallbackNotice text="Completed shelves rotate in as longer runs update. Open a fresh story tonight and this lane will keep changing." />
         )}
