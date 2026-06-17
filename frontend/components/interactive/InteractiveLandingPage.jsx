@@ -6,9 +6,13 @@ import {
   BookOpen,
   Flag,
   GitBranch,
+  Lock,
+  Map as MapIcon,
   MousePointerClick,
   Play,
+  RefreshCw,
   Sparkles,
+  Trophy,
 } from "lucide-react";
 import { apiGet } from "../../lib/apiClient";
 import { trackEvent } from "../../lib/trackEvent";
@@ -23,6 +27,16 @@ import {
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
 import { StorefrontPage } from "../storefront/StorefrontScaffold";
+
+const ROUTE_TYPE_CHIPS = [
+  "Mystery Route",
+  "Secret Ending",
+  "Romance Choice",
+  "Escape Route",
+  "Group Chat Drama",
+  "Sci-Fi Signal",
+  "Replayable",
+];
 
 function normalizeText(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
@@ -151,32 +165,72 @@ function SectionHeader({ title, subtitle }) {
   );
 }
 
+function RouteTypeRail() {
+  return (
+    <section aria-label="Route types" className="-mx-4 overflow-x-auto px-4 pb-1 no-scrollbar sm:mx-0 sm:px-0">
+      <div className="flex min-w-max gap-2.5">
+        {ROUTE_TYPE_CHIPS.map((chip, index) => (
+          <a
+            key={chip}
+            href="#choice-based-stories"
+            className={`min-h-[44px] shrink-0 px-4 text-sm ${
+              index === 0
+                ? "inline-flex items-center gap-2 rounded-full border border-cyan-200/24 bg-cyan-200/[0.12] font-semibold text-cyan-50 shadow-[0_16px_34px_rgba(103,232,249,0.14)]"
+                : `${storefrontChipClass} text-white/76`
+            }`}
+          >
+            {index === 0 ? <GitBranch className="size-4" /> : null}
+            {chip}
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function ChoiceBranchMap({ compact = false, className = "" }) {
   const nodes = [
-    { choice: "Trust them", ending: "END 01", tone: "cyan" },
-    { choice: "Walk away", ending: "END 02", tone: "rose" },
-    { choice: "Tell the truth", ending: "END 03", tone: "amber" },
+    { choice: "Trust them", ending: "Found ending", tone: "cyan" },
+    { choice: "Walk away", ending: "Hidden ending", tone: "rose" },
+    { choice: "Tell the truth", ending: "Rare ending", tone: "amber" },
   ];
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[28px] border border-white/10 bg-[rgba(7,8,18,0.72)] p-4 shadow-[0_26px_70px_rgba(0,0,0,0.34)] backdrop-blur-xl ${className}`}
+      className={`relative overflow-hidden rounded-[28px] border border-white/10 bg-[rgba(7,8,18,0.74)] p-4 shadow-[0_26px_70px_rgba(0,0,0,0.34)] backdrop-blur-xl ${className}`}
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(103,232,249,0.18),transparent_26%),radial-gradient(circle_at_80%_80%,rgba(255,79,154,0.2),transparent_30%)]" />
       <div className="relative">
         <div className="mb-4 flex items-center justify-between gap-3">
           <span className="inline-flex min-h-[32px] items-center gap-2 rounded-full border border-cyan-200/18 bg-cyan-200/10 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-100">
-            <GitBranch className="size-3.5" />
-            Story map
+            <MapIcon className="size-3.5" />
+            Route map
           </span>
           <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/42">
-            Choose a path
+            Tap a branch
           </span>
         </div>
 
         <div className="relative grid gap-3">
-          <div className="absolute bottom-8 left-5 top-5 w-px bg-[linear-gradient(180deg,rgba(103,232,249,0.78),rgba(255,79,154,0.62),rgba(251,191,36,0.7))]" />
-          {nodes.map((node, index) => {
+          <div className="absolute bottom-8 left-5 top-5 w-px bg-[linear-gradient(180deg,rgba(255,255,255,0.34),rgba(103,232,249,0.78),rgba(255,79,154,0.62),rgba(251,191,36,0.7))]" />
+          <div className={`relative grid items-center gap-3 ${compact ? "grid-cols-[40px_minmax(0,1fr)]" : "grid-cols-[40px_minmax(0,1fr)_auto]"}`}>
+            <span className="relative z-10 flex size-10 items-center justify-center rounded-full border border-white/18 bg-white/10 text-white shadow-[0_0_28px_rgba(255,255,255,0.12)]">
+              <Play className="size-4 fill-current" />
+            </span>
+            <div className="rounded-2xl border border-white/14 bg-white/[0.075] px-3 py-2">
+              <p className="text-sm font-semibold tracking-[-0.01em] text-white">
+                Start
+              </p>
+              <p className="mt-1 text-xs text-white/52">Open the first scene.</p>
+            </div>
+            {!compact ? (
+              <span className="hidden min-h-[32px] items-center rounded-full border border-white/10 bg-white/5 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/58 sm:inline-flex">
+                Scene 01
+              </span>
+            ) : null}
+          </div>
+
+          {nodes.map((node) => {
             const toneClass =
               node.tone === "cyan"
                 ? "border-cyan-200/28 bg-cyan-200/10 text-cyan-100 shadow-[0_0_32px_rgba(103,232,249,0.16)]"
@@ -187,28 +241,25 @@ function ChoiceBranchMap({ compact = false, className = "" }) {
             return (
               <div
                 key={node.choice}
-                className={`relative grid items-center gap-3 ${compact ? "grid-cols-[24px_minmax(0,1fr)]" : "grid-cols-[28px_minmax(0,1fr)_auto]"}`}
+                className={`relative grid items-center gap-3 ${compact ? "grid-cols-[40px_minmax(0,1fr)]" : "grid-cols-[40px_minmax(0,1fr)_auto]"}`}
               >
                 <span className={`relative z-10 flex size-10 items-center justify-center rounded-full border ${toneClass}`}>
                   <span className="size-2 rounded-full bg-current" />
                 </span>
-                <div className={`rounded-2xl border px-3 py-2 ${toneClass}`}>
+                <div className={`rounded-2xl border px-3 py-2 transition-transform duration-150 hover:-translate-y-0.5 ${toneClass}`}>
                   <p className="text-sm font-semibold tracking-[-0.01em]">
                     {node.choice}
                   </p>
                   {compact ? (
-                    <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/48">
+                    <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/48">
                       {node.ending}
                     </p>
                   ) : null}
                 </div>
                 {!compact ? (
-                  <span className="inline-flex min-h-[32px] items-center rounded-full border border-white/10 bg-white/5 px-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/58 sm:px-3 sm:tracking-[0.18em]">
+                  <span className="inline-flex min-h-[32px] items-center rounded-full border border-white/10 bg-white/5 px-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/58 sm:px-3 sm:tracking-[0.16em]">
                     {node.ending}
                   </span>
-                ) : null}
-                {index < nodes.length - 1 ? (
-                  <span className="absolute left-10 top-5 h-px w-8 bg-white/14" />
                 ) : null}
               </div>
             );
@@ -239,10 +290,37 @@ function MiniBranchIndicator() {
   );
 }
 
+function RouteProgressBar({ index = 0 }) {
+  const activeCount = 2 + (index % 3);
+
+  return (
+    <div className="mt-4">
+      <div className="flex items-center gap-1.5" aria-hidden="true">
+        {[0, 1, 2, 3].map((item) => (
+          <span
+            key={item}
+            className={`h-2 flex-1 rounded-full ${
+              item < activeCount
+                ? "bg-[linear-gradient(90deg,#67e8f9_0%,#ec4899_100%)] shadow-[0_0_16px_rgba(236,72,153,0.24)]"
+                : "bg-white/10"
+            }`}
+          />
+        ))}
+      </div>
+      <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/46">
+        Route progress
+      </p>
+    </div>
+  );
+}
+
 function PathCard({ story, index, continueProgress = null, compact = false }) {
   const visual = getStoryVisual(story, index);
   const genre = getStoryGenre(story, visual);
   const isResume = Boolean(continueProgress?.node?.id);
+  const choicesCount = Math.max(1, Number(story?.choicesCount || 0));
+  const endingsCount = Math.max(1, Number(story?.endingsCount || 0));
+  const replayable = endingsCount > 1;
 
   return (
     <Link
@@ -266,7 +344,7 @@ function PathCard({ story, index, continueProgress = null, compact = false }) {
               </span>
             </div>
             <div>
-              <MiniBranchIndicator />
+              <RouteProgressBar index={index} />
               <h3 className="mt-4 font-display text-[1.65rem] font-semibold leading-[0.96] tracking-[-0.05em] text-white">
                 {normalizeText(story?.title)}
               </h3>
@@ -276,14 +354,17 @@ function PathCard({ story, index, continueProgress = null, compact = false }) {
 
         <div className="mt-4 flex flex-wrap gap-2">
           <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-            {Number(story?.choicesCount || 0)} choices
+            {choicesCount} choices
           </span>
           <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-            {Number(story?.endingsCount || 0)} endings
+            {endingsCount} endings
           </span>
-          <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-            {getStoryStatus(story)}
-          </span>
+          {replayable ? (
+            <span className={`${storefrontBadgeClass} px-3 py-1.5 text-cyan-100`}>
+              <RefreshCw className="mr-1 size-3" />
+              Replayable
+            </span>
+          ) : null}
         </div>
 
         <div className={`mt-5 ${storefrontChipClass} w-full justify-center text-xs uppercase tracking-[0.16em] text-white/78 group-hover:border-cyan-200/30 group-hover:text-cyan-100`}>
@@ -291,6 +372,75 @@ function PathCard({ story, index, continueProgress = null, compact = false }) {
         </div>
       </article>
     </Link>
+  );
+}
+
+function EndingGallery() {
+  const endings = [
+    {
+      label: "Found",
+      title: "First light",
+      text: "A route you can reach on the first run.",
+      icon: Flag,
+      className: "border-cyan-200/24 bg-cyan-200/10 text-cyan-100",
+    },
+    {
+      label: "Hidden",
+      title: "Quiet clue",
+      text: "A branch tucked behind one risky choice.",
+      icon: Sparkles,
+      className: "border-fuchsia-200/24 bg-fuchsia-200/10 text-fuchsia-100",
+    },
+    {
+      label: "Locked",
+      title: "Not yet",
+      text: "A scene waiting for the right path.",
+      icon: Lock,
+      className: "border-white/14 bg-white/[0.07] text-white/72",
+    },
+    {
+      label: "Rare",
+      title: "Perfect turn",
+      text: "The ending readers replay for.",
+      icon: Trophy,
+      className: "border-amber-200/26 bg-amber-200/10 text-amber-100",
+    },
+  ];
+
+  return (
+    <section className="space-y-4">
+      <SectionHeader
+        title="Ending Gallery"
+        subtitle="Found, hidden, locked, and rare endings give each replay a reason."
+      />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {endings.map((ending) => {
+          const Icon = ending.icon;
+          return (
+            <article
+              key={ending.label}
+              className={`${storefrontInfoCardClass} relative overflow-hidden p-4`}
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_16%,rgba(255,255,255,0.07),transparent_26%)]" />
+              <div className="relative">
+                <div className={`flex size-12 items-center justify-center rounded-2xl border ${ending.className}`}>
+                  <Icon className="size-5" />
+                </div>
+                <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/48">
+                  {ending.label}
+                </p>
+                <h3 className="mt-2 text-[1.18rem] font-semibold tracking-[-0.03em] text-white">
+                  {ending.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-white/62">
+                  {ending.text}
+                </p>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -364,12 +514,6 @@ export default function InteractiveLandingPage({
   const featuredStories = useMemo(() => stories.slice(0, 4), [stories]);
   const choiceStories = useMemo(() => stories.slice(0, 8), [stories]);
   const moreStories = useMemo(() => stories.slice(8), [stories]);
-  const totalEndings = useMemo(
-    () =>
-      stories.reduce((sum, item) => sum + Number(item?.endingsCount || 0), 0),
-    [stories],
-  );
-  const resumeCount = useMemo(() => continueMap.size, [continueMap]);
   const spotlightVisual = getStoryVisual(tonightStory, 0);
   const startRouteHref = tonightStory ? buildStoryHref(tonightStory) : "#choice-based-stories";
 
@@ -400,47 +544,45 @@ export default function InteractiveLandingPage({
                 {initialContentMode === "adult" ? "Mature picks" : "Story routes"}
               </span>
             </div>
-            <h1 className="mt-5 max-w-[11ch] font-display text-[3.1rem] font-semibold leading-[0.88] tracking-[-0.075em] text-white sm:text-[4.7rem]">
-              Your Choice Changes the Story
+            <h1 className="mt-5 max-w-[10ch] font-display text-[3.2rem] font-semibold leading-[0.9] tracking-[-0.055em] text-white sm:text-[4.8rem]">
+              Choose your first move.
             </h1>
             <p className="mt-5 max-w-[39rem] text-base leading-[1.75] text-white/72">
-              Pick a path, unlock new scenes, and discover endings that change
-              with every decision.
+              Start with one tap, follow the branch, and unlock a different ending when the choice turns.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <a
                 href="#choice-based-stories"
                 className={`${storefrontPrimaryButtonClass} min-h-[48px] px-6 text-[#190d18]`}
               >
-                Explore Stories
+                Browse Paths
                 <Sparkles className="size-4" />
               </a>
               <Link
                 href={startRouteHref}
                 className={`${storefrontSecondaryButtonClass} min-h-[48px] px-6 text-white/84`}
               >
-                Start a Story
+                Start Tonight's Route
                 <Play className="size-4" />
               </Link>
             </div>
-            <div className="mt-7 flex flex-wrap gap-2">
-              <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-                {stories.length} stories
-              </span>
-              <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-                {totalEndings} endings
-              </span>
-              {resumeCount > 0 ? (
-                <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-                  {resumeCount} saved stories
+            <div className="mt-6 flex max-w-[620px] flex-wrap gap-2">
+              {ROUTE_TYPE_CHIPS.slice(0, 4).map((chip) => (
+                <span
+                  key={chip}
+                  className={`${storefrontBadgeClass} min-h-[32px] px-3 text-white/68`}
+                >
+                  {chip}
                 </span>
-              ) : null}
+              ))}
             </div>
           </div>
 
           <ChoiceBranchMap className="lg:min-h-[360px]" />
         </div>
       </section>
+
+      <RouteTypeRail />
 
       {tonightStory ? (
         <section className="space-y-4">
@@ -518,21 +660,20 @@ export default function InteractiveLandingPage({
             title="Choice-Based Stories"
             subtitle="Stories where one tap changes the scene."
           />
-          <div className="-mx-4 overflow-x-auto px-4 pb-2 no-scrollbar sm:mx-0 sm:px-0">
-            <div className="flex min-w-max gap-4">
-              {choiceStories.map((story, index) => (
-                <PathCard
-                  key={story.id || story.slug}
-                  story={story}
-                  index={index}
-                  continueProgress={continueMap.get(normalizeText(story.slug))}
-                  compact
-                />
-              ))}
-            </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {choiceStories.map((story, index) => (
+              <PathCard
+                key={story.id || story.slug}
+                story={story}
+                index={index}
+                continueProgress={continueMap.get(normalizeText(story.slug))}
+              />
+            ))}
           </div>
         </section>
       ) : null}
+
+      <EndingGallery />
 
       <section className="space-y-4">
         <SectionHeader
