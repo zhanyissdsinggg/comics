@@ -192,8 +192,8 @@ function RouteTypeRail() {
               href="#choice-based-stories"
               className={`min-h-[44px] shrink-0 px-4 text-sm ${
                 index === 0
-                  ? "inline-flex items-center gap-2 rounded-full border border-cyan-200/24 bg-cyan-200/[0.12] font-semibold text-cyan-50 shadow-[0_16px_34px_rgba(103,232,249,0.14)]"
-                  : `${storefrontChipClass} text-white/76`
+                  ? "inline-flex items-center gap-2 rounded-full border border-cyan-200/24 bg-cyan-200/[0.12] font-semibold text-cyan-50 shadow-[0_16px_34px_rgba(103,232,249,0.14)] transition-all duration-150 hover:-translate-y-0.5 hover:border-cyan-200/34 hover:bg-cyan-200/[0.16] active:translate-y-0 active:scale-[0.98]"
+                  : `${storefrontChipClass} text-white/76 transition-all duration-150 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.08] active:translate-y-0 active:scale-[0.98]`
               }`}
             >
               {index === 0 ? <GitBranch className="size-4" /> : null}
@@ -265,13 +265,13 @@ function ChoiceBranchMap({ compact = false, className = "" }) {
                   <span className="size-2 rounded-full bg-current" />
                 </span>
                 <div
-                  className={`min-h-[56px] cursor-pointer rounded-[22px] border px-3 py-3 transition-transform duration-150 hover:-translate-y-0.5 ${toneClass}`}
+                  className={`min-h-[56px] cursor-pointer rounded-[22px] border px-3 py-3 transition-all duration-150 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 active:scale-[0.985] ${toneClass}`}
                 >
                   <p className="text-sm font-semibold tracking-[-0.01em]">
                     {node.choice}
                   </p>
                   {compact ? (
-                    <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/48">
+                    <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/48">
                       {node.ending}
                     </p>
                   ) : null}
@@ -382,7 +382,7 @@ function TonightRoutePreview({ story }) {
           {routeOptions.map((option) => (
             <div
               key={option.label}
-              className={`w-full rounded-[22px] border px-4 py-4 text-left transition-transform duration-150 hover:-translate-y-0.5 ${option.tone}`}
+              className={`w-full cursor-pointer rounded-[22px] border px-4 py-4 text-left transition-all duration-150 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 active:scale-[0.985] ${option.tone}`}
             >
               <div className="flex items-start gap-3">
                 <span className="mt-1 size-2.5 shrink-0 rounded-full bg-current" />
@@ -390,7 +390,7 @@ function TonightRoutePreview({ story }) {
                   <p className="text-sm font-semibold tracking-[-0.01em]">
                     {option.label}
                   </p>
-                  <p className="mt-1 text-xs leading-5 text-white/62">
+                  <p className="mt-1 text-[13px] leading-5 text-white/62 sm:text-xs">
                     {option.note}
                   </p>
                 </div>
@@ -475,7 +475,7 @@ function PathCard({ story, index, continueProgress = null, compact = false }) {
       className={`group block ${compact ? "w-[78vw] min-w-[264px] max-w-[340px] shrink-0 sm:w-[320px]" : ""}`}
     >
       <article
-        className={`${storefrontInfoCardClass} h-full overflow-hidden p-4 transition-all duration-200 hover:-translate-y-1.5 hover:border-cyan-200/24 hover:shadow-[0_28px_90px_rgba(103,232,249,0.14)]`}
+        className={`${storefrontInfoCardClass} h-full overflow-hidden p-4 transition-all duration-200 hover:-translate-y-1.5 hover:border-cyan-200/24 hover:shadow-[0_28px_90px_rgba(103,232,249,0.14)] active:translate-y-0 active:scale-[0.99]`}
       >
         <div className="relative min-h-[220px] overflow-hidden rounded-[26px] border border-white/10">
           <div className={`absolute inset-0 ${visual.posterClass}`} />
@@ -514,7 +514,7 @@ function PathCard({ story, index, continueProgress = null, compact = false }) {
           ) : null}
         </div>
 
-        <div className={`mt-5 ${storefrontChipClass} w-full justify-center text-xs uppercase tracking-[0.16em] text-white/78 group-hover:border-cyan-200/30 group-hover:text-cyan-100`}>
+        <div className={`mt-5 ${storefrontChipClass} w-full justify-center text-xs uppercase tracking-[0.16em] text-white/78 transition-all duration-150 group-hover:border-cyan-200/30 group-hover:bg-white/[0.08] group-hover:text-cyan-100 group-active:scale-[0.99]`}>
           Start Story
         </div>
       </article>
@@ -530,7 +530,7 @@ function CompactPathListItem({ story, index, continueProgress = null }) {
 
   return (
     <Link href={buildStoryHref(story)} className="group block">
-      <article className={`${storefrontInfoCardClass} grid gap-3 p-3.5 transition-all duration-150 hover:-translate-y-0.5 hover:border-cyan-200/24 hover:bg-white/[0.06] sm:grid-cols-[120px_minmax(0,1fr)_auto] sm:items-center sm:gap-4 sm:p-4`}>
+      <article className={`${storefrontInfoCardClass} grid gap-3 p-3.5 transition-all duration-150 hover:-translate-y-0.5 hover:border-cyan-200/24 hover:bg-white/[0.06] active:translate-y-0 active:scale-[0.99] sm:grid-cols-[120px_minmax(0,1fr)_auto] sm:items-center sm:gap-4 sm:p-4`}>
         <div className="relative aspect-[4/5] overflow-hidden rounded-[20px] border border-white/10 sm:aspect-[3/4] sm:rounded-[22px]">
           <div className={`absolute inset-0 ${visual.posterClass}`} />
           <div className={`absolute inset-0 ${visual.glowClass}`} />
@@ -575,7 +575,7 @@ function CompactPathListItem({ story, index, continueProgress = null }) {
           </p>
         </div>
 
-        <div className={`inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-semibold text-white/78 transition-colors duration-150 group-hover:border-cyan-200/28 group-hover:text-cyan-100`}>
+        <div className={`inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-semibold text-white/78 transition-all duration-150 group-hover:border-cyan-200/28 group-hover:bg-white/[0.08] group-hover:text-cyan-100 group-active:scale-[0.99]`}>
           Open route
           <ArrowRight className="size-4" />
         </div>

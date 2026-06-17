@@ -65,23 +65,27 @@ const NOVEL_SHELF_SMALL_BADGES = [
   "One More Chapter",
   "Shelf Pick",
 ];
-const NOVEL_SHELF_SMALL_DETAILS = [
+const NOVEL_SHELF_SMALL_VARIANTS = [
   {
+    title: "Moonlight Sonata",
     kicker: "Neon city mystery",
     description:
       "A singer disappears, the skyline glitches, and the next clue lands after midnight.",
   },
   {
+    title: "The Quiet Storm",
     kicker: "Station signal",
     description:
       "A drifting transmission keeps pulling the crew back toward the cargo they should have left behind.",
   },
   {
+    title: "Starfall Academy: Novel Edition",
     kicker: "One last clue",
     description:
       "The courier is already too deep in the city to stop when the wrong answer opens the right door.",
   },
   {
+    title: "Midnight Library",
     kicker: "Night shift sci-fi",
     description:
       "Storm light, salvage metal, and a message that sounds like it already knows the ship by name.",
@@ -99,12 +103,26 @@ const NOVEL_EDITORIAL_COPY = {
 };
 const FINISHED_STORY_CTA_LABEL = "Start Full Story";
 const FINISHED_STORY_STATUS_LABEL = "Completed";
-const FINISHED_STORY_HOOKS = {
-  "Solar Wind":
-    "A shipboard mystery that pays off in one long run instead of making you wait for the next signal.",
-  "Neon Nights":
-    "A neon-soaked chase through the city with enough turns to carry the whole story in one sitting.",
-};
+const FINISHED_STORY_VARIANTS = [
+  {
+    title: "Moonlight Sonata",
+    genre: "Romance / Drama",
+    hook:
+      "A midnight performance, one last letter, and a love story that closes its full arc in a single run.",
+  },
+  {
+    title: "Midnight Library",
+    genre: "Fantasy / Mystery",
+    hook:
+      "Every locked shelf opens into one more buried memory until the final room finally gives up its secret.",
+  },
+  {
+    title: "The Quiet Storm",
+    genre: "Drama / Slice of Life",
+    hook:
+      "A coastal town keeps its calm right up to the night every held-back feeling finally breaks open.",
+  },
+];
 
 function normalizeValue(value) {
   return String(value || "").trim().toLowerCase();
@@ -436,6 +454,7 @@ function NovelUpdateFeed({ items = [] }) {
 function NovelShelfCard({
   series,
   badge = "",
+  titleOverride = "",
   kicker = "",
   description = "",
   sectionName = "",
@@ -474,7 +493,7 @@ function NovelShelfCard({
               </p>
             ) : null}
             <h3 className="mt-3 line-clamp-2 text-[1.08rem] font-semibold leading-tight text-white">
-              {series.title}
+              {titleOverride || series.title}
             </h3>
             <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/62">
               {description || buildCardHook(series, 82)}
@@ -493,7 +512,7 @@ function NovelCardGrid({
   items = [],
   badge = "",
   badges = [],
-  details = [],
+  variants = [],
   sectionName = "",
   gridClassName = "sm:grid-cols-2 xl:grid-cols-4",
 }) {
@@ -508,8 +527,9 @@ function NovelCardGrid({
           key={`${series.id}-${index}`}
           series={series}
           badge={badges[index] || badge}
-          kicker={details[index]?.kicker || ""}
-          description={details[index]?.description || ""}
+          titleOverride={variants[index]?.title || ""}
+          kicker={variants[index]?.kicker || ""}
+          description={variants[index]?.description || ""}
           sectionName={sectionName}
           position={index + 1}
         />
@@ -526,7 +546,7 @@ function ShelfFallbackNotice({ text }) {
   );
 }
 
-function FinishedStoryCard({ series, position = 0 }) {
+function FinishedStoryCard({ series, position = 0, titleOverride = "", genreOverride = "", hookOverride = "" }) {
   if (!series) {
     return null;
   }
@@ -558,18 +578,17 @@ function FinishedStoryCard({ series, position = 0 }) {
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/70`}>
-              {buildGenreLabel(series, 2) || "Novel"}
+              {genreOverride || buildGenreLabel(series, 2) || "Novel"}
             </span>
             <span className={`${storefrontBadgeClass} px-3 py-1.5 text-fuchsia-100`}>
               {FINISHED_STORY_STATUS_LABEL}
             </span>
           </div>
           <h3 className="mt-3 text-[1.22rem] font-semibold tracking-[-0.03em] text-white">
-            {series.title}
+            {titleOverride || series.title}
           </h3>
           <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/62">
-            {FINISHED_STORY_HOOKS[String(series?.title || "").trim()] ||
-              buildCardHook(series, 112)}
+            {hookOverride || buildCardHook(series, 112)}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="text-sm font-semibold text-white/74">
@@ -725,8 +744,7 @@ export default function NovelsLandingPage({
       const seriesId = getSeriesId(series);
       return seriesId && list.findIndex((item) => getSeriesId(item) === seriesId) === index;
     });
-    const finishedStories = finishedStoriesUnique
-      .slice(0, 3)
+    const finishedStories = fillSeriesSlots(finishedStoriesUnique, 3)
       .map((series) => withCoverArtwork(series));
     const rankings = excludeSeries(buildTopTen(seriesList), featuredIds)
       .slice(0, 4)
@@ -823,7 +841,7 @@ export default function NovelsLandingPage({
             <NovelCardGrid
               items={model.shelfSmall}
               badges={NOVEL_SHELF_SMALL_BADGES}
-              details={NOVEL_SHELF_SMALL_DETAILS}
+              variants={NOVEL_SHELF_SMALL_VARIANTS}
               badge="Shelf Pick"
               sectionName="novels_shelf_small"
             />
@@ -890,6 +908,9 @@ export default function NovelsLandingPage({
                 key={`${series.id}-${index}`}
                 series={series}
                 position={index + 1}
+                titleOverride={FINISHED_STORY_VARIANTS[index]?.title || ""}
+                genreOverride={FINISHED_STORY_VARIANTS[index]?.genre || ""}
+                hookOverride={FINISHED_STORY_VARIANTS[index]?.hook || ""}
               />
             ))}
           </div>
