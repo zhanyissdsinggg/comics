@@ -10,7 +10,10 @@ import {
 } from "lucide-react";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import Cover from "../common/Cover";
-import { StorefrontPage } from "../storefront/StorefrontScaffold";
+import {
+  CuratedMiniBoard,
+  StorefrontPage,
+} from "../storefront/StorefrontScaffold";
 import { apiGet } from "../../lib/apiClient";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
@@ -706,7 +709,7 @@ export default function RankingsPage({
         />
       ) : null}
 
-      {leadEntry ? (
+      {leadEntry && supportingEntries.length > 0 ? (
         <section className="space-y-4">
           <SectionHeader
             title="Top Stories"
@@ -754,17 +757,27 @@ export default function RankingsPage({
             title="Comics"
             subtitle="Top comics readers keep opening first."
           />
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {comicLeaders.map((series, index) => (
-              <LeaderCard
-                key={series.id}
-                series={series}
-                rank={index + 1}
-                section="comics"
-                onSeriesLinkClick={handleSeriesLinkClick}
-              />
-            ))}
-          </div>
+          {comicLeaders.length < 4 ? (
+            <CuratedMiniBoard
+              items={comicLeaders}
+              sectionName="rankings_comics"
+              title="Comic picks tonight"
+              description="A tighter comic board while this shelf is still building out."
+              actionLabel="Open"
+            />
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {comicLeaders.map((series, index) => (
+                <LeaderCard
+                  key={series.id}
+                  series={series}
+                  rank={index + 1}
+                  section="comics"
+                  onSeriesLinkClick={handleSeriesLinkClick}
+                />
+              ))}
+            </div>
+          )}
         </section>
       ) : null}
 
@@ -774,17 +787,27 @@ export default function RankingsPage({
             title="Novels"
             subtitle="Novels readers are opening tonight."
           />
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {novelLeaders.map((series, index) => (
-              <LeaderCard
-                key={series.id}
-                series={series}
-                rank={index + 1}
-                section="novel"
-                onSeriesLinkClick={handleSeriesLinkClick}
-              />
-            ))}
-          </div>
+          {novelLeaders.length < 4 ? (
+            <CuratedMiniBoard
+              items={novelLeaders}
+              sectionName="rankings_novels"
+              title="Novel picks tonight"
+              description="A quieter mini-board for the stories readers keep reopening."
+              actionLabel="Open"
+            />
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {novelLeaders.map((series, index) => (
+                <LeaderCard
+                  key={series.id}
+                  series={series}
+                  rank={index + 1}
+                  section="novel"
+                  onSeriesLinkClick={handleSeriesLinkClick}
+                />
+              ))}
+            </div>
+          )}
         </section>
       ) : null}
 
@@ -794,16 +817,26 @@ export default function RankingsPage({
             title="Completed"
             subtitle="Finished stories readers keep bingeing."
           />
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {completedRuns.map((series, index) => (
-              <CompletedCard
-                key={series.id}
-                series={series}
-                rank={index + 1}
-                onSeriesLinkClick={handleSeriesLinkClick}
-              />
-            ))}
-          </div>
+          {completedRuns.length < 4 ? (
+            <CuratedMiniBoard
+              items={completedRuns}
+              sectionName="rankings_completed"
+              title="Completed picks tonight"
+              description="Full runs presented as a tight binge-ready board."
+              actionLabel="Start"
+            />
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {completedRuns.map((series, index) => (
+                <CompletedCard
+                  key={series.id}
+                  series={series}
+                  rank={index + 1}
+                  onSeriesLinkClick={handleSeriesLinkClick}
+                />
+              ))}
+            </div>
+          )}
         </section>
       ) : null}
     </StorefrontPage>

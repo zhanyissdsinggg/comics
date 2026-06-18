@@ -27,6 +27,7 @@ import {
   storefrontInfoCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
+  StorefrontStateBadge,
 } from "../common/StorefrontPagePrimitives";
 import { StorefrontPage } from "../storefront/StorefrontScaffold";
 
@@ -500,17 +501,10 @@ function PathCard({ story, index, continueProgress = null, compact = false }) {
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-            {choicesCount} choices
-          </span>
-          <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-            {endingsCount} endings
-          </span>
+          <StorefrontStateBadge variant="muted" label={`${choicesCount} choices`} />
+          <StorefrontStateBadge variant="muted" label={`${endingsCount} endings`} />
           {replayable ? (
-            <span className={`${storefrontBadgeClass} px-3 py-1.5 text-cyan-100`}>
-              <RefreshCw className="mr-1 size-3" />
-              Replayable
-            </span>
+            <StorefrontStateBadge variant="replayable" label="Replayable" />
           ) : null}
         </div>
 
@@ -524,9 +518,13 @@ function PathCard({ story, index, continueProgress = null, compact = false }) {
 
 function CompactPathListItem({ story, index, continueProgress = null }) {
   const visual = getStoryVisual(story, index);
+  const genreLabel = getStoryGenre(story, visual);
   const choicesCount = Math.max(1, Number(story?.choicesCount || 0));
   const endingsCount = Math.max(1, Number(story?.endingsCount || 0));
   const isResume = Boolean(continueProgress?.node?.id);
+  const showRouteLabel =
+    normalizeText(genreLabel).toLowerCase() !==
+    normalizeText(visual.routeLabel).toLowerCase();
 
   return (
     <Link href={buildStoryHref(story)} className="group block">
@@ -537,32 +535,25 @@ function CompactPathListItem({ story, index, continueProgress = null }) {
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,10,18,0.08)_0%,rgba(8,10,18,0.28)_38%,rgba(8,10,18,0.88)_100%)]" />
           <div className="relative flex h-full flex-col justify-between p-3">
             <span className={`${storefrontBadgeClass} w-max px-2.5 py-1 text-white/72`}>
-              {getStoryGenre(story, visual)}
+              {genreLabel}
             </span>
-            <p className="text-sm font-semibold text-white">
-              {visual.routeLabel}
-            </p>
+            {showRouteLabel ? (
+              <p className="text-sm font-semibold text-white">
+                {visual.routeLabel}
+              </p>
+            ) : null}
           </div>
         </div>
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-              {choicesCount} choices
-            </span>
-            <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/68`}>
-              {endingsCount} endings
-            </span>
+            <StorefrontStateBadge variant="muted" label={`${choicesCount} choices`} />
+            <StorefrontStateBadge variant="muted" label={`${endingsCount} endings`} />
             {Number(story?.endingsCount || 0) > 1 ? (
-              <span className={`${storefrontBadgeClass} px-3 py-1.5 text-cyan-100`}>
-                <RefreshCw className="mr-1 size-3" />
-                Replayable
-              </span>
+              <StorefrontStateBadge variant="replayable" label="Replayable" />
             ) : null}
             {isResume ? (
-              <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/72`}>
-                Resume
-              </span>
+              <StorefrontStateBadge variant="ongoing" label="Resume" />
             ) : null}
           </div>
           <h3 className="mt-3 text-[1.15rem] font-semibold tracking-[-0.03em] text-white sm:text-[1.3rem]">
@@ -643,9 +634,12 @@ function EndingGallery() {
                 <div className={`flex size-12 items-center justify-center rounded-2xl border ${ending.className}`}>
                   <Icon className="size-5" />
                 </div>
-                <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/48">
-                  {ending.label}
-                </p>
+                <div className="mt-5">
+                  <StorefrontStateBadge
+                    variant={ending.label.includes("Locked") ? "locked" : "muted"}
+                    label={ending.label}
+                  />
+                </div>
                 <p className="mt-3 text-sm leading-6 text-white/62">
                   {ending.text}
                 </p>
@@ -744,7 +738,7 @@ export default function InteractiveLandingPage({
       accentClass="from-[rgba(255,79,154,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.12)]"
       contentClassName="space-y-10 lg:space-y-12"
     >
-      <section className="relative overflow-hidden rounded-[36px] border border-white/10 bg-[linear-gradient(135deg,rgba(11,9,24,0.98)_0%,rgba(29,16,55,0.98)_42%,rgba(9,18,31,0.98)_100%)] p-5 shadow-[0_34px_110px_rgba(0,0,0,0.42)] sm:p-7 lg:p-8">
+      <section className="relative overflow-hidden rounded-[36px] border border-white/10 bg-[linear-gradient(135deg,rgba(11,9,24,0.98)_0%,rgba(29,16,55,0.98)_42%,rgba(9,18,31,0.98)_100%)] p-4 shadow-[0_34px_110px_rgba(0,0,0,0.42)] sm:p-7 lg:p-8">
         <div className="absolute inset-0" aria-hidden="true">
           <img
             src={siteMaterialImages.interactiveTonightsRouteHero}
@@ -756,7 +750,7 @@ export default function InteractiveLandingPage({
           <div className={`absolute inset-0 ${spotlightVisual.glowClass}`} />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(255,79,154,0.26),transparent_24%),radial-gradient(circle_at_76%_20%,rgba(103,232,249,0.18),transparent_24%),linear-gradient(90deg,rgba(8,7,18,0.98)_0%,rgba(13,9,27,0.88)_48%,rgba(8,12,24,0.72)_100%)]" />
         </div>
-        <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(300px,440px)] lg:items-center">
+        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(300px,440px)] lg:items-center">
           <div className="max-w-3xl">
             <div className="flex flex-wrap items-center gap-2.5">
               <span className={`${storefrontAccentChipClass} min-h-[34px] px-3 py-1 text-[10px] tracking-[0.02em] text-cyan-100`}>
@@ -766,13 +760,13 @@ export default function InteractiveLandingPage({
                 {initialContentMode === "adult" ? "Mature picks" : "Story routes"}
               </span>
             </div>
-            <h1 className="mt-5 max-w-[10ch] font-display text-[3.2rem] font-semibold leading-[0.9] tracking-[-0.055em] text-white sm:text-[4.8rem]">
+            <h1 className="mt-4 max-w-[10ch] font-display text-[3rem] font-semibold leading-[0.9] tracking-[-0.055em] text-white sm:mt-5 sm:text-[4.8rem]">
               Choose your first move.
             </h1>
-            <p className="mt-5 max-w-[39rem] text-base leading-[1.75] text-white/72">
+            <p className="mt-4 max-w-[39rem] text-base leading-[1.72] text-white/72 sm:mt-5 sm:leading-[1.75]">
               Start with one tap, follow the branch, and unlock a different ending when the choice turns.
             </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <div className="mt-5 flex flex-col gap-3 sm:mt-7 sm:flex-row sm:flex-wrap">
               <a
                 href="#choice-based-stories"
                 className={`${storefrontPrimaryButtonClass} min-h-[48px] px-6 text-[#190d18]`}
@@ -788,7 +782,7 @@ export default function InteractiveLandingPage({
                 <Play className="size-4" />
               </Link>
             </div>
-            <div className="mt-6 flex max-w-[620px] flex-wrap gap-2">
+            <div className="mt-4 flex max-w-[620px] flex-wrap gap-2 sm:mt-6">
               <span className={`${storefrontBadgeClass} min-h-[32px] px-3 text-white/68`}>
                 {heroChoicesCount} choices
               </span>
@@ -901,7 +895,7 @@ export default function InteractiveLandingPage({
       <section className="space-y-4">
         <SectionHeader
           title="How Choices Work"
-          subtitle="A replay loop that keeps opening new scenes."
+          subtitle="Read the setup, make a move, and replay for a different ending."
         />
         <div className="relative grid gap-4 lg:grid-cols-3">
           <div className="absolute left-[16%] right-[16%] top-10 hidden h-px bg-[linear-gradient(90deg,rgba(103,232,249,0.08),rgba(255,79,154,0.48),rgba(251,191,36,0.08))] lg:block" />

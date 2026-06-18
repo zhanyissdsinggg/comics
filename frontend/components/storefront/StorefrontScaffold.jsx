@@ -19,7 +19,10 @@ import {
   storefrontBadgeClass,
   storefrontChipClass,
   storefrontInfoCardClass,
+  StorefrontLoadingCard,
+  StorefrontNoCoverCard,
   storefrontPrimaryButtonClass,
+  StorefrontStateBadge,
   storefrontSecondaryButtonClass,
   storefrontSoftCardClass,
 } from "../common/StorefrontPagePrimitives";
@@ -165,7 +168,10 @@ export function StorefrontPage({
   return (
     <PageShell
       theme={theme}
-      className={cn("pb-12", className)}
+      className={cn(
+        "pb-[calc(var(--gush-mobile-bottom-nav-height)+1.35rem)] md:pb-12",
+        className,
+      )}
       contentClassName={contentClassName}
     >
       {children}
@@ -237,6 +243,7 @@ export function StoryHero({
   featureLabel = "",
   backgroundImageUrl = "",
   backgroundPosition = "right center",
+  mobileContentFirst = false,
 }) {
   if (!series) {
     return null;
@@ -300,7 +307,7 @@ export function StoryHero({
       </div>
 
       <div className="relative grid gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(240px,320px)] lg:items-end lg:gap-8 lg:p-8">
-        <div className="order-2 space-y-5 lg:order-1">
+        <div className={`${mobileContentFirst ? "order-1" : "order-2"} space-y-5 lg:order-1`}>
           <div className="space-y-3">
             {eyebrow ? (
               <p className={`${storefrontBadgeClass} px-3 py-1.5 text-white/78`}>
@@ -394,7 +401,7 @@ export function StoryHero({
           ) : null}
         </div>
 
-        <div className="order-1 mx-auto w-full max-w-[260px] lg:order-2 lg:max-w-[320px]">
+        <div className={`${mobileContentFirst ? "order-2" : "order-1"} mx-auto w-full max-w-[260px] lg:order-2 lg:max-w-[320px]`}>
           {trailingCard || (
             <div className="relative mx-auto w-full max-w-[300px]">
               <div className={`absolute inset-4 rounded-[28px] blur-3xl ${themeClasses.glow}`} />
@@ -610,6 +617,9 @@ export function CoverCard({
     variant === "novel"
       ? meta.tertiary || [buildLatestInstallmentLabel(series), status].filter(Boolean).join(" / ")
       : [genres, meta.tertiary || status].filter(Boolean).join(" / ");
+  const hasCover = Boolean(
+    String(series?.coverUrl || "").trim() && coverUrl,
+  );
 
   return (
     <Link
@@ -624,13 +634,22 @@ export function CoverCard({
             useChannelVisual ? "rounded-[32px]" : "rounded-[30px]"
           }`}
         >
-          <img
-            src={coverUrl}
-            alt=""
-            aria-hidden="true"
-            role="presentation"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-          />
+          {hasCover ? (
+            <img
+              src={coverUrl}
+              alt=""
+              aria-hidden="true"
+              role="presentation"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            />
+          ) : (
+            <StorefrontNoCoverCard
+              title={series.title}
+              description={hook}
+              label={variant === "novel" ? "Novel shelf" : "Comic shelf"}
+              className="h-full rounded-[inherit] border-0 shadow-none"
+            />
+          )}
           <div
             className={`absolute inset-0 ${
               useChannelVisual
@@ -878,6 +897,193 @@ export function RankList({
         })}
       </div>
     </section>
+  );
+}
+
+function CuratedEditorialRow({
+  series,
+  index = 0,
+  variant = "story",
+  sectionName = "",
+  actionLabel = "Open Story",
+}) {
+  if (!series) {
+    return null;
+  }
+
+  const href = buildSeriesHref(series);
+  const coverUrl = resolveDisplayImageUrl(series?.coverUrl, {
+    kind: "cover",
+    adult: series?.adult || series?.isAdult,
+  });
+  const statusLabel = buildStatusLabel(series);
+  const updateLabel = buildUpdatedLabel(series);
+  const hasCover = Boolean(String(series?.coverUrl || "").trim() && coverUrl);
+
+  return (
+    <Link
+      href={href}
+      onClick={() => {
+        if (sectionName) {
+          trackEvent("story_click", {
+            seriesId: series?.id,
+            sourceSection: sectionName,
+            position: index + 1,
+          });
+        }
+      }}
+      className="group block"
+    >
+      <article className={`${storefrontInfoCardClass} grid gap-4 p-4 transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-white/[0.06] sm:grid-cols-[112px_minmax(0,1fr)] sm:items-center`}>
+        <div className="overflow-hidden rounded-[22px] border border-white/10">
+          {hasCover ? (
+            <img
+              src={coverUrl}
+              alt=""
+              aria-hidden="true"
+              role="presentation"
+              className="aspect-[3/4] h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            />
+          ) : (
+            <StorefrontNoCoverCard
+              title={series.title}
+              description={buildCardHook(series, 70)}
+              label={variant}
+              className="min-h-[156px] rounded-[inherit] border-0 shadow-none"
+            />
+          )}
+        </div>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <StorefrontStateBadge
+              variant={statusLabel === "Completed" ? "completed" : "ongoing"}
+              label={statusLabel}
+            />
+            <StorefrontStateBadge
+              variant={
+                updateLabel.toLowerCase().includes("today") ? "newToday" : "muted"
+              }
+              label={updateLabel}
+            />
+          </div>
+          <h3 className="mt-3 text-[1.18rem] font-semibold tracking-[-0.03em] text-white">
+            {series.title}
+          </h3>
+          <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/62">
+            {buildCardHook(series, 108)}
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-white/58">
+            <span>{buildGenreLabel(series, 2) || variant}</span>
+            <span className="text-white/28">/</span>
+            <span>{buildLatestInstallmentLabel(series)}</span>
+          </div>
+          <p className="mt-4 text-sm font-semibold text-white/78">{actionLabel}</p>
+        </div>
+      </article>
+    </Link>
+  );
+}
+
+export function CuratedEditorialModule({
+  items = [],
+  sectionName = "",
+  actionLabel = "Open Story",
+  variant = "Story",
+  className = "",
+}) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={cn("grid gap-3", className)}>
+      {items.map((series, index) => (
+        <CuratedEditorialRow
+          key={`${series?.id || "series"}-${index}`}
+          series={series}
+          index={index}
+          variant={variant}
+          sectionName={sectionName}
+          actionLabel={actionLabel}
+        />
+      ))}
+    </div>
+  );
+}
+
+export function CuratedMiniBoard({
+  items = [],
+  sectionName = "",
+  title = "Selected Tonight",
+  description = "A smaller board shaped like an intentional shelf, not a half-empty list.",
+  actionLabel = "Open Story",
+  className = "",
+}) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className={cn(`${storefrontInfoCardClass} overflow-hidden p-4 sm:p-5`, className)}>
+      <SectionHeading
+        eyebrow="Selected tonight"
+        title={title}
+        description={description}
+        tone="channel"
+      />
+      <div className="mt-5 grid gap-3">
+        {items.map((series, index) => (
+          <Link
+            key={`${series?.id || "series"}-${index}`}
+            href={buildSeriesHref(series)}
+            onClick={() => {
+              if (sectionName) {
+                trackEvent("story_click", {
+                  seriesId: series?.id,
+                  sourceSection: sectionName,
+                  position: index + 1,
+                });
+              }
+            }}
+            className="group grid grid-cols-[54px_minmax(0,1fr)_auto] items-center gap-3 rounded-[22px] border border-white/10 bg-white/[0.035] p-3 transition-all duration-150 hover:border-white/16 hover:bg-white/[0.065]"
+          >
+            <span className="text-center font-display text-[1.3rem] font-semibold text-white/72">
+              #{index + 1}
+            </span>
+            <div className="min-w-0">
+              <h3 className="truncate text-base font-semibold text-white">
+                {series?.title}
+              </h3>
+              <p className="truncate text-sm text-white/56">
+                {[buildGenreLabel(series, 2), buildStatusLabel(series)]
+                  .filter(Boolean)
+                  .join(" / ")}
+              </p>
+            </div>
+            <span className="text-sm font-semibold text-white/72">
+              {actionLabel}
+            </span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function StorefrontSectionLoadingGrid({
+  count = 2,
+  compact = false,
+  className = "",
+}) {
+  return (
+    <div className={cn("grid gap-3", className)}>
+      {Array.from({ length: count }).map((_, index) => (
+        <StorefrontLoadingCard
+          key={`storefront-loading-${index}`}
+          compact={compact}
+        />
+      ))}
+    </div>
   );
 }
 

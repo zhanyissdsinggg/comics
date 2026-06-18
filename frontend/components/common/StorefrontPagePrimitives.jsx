@@ -1,5 +1,7 @@
+import { CheckCircle2, Clock3, Lock, RefreshCw, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SurfacePanel from "./SurfacePanel";
+import { Skeleton } from "./Skeleton";
 
 export const storefrontPrimaryButtonClass =
   "gush-transition-base inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-[rgba(236,72,153,0.32)] [background:var(--gush-gradient-primary)] px-5 text-sm font-semibold tracking-[0em] text-[color:var(--gush-button-text-dark)] shadow-[var(--gush-shadow-button)] outline-none select-none hover:-translate-y-0.5 hover:shadow-[var(--gush-shadow-button),var(--gush-shadow-glow)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--gush-focus-pink)]";
@@ -27,6 +29,123 @@ export const storefrontAccentChipClass =
 
 export const storefrontHighlightBadgeClass =
   "inline-flex items-center rounded-full border border-[rgba(255,143,195,0.3)] bg-[linear-gradient(135deg,rgba(255,79,154,0.22)_0%,rgba(124,58,237,0.18)_100%)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_12px_24px_rgba(255,79,154,0.18)]";
+
+export const storefrontStateBadgeBaseClass =
+  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] backdrop-blur-xl";
+
+const storefrontStateBadgeVariants = {
+  completed:
+    "border-amber-200/24 bg-amber-200/10 text-amber-100 shadow-[0_10px_24px_rgba(251,191,36,0.08)]",
+  ongoing:
+    "border-cyan-200/20 bg-cyan-200/10 text-cyan-100 shadow-[0_10px_24px_rgba(103,232,249,0.08)]",
+  newToday:
+    "border-fuchsia-200/22 bg-fuchsia-200/10 text-fuchsia-100 shadow-[0_10px_24px_rgba(255,79,154,0.08)]",
+  replayable:
+    "border-violet-200/22 bg-violet-200/10 text-violet-100 shadow-[0_10px_24px_rgba(167,139,250,0.1)]",
+  locked:
+    "border-white/14 bg-white/[0.06] text-white/72 shadow-[0_10px_24px_rgba(0,0,0,0.12)]",
+  muted: "border-white/10 bg-white/[0.04] text-white/54",
+};
+
+const storefrontStateBadgeIcons = {
+  completed: CheckCircle2,
+  ongoing: Clock3,
+  newToday: Sparkles,
+  replayable: RefreshCw,
+  locked: Lock,
+  muted: null,
+};
+
+const storefrontStateBadgeLabels = {
+  completed: "Completed",
+  ongoing: "Ongoing",
+  newToday: "New today",
+  replayable: "Replayable",
+  locked: "Locked",
+  muted: "Available",
+};
+
+export function StorefrontStateBadge({
+  variant = "ongoing",
+  label = "",
+  icon: Icon = null,
+  className = "",
+}) {
+  const BadgeIcon = Icon || storefrontStateBadgeIcons[variant] || null;
+
+  return (
+    <span
+      className={cn(
+        storefrontStateBadgeBaseClass,
+        storefrontStateBadgeVariants[variant] || storefrontStateBadgeVariants.muted,
+        className,
+      )}
+    >
+      {BadgeIcon ? <BadgeIcon className="size-3.5 shrink-0" /> : null}
+      <span>{label || storefrontStateBadgeLabels[variant] || "Story"}</span>
+    </span>
+  );
+}
+
+export function StorefrontNoCoverCard({
+  title = "No cover yet",
+  description = "A clean fallback keeps the shelf intentional until artwork lands.",
+  label = "No cover",
+  compact = false,
+  className = "",
+}) {
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.025)_100%)]",
+        className,
+      )}
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.08),transparent_26%),radial-gradient(circle_at_80%_18%,rgba(103,232,249,0.08),transparent_28%)]" />
+      <div className={cn("relative flex flex-col justify-between p-4", compact ? "min-h-[160px]" : "min-h-[220px]")}>
+        <StorefrontStateBadge variant="muted" label={label} />
+        <div>
+          <h3 className="text-[1.15rem] font-semibold tracking-[-0.03em] text-white">
+            {title}
+          </h3>
+          <p className="mt-2 text-sm leading-6 text-white/60">{description}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function StorefrontLoadingCard({
+  compact = false,
+  className = "",
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.025)_100%)] p-4 shadow-[var(--gush-shadow-card)] backdrop-blur-xl",
+        className,
+      )}
+    >
+      <div className={`grid gap-4 ${compact ? "grid-cols-[88px_minmax(0,1fr)]" : "sm:grid-cols-[120px_minmax(0,1fr)]"}`}>
+        <Skeleton
+          className={`aspect-[3/4] ${compact ? "rounded-[18px]" : "rounded-[20px]"}`}
+        />
+        <div className="space-y-3">
+          <div className="space-y-2">
+            <Skeleton className="h-3.5 w-24" rounded="full" />
+            <Skeleton className="h-6 w-4/5" rounded="sm" />
+          </div>
+          <Skeleton className="h-3.5 w-full" rounded="full" />
+          <Skeleton className="h-3.5 w-[88%]" rounded="full" />
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Skeleton className="h-8 w-24" rounded="full" />
+            <Skeleton className="h-8 w-20" rounded="full" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export const storefrontNoticeClass =
   "[border-radius:var(--gush-radius-xl)] border border-[color:var(--gush-glass-border)] [background:linear-gradient(180deg,var(--gush-panel-strong),var(--gush-panel-soft)),var(--gush-glass-bg)] px-4 py-3.5 text-sm font-medium text-[color:var(--gush-text-secondary)] shadow-[var(--gush-glass-shadow)] backdrop-blur-xl";

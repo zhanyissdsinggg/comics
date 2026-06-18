@@ -19,13 +19,16 @@ import { trackEvent } from "../../lib/trackEvent";
 import { withHomeArtwork } from "../../lib/homeArtwork";
 import { siteMaterialImages } from "../../lib/siteMaterialAssets";
 import {
+  CuratedEditorialModule,
   EmptyShelf,
   SectionHeading,
+  StorefrontSectionLoadingGrid,
   StorefrontPage,
   useCatalogFeed,
 } from "./StorefrontScaffold";
 import {
   storefrontBadgeClass,
+  StorefrontNoCoverCard,
   storefrontChipClass,
   storefrontInfoCardClass,
   storefrontPrimaryButtonClass,
@@ -59,52 +62,6 @@ const NOVEL_MOOD_CHIPS = [
   "Completed",
   "One More Chapter",
 ];
-const NOVEL_SHELF_SMALL_BADGES = [
-  "After Dark",
-  "Quick Read",
-  "One More Chapter",
-  "Shelf Pick",
-];
-const NOVEL_SHELF_SMALL_VARIANTS = [
-  {
-    title: "Moonlight Sonata",
-    kicker: "Neon city mystery",
-    description:
-      "A singer disappears, the skyline glitches, and the next clue lands after midnight.",
-  },
-  {
-    title: "The Quiet Storm",
-    kicker: "Station signal",
-    description:
-      "A drifting transmission keeps pulling the crew back toward the cargo they should have left behind.",
-  },
-  {
-    title: "Starfall Academy: Novel Edition",
-    kicker: "One last clue",
-    description:
-      "The courier is already too deep in the city to stop when the wrong answer opens the right door.",
-  },
-  {
-    title: "Midnight Library",
-    kicker: "Night shift sci-fi",
-    description:
-      "Storm light, salvage metal, and a message that sounds like it already knows the ship by name.",
-  },
-];
-const NOVEL_SHORT_READ_VARIANTS = [
-  {
-    title: "Starfall Academy: Novel Edition",
-    kicker: "Fast lane pick",
-    description:
-      "A campus courier opens the wrong note, takes the right train, and finds out one quick chapter can still ruin the whole night.",
-  },
-  {
-    title: "Midnight Library",
-    kicker: "After-hours shelf",
-    description:
-      "One closed stack, one last key, and a short run that still leaves the lights buzzing after you finish.",
-  },
-];
 const NOVEL_FEATURED_HOOKS = {
   "Solar Wind":
     "A salvage crew follows a signal that feels older than the station waiting for it.",
@@ -117,36 +74,6 @@ const NOVEL_EDITORIAL_COPY = {
 };
 const FINISHED_STORY_CTA_LABEL = "Start Full Story";
 const FINISHED_STORY_STATUS_LABEL = "Completed";
-const FINISHED_STORY_VARIANTS = [
-  {
-    title: "Moonlight Sonata",
-    genre: "Romance / Drama",
-    hook:
-      "A midnight performance, one last letter, and a love story that closes its full arc in a single run.",
-  },
-  {
-    title: "Midnight Library",
-    genre: "Fantasy / Mystery",
-    hook:
-      "Every locked shelf opens into one more buried memory until the final room finally gives up its secret.",
-  },
-  {
-    title: "The Quiet Storm",
-    genre: "Drama / Slice of Life",
-    hook:
-      "A coastal town keeps its calm right up to the night every held-back feeling finally breaks open.",
-  },
-];
-const NIGHTSTAND_PICK_VARIANTS = [
-  {
-    title: "Moonlight Sonata",
-    meta: "Romance / Drama / Ongoing",
-  },
-  {
-    title: "The Quiet Storm",
-    meta: "Drama / Slice of Life / Ongoing",
-  },
-];
 
 function normalizeValue(value) {
   return String(value || "").trim().toLowerCase();
@@ -209,19 +136,6 @@ function excludeSeries(seriesList = [], excludedIds = new Set()) {
 
 function withCoverArtwork(series) {
   return series ? withHomeArtwork(series, "cover") : series;
-}
-
-function fillSeriesSlots(seriesList = [], limit = 4) {
-  const safeList = Array.isArray(seriesList) ? seriesList.filter(Boolean) : [];
-  if (safeList.length === 0 || limit <= 0) {
-    return [];
-  }
-
-  const filled = [];
-  for (let index = 0; index < limit; index += 1) {
-    filled.push(safeList[index % safeList.length]);
-  }
-  return filled;
 }
 
 function NovelMoodRail() {
@@ -324,7 +238,7 @@ function NovelHero({ featured, hook = "", stackItems = [] }) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(56,189,248,0.2),transparent_24%),radial-gradient(circle_at_80%_30%,rgba(236,72,153,0.16),transparent_28%),linear-gradient(90deg,rgba(7,10,19,0.98)_0%,rgba(9,11,21,0.9)_46%,rgba(7,10,19,0.66)_100%)]" />
       </div>
 
-      <div className="relative grid gap-7 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(300px,390px)] lg:items-center lg:p-8">
+      <div className="relative grid gap-6 p-5 pb-[calc(var(--gush-mobile-bottom-nav-height)+1.35rem)] sm:gap-7 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(300px,390px)] lg:items-center lg:p-8">
         <div className="max-w-[760px]">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`${storefrontBadgeClass} min-h-[34px] px-3 text-white/70`}>
@@ -357,12 +271,18 @@ function NovelHero({ featured, hook = "", stackItems = [] }) {
               </div>
             ))}
           </div>
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link href={readHref} className={`${storefrontPrimaryButtonClass} min-h-[50px] px-6 text-[#190d18]`}>
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-7 sm:flex sm:flex-row sm:flex-wrap">
+            <Link
+              href={readHref}
+              className={`${storefrontPrimaryButtonClass} min-h-[50px] min-w-0 justify-center px-4 text-[#190d18] sm:px-6`}
+            >
               Start Reading
               <ArrowRight className="size-4" />
             </Link>
-            <Link href={buildSeriesHref(featured)} className={`${storefrontSecondaryButtonClass} min-h-[50px] px-6 text-white/84`}>
+            <Link
+              href={buildSeriesHref(featured)}
+              className={`${storefrontSecondaryButtonClass} min-h-[50px] min-w-0 justify-center px-4 text-white/84 sm:px-6`}
+            >
               View Series
               <ArrowUpRight className="size-4" />
             </Link>
@@ -535,8 +455,6 @@ function NovelShelfCard({
 function NovelCardGrid({
   items = [],
   badge = "",
-  badges = [],
-  variants = [],
   sectionName = "",
   gridClassName = "sm:grid-cols-2 xl:grid-cols-4",
 }) {
@@ -550,10 +468,7 @@ function NovelCardGrid({
         <NovelShelfCard
           key={`${series.id}-${index}`}
           series={series}
-          badge={badges[index] || badge}
-          titleOverride={variants[index]?.title || ""}
-          kicker={variants[index]?.kicker || ""}
-          description={variants[index]?.description || ""}
+          badge={badge}
           sectionName={sectionName}
           position={index + 1}
         />
@@ -567,6 +482,22 @@ function ShelfFallbackNotice({ text }) {
     <div className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 text-sm leading-6 text-white/60">
       {text}
     </div>
+  );
+}
+
+function CompactShelfPlaceholder({
+  title,
+  description,
+  label,
+}) {
+  return (
+    <StorefrontNoCoverCard
+      title={title}
+      description={description}
+      label={label}
+      compact
+      className="shadow-none"
+    />
   );
 }
 
@@ -632,9 +563,38 @@ function FinishedStoryCard({ series, position = 0, titleOverride = "", genreOver
   );
 }
 
-function NightstandPicks({ items = [], variants = [] }) {
+function NightstandPicks({ items = [] }) {
   if (!Array.isArray(items) || items.length === 0) {
-    return null;
+    return (
+      <section className="space-y-4">
+        <SectionHeading
+          eyebrow="Nightstand Picks"
+          title="Readers Keep Opening"
+          description="Soft signals collect here as more readers settle into a late-night story."
+          tone="channel"
+        />
+        <ShelfFallbackNotice text="Reader-opening signals will build here as more stories start gathering repeat reads." />
+      </section>
+    );
+  }
+
+  if (items.length <= 2) {
+    return (
+      <section className="space-y-4">
+        <SectionHeading
+          eyebrow="Nightstand Picks"
+          title="Readers Keep Opening"
+          description="Soft signals from the stories readers come back to after dark."
+          tone="channel"
+        />
+        <CuratedEditorialModule
+          items={items}
+          sectionName="novels_nightstand_picks"
+          actionLabel="Open Story"
+          variant="Novel"
+        />
+      </section>
+    );
   }
 
   return (
@@ -657,13 +617,12 @@ function NightstandPicks({ items = [], variants = [] }) {
             </div>
             <div className="min-w-0">
               <h3 className="truncate text-base font-semibold text-white">
-                {variants[index]?.title || series.title}
+                {series.title}
               </h3>
               <p className="truncate text-sm text-white/58">
-                {variants[index]?.meta ||
-                  [buildGenreLabel(series, 2), buildStatusLabel(series)]
-                    .filter(Boolean)
-                    .join(" / ")}
+                {[buildGenreLabel(series, 2), buildStatusLabel(series)]
+                  .filter(Boolean)
+                  .join(" / ")}
               </p>
             </div>
             <ArrowRight className="size-4 text-white/48 group-hover:text-fuchsia-100" />
@@ -708,8 +667,9 @@ export default function NovelsLandingPage({
     const featured = withCoverArtwork(featuredBase);
     const featuredId = getSeriesId(featuredBase);
     const featuredIds = new Set(featuredId ? [featuredId] : []);
+    const novelShelfPool = excludeSeries(seriesList, featuredIds);
     const novelShelfBase = pickPrioritySeries(
-      seriesList,
+      novelShelfPool,
       NOVEL_SHELF_PRIORITY_TITLES,
       2,
     );
@@ -717,35 +677,32 @@ export default function NovelsLandingPage({
     const novelShelfIds = new Set(
       novelShelfBase.map((series) => getSeriesId(series)),
     );
-    const latestPool = excludeSeries(buildUpdatedRail(seriesList, 12), featuredIds);
+    const latestPool = excludeSeries(
+      buildUpdatedRail(seriesList, 12),
+      new Set([...featuredIds, ...novelShelfIds]),
+    );
     const latest = latestPool.slice(0, 6).map((series) => withCoverArtwork(series));
     const latestIds = new Set(latest.map((series) => getSeriesId(series)));
+    const shelfExcludedIds = new Set([...featuredIds, ...latestIds, ...novelShelfIds]);
     const shelfSmallSeed = [
-      ...excludeSeries(buildUpdatedRail(seriesList, 16), featuredIds),
-      ...excludeSeries(buildShortReadsRail(seriesList, 12), featuredIds),
-      ...excludeSeries(buildTopTen(seriesList), featuredIds),
-      ...novelShelfBase,
+      ...excludeSeries(buildUpdatedRail(seriesList, 16), shelfExcludedIds),
+      ...excludeSeries(buildShortReadsRail(seriesList, 12), shelfExcludedIds),
+      ...excludeSeries(buildTopTen(seriesList), shelfExcludedIds),
     ].filter(Boolean);
     const shelfSmallUnique = shelfSmallSeed.filter((series, index, list) => {
       const seriesId = getSeriesId(series);
       return seriesId && list.findIndex((item) => getSeriesId(item) === seriesId) === index;
     });
-    const shelfSmall = fillSeriesSlots(shelfSmallUnique, 4).map((series) =>
-      withCoverArtwork(series),
-    );
+    const shelfSmall = shelfSmallUnique
+      .slice(0, 4)
+      .map((series) => withCoverArtwork(series));
     const continueItems = buildContinueReadingItems(seriesList, bySeriesId).slice(0, 4);
     const continueIds = new Set(continueItems.map((series) => getSeriesId(series)));
     const shortReadPool = excludeSeries(
       buildShortReadsRail(seriesList, 10),
-      new Set([...featuredIds, ...continueIds, ...latestIds]),
+      new Set([...featuredIds, ...continueIds, ...latestIds, ...novelShelfIds]),
     );
-    const fallbackShortReadPool = excludeSeries(
-      buildShortReadsRail(seriesList, 10),
-      new Set([...featuredIds, ...continueIds]),
-    );
-    const shortReads = (shortReadPool.length >= 2 ? shortReadPool : fallbackShortReadPool)
-      .slice(0, 4)
-      .map((series) => withCoverArtwork(series));
+    const shortReads = shortReadPool.slice(0, 4).map((series) => withCoverArtwork(series));
     const shortReadIds = new Set(shortReads.map((series) => getSeriesId(series)));
     const completed = excludeSeries(
       buildCompletedRail(seriesList, 8),
@@ -758,20 +715,11 @@ export default function NovelsLandingPage({
     )
       .slice(0, 4)
       .map((series) => withCoverArtwork(series));
-    const finishedStoriesSeed = completed.length > 0
-      ? completed
-      : [
-          ...buildTopTen(seriesList),
-          ...buildShortReadsRail(seriesList, 8),
-          ...novelShelfBase,
-        ];
-    const finishedStoriesUnique = finishedStoriesSeed.filter((series, index, list) => {
-      const seriesId = getSeriesId(series);
-      return seriesId && list.findIndex((item) => getSeriesId(item) === seriesId) === index;
-    });
-    const finishedStories = fillSeriesSlots(finishedStoriesUnique, 3)
-      .map((series) => withCoverArtwork(series));
-    const rankings = excludeSeries(buildTopTen(seriesList), featuredIds)
+    const finishedStories = completed.slice(0, 3);
+    const rankings = excludeSeries(
+      buildTopTen(seriesList),
+      new Set([...featuredIds, ...latestIds, ...novelShelfIds, ...shortReadIds]),
+    )
       .slice(0, 4)
       .map((series) => withCoverArtwork(series));
 
@@ -791,6 +739,10 @@ export default function NovelsLandingPage({
   }, [bySeriesId, seriesList]);
 
   const showContinueReading = isSignedIn && model.continueItems.length > 0;
+  const isSmallLibrary = seriesList.length <= 2;
+  const showLatestSection = model.latest.length > 0 || !isSmallLibrary;
+  const showShortReadsSection = model.shortReads.length > 0 || !isSmallLibrary;
+  const showNightstandSection = model.rankings.length > 0 || !isSmallLibrary;
 
   return (
     <StorefrontPage
@@ -803,7 +755,9 @@ export default function NovelsLandingPage({
           hook={model.featuredHook}
           stackItems={[...model.novelShelf, ...model.latest].slice(0, 3)}
         />
-      ) : loading ? null : (
+      ) : loading ? (
+        <StorefrontSectionLoadingGrid count={2} />
+      ) : (
         <EmptyShelf
           title="Fresh novel picks are being queued"
           description="Open Search or Rankings for ready-to-read stories in this mode."
@@ -813,66 +767,77 @@ export default function NovelsLandingPage({
 
       <NovelMoodRail />
 
-      <section className="space-y-4">
-        <SectionHeading
-          eyebrow="Fresh serials"
-          title="Latest Chapters"
-          description="Compact chapter drops for quick late-night catch-up."
-          tone="channel"
-          action={
-            <Link
-              href="/search?type=novel&sort=latest"
-              className={`inline-flex min-h-[44px] items-center gap-2 px-4 text-sm font-medium text-white/78 ${storefrontSecondaryButtonClass}`}
-            >
-              <Sparkles className="size-4" />
-              Fresh updates
-            </Link>
-          }
-        />
-        <NovelUpdateFeed items={model.latest} />
-      </section>
-
-      {model.novelShelf.length > 0 || model.shelfSmall.length > 0 ? (
+      {showLatestSection ? (
         <section className="space-y-4">
           <SectionHeading
-            eyebrow="Editorial shelf"
-            title="Novel Shelf"
-            description="Two editorial leads up front, then a quieter shelf for the next chapter."
+            eyebrow="Fresh serials"
+            title="Latest Chapters"
+            description="Compact chapter drops for quick late-night catch-up."
             tone="channel"
+            action={
+              <Link
+                href="/search?type=novel&sort=latest"
+                className={`inline-flex min-h-[44px] items-center gap-2 px-4 text-sm font-medium text-white/78 ${storefrontSecondaryButtonClass}`}
+              >
+                <Sparkles className="size-4" />
+                Fresh updates
+              </Link>
+            }
           />
-          <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045)_0%,rgba(255,255,255,0.02)_100%)] p-4 shadow-[var(--gush-shadow-panel)] sm:p-5">
-            {model.novelShelf.length > 0 ? (
-              <div className="grid gap-4 lg:grid-cols-2">
-                {model.novelShelf.slice(0, 2).map((series, index) => (
-                  <NovelEditorialCard
-                    key={series.id}
-                    series={series}
-                    description={
-                      NOVEL_EDITORIAL_COPY[String(series?.title || "").trim()] ||
-                      buildCardHook(series, 156)
-                    }
-                    sectionName="novels_editorial_shelf"
-                    position={index + 1}
-                  />
-                ))}
-              </div>
-            ) : null}
-            {model.novelShelf.length > 0 && model.shelfSmall.length > 0 ? (
-              <div
-                aria-hidden="true"
-                className="my-4 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)]"
-              />
-            ) : null}
+          {model.latest.length > 0 ? (
+            <NovelUpdateFeed items={model.latest} />
+          ) : (
+            <ShelfFallbackNotice text="Fresh chapter drops will settle here once another late-night update lands." />
+          )}
+        </section>
+      ) : null}
+
+      <section className="space-y-4">
+        <SectionHeading
+          eyebrow="Editorial shelf"
+          title="Novel Shelf"
+          description="A quieter shelf for the next story you open tonight."
+          tone="channel"
+        />
+        <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045)_0%,rgba(255,255,255,0.02)_100%)] p-4 shadow-[var(--gush-shadow-panel)] sm:p-5">
+          {model.novelShelf.length > 0 ? (
+            <div className="grid gap-4 lg:grid-cols-2">
+              {model.novelShelf.slice(0, 2).map((series, index) => (
+                <NovelEditorialCard
+                  key={series.id}
+                  series={series}
+                  description={
+                    NOVEL_EDITORIAL_COPY[String(series?.title || "").trim()] ||
+                    buildCardHook(series, 156)
+                  }
+                  sectionName="novels_editorial_shelf"
+                  position={index + 1}
+                />
+              ))}
+            </div>
+          ) : null}
+          {model.novelShelf.length > 0 && model.shelfSmall.length > 0 ? (
+            <div
+              aria-hidden="true"
+              className="my-4 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent)]"
+            />
+          ) : null}
+          {model.shelfSmall.length > 0 ? (
             <NovelCardGrid
               items={model.shelfSmall}
-              badges={NOVEL_SHELF_SMALL_BADGES}
-              variants={NOVEL_SHELF_SMALL_VARIANTS}
               badge="Shelf Pick"
               sectionName="novels_shelf_small"
             />
-          </div>
-        </section>
-      ) : null}
+          ) : null}
+          {model.novelShelf.length === 0 && model.shelfSmall.length === 0 ? (
+            <CompactShelfPlaceholder
+              title="A smaller shelf can still feel intentional."
+              description="This lane stays selective until a few more novel picks are ready to stack here."
+              label="Curated shelf"
+            />
+          ) : null}
+        </div>
+      </section>
 
       {showContinueReading ? (
         <section className="space-y-4">
@@ -899,7 +864,7 @@ export default function NovelsLandingPage({
         </section>
       ) : null}
 
-      {model.shortReads.length > 0 ? (
+      {showShortReadsSection ? (
         <section className="space-y-4">
           <SectionHeading
             eyebrow="Quick reads"
@@ -907,12 +872,24 @@ export default function NovelsLandingPage({
             description="Short enough to start now, strong enough to remember tomorrow."
             tone="channel"
           />
-          <NovelCardGrid
-            items={model.shortReads}
-            badge="Short Read"
-            variants={NOVEL_SHORT_READ_VARIANTS}
-            sectionName="novels_short_reads"
-          />
+          {model.shortReads.length > 0 ? (
+            model.shortReads.length <= 2 ? (
+              <CuratedEditorialModule
+                items={model.shortReads}
+                sectionName="novels_short_reads"
+                actionLabel="Start Tonight"
+                variant="Novel"
+              />
+            ) : (
+              <NovelCardGrid
+                items={model.shortReads}
+                badge="Short Read"
+                sectionName="novels_short_reads"
+              />
+            )
+          ) : (
+            <ShelfFallbackNotice text="Shorter late-night picks will collect here once a faster read joins the shelf." />
+          )}
         </section>
       ) : null}
 
@@ -920,7 +897,7 @@ export default function NovelsLandingPage({
         <SectionHeading
           eyebrow="Complete arcs"
           title="Finished Stories"
-          description="No waiting, no cliffhanger gap — start and finish the full run tonight."
+          description="No waiting, no cliffhanger gap - start and finish the full run tonight."
           tone="channel"
         />
         {model.finishedStories.length > 0 ? (
@@ -934,18 +911,22 @@ export default function NovelsLandingPage({
                 key={`${series.id}-${index}`}
                 series={series}
                 position={index + 1}
-                titleOverride={FINISHED_STORY_VARIANTS[index]?.title || ""}
-                genreOverride={FINISHED_STORY_VARIANTS[index]?.genre || ""}
-                hookOverride={FINISHED_STORY_VARIANTS[index]?.hook || ""}
               />
             ))}
           </div>
         ) : (
-          <ShelfFallbackNotice text="Completed shelves rotate in as longer runs update. Open a fresh story tonight and this lane will keep changing." />
+          <StorefrontNoCoverCard
+            title="Completed runs stay selective."
+            description="When the first binge-ready novel lands, it gets a full editorial slot instead of filler tiles."
+            label="Completed shelf"
+            className="shadow-none"
+          />
         )}
       </section>
 
-      <NightstandPicks items={model.rankings} variants={NIGHTSTAND_PICK_VARIANTS} />
+      {showNightstandSection ? <NightstandPicks items={model.rankings} /> : null}
     </StorefrontPage>
   );
 }
+
+

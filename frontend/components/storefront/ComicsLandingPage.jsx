@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Sparkles } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, Sparkles } from "lucide-react";
 import { trackEvent } from "../../lib/trackEvent";
 import { withHomeArtwork } from "../../lib/homeArtwork";
 import { siteMaterialImages } from "../../lib/siteMaterialAssets";
 import {
+  CuratedEditorialModule,
   CoverCard,
   EmptyShelf,
   GenreShelfSection,
@@ -18,7 +19,11 @@ import {
   UpdateList,
   useCatalogFeed,
 } from "./StorefrontScaffold";
-import { storefrontSecondaryButtonClass } from "../common/StorefrontPagePrimitives";
+import {
+  storefrontBadgeClass,
+  StorefrontNoCoverCard,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 import {
   buildCompletedRail,
   buildGenreLabel,
@@ -111,6 +116,91 @@ function pickPrioritySeriesList(seriesList = [], titles = [], limit = titles.len
   return selected.slice(0, limit);
 }
 
+function FeaturedCompletedRunCard({ series, index = 0 }) {
+  if (!series) {
+    return null;
+  }
+
+  const coverUrl = series?.coverUrl || "";
+  const hasCover = Boolean(String(coverUrl).trim());
+
+  return (
+    <Link
+      href={`/series/${series.id}`}
+      onClick={() =>
+        trackEvent("story_click", {
+          seriesId: series?.id,
+          sourceSection: "comics_completed_featured",
+          position: index + 1,
+        })
+      }
+      className="group block"
+    >
+      <article className="relative overflow-hidden rounded-[32px] border border-amber-200/18 bg-[linear-gradient(135deg,rgba(27,15,20,0.98)_0%,rgba(10,12,21,0.98)_52%,rgba(16,24,28,0.98)_100%)] p-4 shadow-[0_30px_96px_rgba(0,0,0,0.38)] transition-all duration-200 hover:-translate-y-1 hover:border-amber-200/30 sm:p-5">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(251,191,36,0.16),transparent_24%),radial-gradient(circle_at_82%_20%,rgba(103,232,249,0.12),transparent_28%)]" />
+        <div className="relative grid gap-5 lg:grid-cols-[minmax(210px,260px)_minmax(0,1fr)] lg:items-end">
+          <div className="relative">
+            <div className="absolute left-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-amber-200/24 bg-amber-200/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-100">
+              <CheckCircle2 className="size-3.5" />
+              Completed
+            </div>
+            <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-[0_24px_72px_rgba(0,0,0,0.34)]">
+              {hasCover ? (
+                <div className="aspect-[3/4] overflow-hidden">
+                  <img
+                    src={coverUrl}
+                    alt=""
+                    aria-hidden="true"
+                    role="presentation"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                  />
+                </div>
+              ) : (
+                <StorefrontNoCoverCard
+                  title={series.title}
+                  description="Finished run ready to open from chapter one."
+                  label="Completed run"
+                  className="min-h-[312px] rounded-[inherit] border-0 shadow-none"
+                />
+              )}
+              <div className="border-t border-white/10 bg-[rgba(8,10,18,0.88)] p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/42">
+                  Featured run
+                </p>
+                <p className="mt-2 text-[1.02rem] font-semibold text-white">
+                  {series.title}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="min-w-0 pb-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/46">
+              Featured completed run
+            </p>
+            <h3 className="mt-3 max-w-[14ch] font-display text-[2.7rem] font-semibold leading-[0.92] tracking-[-0.065em] text-white sm:text-[3.6rem]">
+              {series.title}
+            </h3>
+            <p className="mt-4 max-w-[34rem] text-[0.96rem] leading-7 text-white/66">
+              {buildLatestInstallmentLabel(series)} / {buildStatusLabel(series)} / Read the full arc tonight.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/70`}>
+                {buildGenreLabel(series, 2) || "Comic"}
+              </span>
+              <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/70`}>
+                All chapters open
+              </span>
+            </div>
+            <div className="mt-6 inline-flex min-h-[46px] items-center gap-2 rounded-full border border-amber-200/24 bg-amber-200/12 px-5 text-sm font-semibold text-amber-50 transition-all duration-150 group-hover:border-amber-200/34 group-hover:bg-amber-200/16">
+              Read Full Series
+            </div>
+          </div>
+        </div>
+      </article>
+    </Link>
+  );
+}
+
 export default function ComicsLandingPage({
   initialSeries = [],
   initialReady = false,
@@ -194,6 +284,7 @@ export default function ComicsLandingPage({
           secondaryLabel="View Series"
           statsVariant="chips"
           theme="comic"
+          mobileContentFirst
           backgroundImageUrl={siteMaterialImages.comicsFeaturedHero}
           backgroundPosition="right center"
           featureLabel="Dark fantasy heat, large covers, and a cliffhanger worth the tap"
@@ -249,6 +340,15 @@ export default function ComicsLandingPage({
           sectionName="comics_fresh_drops"
           visual="channel"
         />
+        {model.freshDrops.length === 0 ? (
+          <StorefrontNoCoverCard
+            title="Fresh drops are staying light tonight."
+            description="New comic updates will land here once a stronger set of chapter drops is ready."
+            label="Fresh drops"
+            compact
+            className="shadow-none"
+          />
+        ) : null}
       </section>
 
       <section className="space-y-4">
@@ -267,26 +367,43 @@ export default function ComicsLandingPage({
             </Link>
           }
         />
-        <ShelfScroller>
-          {model.popular.map((series, index) => (
-            <CoverCard
-              key={series.id}
-              series={series}
-              href={`/series/${series.id}`}
-              variant="comic"
-              visual="channel"
-              badge={`#${index + 1}`}
-              actionLabel={buildLatestInstallmentLabel(series)}
-              onClick={() =>
-                trackEvent("story_click", {
-                  seriesId: series?.id,
-                  sourceSection: "comics_popular",
-                  position: index + 1,
-                })
-              }
-            />
-          ))}
-        </ShelfScroller>
+        {model.popular.length > 2 ? (
+          <ShelfScroller>
+            {model.popular.map((series, index) => (
+              <CoverCard
+                key={series.id}
+                series={series}
+                href={`/series/${series.id}`}
+                variant="comic"
+                visual="channel"
+                badge={`#${index + 1}`}
+                actionLabel={buildLatestInstallmentLabel(series)}
+                onClick={() =>
+                  trackEvent("story_click", {
+                    seriesId: series?.id,
+                    sourceSection: "comics_popular",
+                    position: index + 1,
+                  })
+                }
+              />
+            ))}
+          </ShelfScroller>
+        ) : model.popular.length > 0 ? (
+          <CuratedEditorialModule
+            items={model.popular}
+            sectionName="comics_popular"
+            actionLabel="Open Comic"
+            variant="Comic"
+          />
+        ) : (
+          <StorefrontNoCoverCard
+            title="Popular picks are still a tighter shelf tonight."
+            description="This lane will open up once a few stronger covers are ready to carry it."
+            label="Popular shelf"
+            compact
+            className="shadow-none"
+          />
+        )}
       </section>
 
       {model.genres.length > 0 ? (
@@ -308,26 +425,37 @@ export default function ComicsLandingPage({
             description="Finished runs when you want the payoff tonight, not next week."
             tone="channel"
           />
-          <ShelfScroller>
-            {model.completed.map((series, index) => (
-              <CoverCard
-                key={series.id}
-                series={series}
-                href={`/series/${series.id}`}
-                variant="comic"
-                visual="channel"
-                badge="Completed"
-                actionLabel="Read Full Series"
-                onClick={() =>
-                  trackEvent("story_click", {
-                    seriesId: series?.id,
-                    sourceSection: "comics_completed",
-                    position: index + 1,
-                  })
-                }
-              />
-            ))}
-          </ShelfScroller>
+          {model.completed.length === 1 ? (
+            <FeaturedCompletedRunCard series={model.completed[0]} />
+          ) : model.completed.length <= 2 ? (
+            <CuratedEditorialModule
+              items={model.completed}
+              sectionName="comics_completed"
+              actionLabel="Read Full Series"
+              variant="Comic"
+            />
+          ) : (
+            <ShelfScroller>
+              {model.completed.map((series, index) => (
+                <CoverCard
+                  key={series.id}
+                  series={series}
+                  href={`/series/${series.id}`}
+                  variant="comic"
+                  visual="channel"
+                  badge="Completed"
+                  actionLabel="Read Full Series"
+                  onClick={() =>
+                    trackEvent("story_click", {
+                      seriesId: series?.id,
+                      sourceSection: "comics_completed",
+                      position: index + 1,
+                    })
+                  }
+                />
+              ))}
+            </ShelfScroller>
+          )}
         </section>
       ) : null}
 
