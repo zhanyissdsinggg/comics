@@ -72,6 +72,18 @@ const NOVEL_EDITORIAL_COPY = {
   "Neon Nights":
     "A missing singer, a glitching city, and a courier moving through the dark like she already knows the wrong answer is the only way in.",
 };
+const CURATED_SHELF_COPY = {
+  "Solar Wind":
+    "A signal in deep space keeps tugging the crew back toward the one route they should have left alone.",
+  "Neon Nights":
+    "A noir trail of clubs, glitches, and missing names keeps every next chapter feeling like a bad idea worth following.",
+};
+const FINISHED_STORY_FALLBACK = {
+  title: "Moonlight Sonata",
+  genre: "Romance / Drama",
+  hook:
+    "A quiet romance with one final performance, one last letter, and a clean ending worth reading tonight.",
+};
 const FINISHED_STORY_CTA_LABEL = "Start Full Story";
 const FINISHED_STORY_STATUS_LABEL = "Completed";
 
@@ -563,6 +575,51 @@ function FinishedStoryCard({ series, position = 0, titleOverride = "", genreOver
   );
 }
 
+function FeaturedFinishedStoryFallback() {
+  return (
+    <article className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(145deg,rgba(24,17,35,0.98)_0%,rgba(10,11,20,0.98)_56%,rgba(21,15,31,0.98)_100%)] p-5 shadow-[0_28px_90px_rgba(0,0,0,0.32)] sm:p-6">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,214,163,0.18),transparent_24%),radial-gradient(circle_at_82%_16%,rgba(255,79,154,0.16),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0))]"
+      />
+      <div className="relative grid gap-5 sm:grid-cols-[124px_minmax(0,1fr)] sm:items-center">
+        <StorefrontNoCoverCard
+          title={FINISHED_STORY_FALLBACK.title}
+          description={FINISHED_STORY_FALLBACK.hook}
+          label="Featured completed novel"
+          compact
+          className="min-h-[192px] rounded-[24px] border-white/12 shadow-none"
+        />
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/70`}>
+              {FINISHED_STORY_FALLBACK.genre}
+            </span>
+            <span className={`${storefrontBadgeClass} px-3 py-1.5 text-fuchsia-100`}>
+              {FINISHED_STORY_STATUS_LABEL}
+            </span>
+          </div>
+          <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/48">
+            Featured Completed Novel
+          </p>
+          <h3 className="mt-2 font-display text-[2rem] font-semibold leading-[0.96] tracking-[-0.05em] text-white">
+            {FINISHED_STORY_FALLBACK.title}
+          </h3>
+          <p className="mt-3 max-w-[34rem] text-sm leading-7 text-white/66">
+            {FINISHED_STORY_FALLBACK.hook}
+          </p>
+          <div
+            className={`mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-fuchsia-200/24 bg-fuchsia-300/[0.12] px-4 text-sm font-semibold text-fuchsia-50`}
+          >
+            {FINISHED_STORY_CTA_LABEL}
+            <ArrowRight className="size-4" />
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 function NightstandPicks({ items = [] }) {
   if (!Array.isArray(items) || items.length === 0) {
     return (
@@ -570,10 +627,10 @@ function NightstandPicks({ items = [] }) {
         <SectionHeading
           eyebrow="Nightstand Picks"
           title="Readers Keep Opening"
-          description="Soft signals collect here as more readers settle into a late-night story."
+          description="A smaller reading signal board, kept tight on purpose."
           tone="channel"
         />
-        <ShelfFallbackNotice text="Reader-opening signals will build here as more stories start gathering repeat reads." />
+        <ShelfFallbackNotice text="A tight set of late-night picks can still feel definitive when the shelf stays selective." />
       </section>
     );
   }
@@ -759,8 +816,8 @@ export default function NovelsLandingPage({
         <StorefrontSectionLoadingGrid count={2} />
       ) : (
         <EmptyShelf
-          title="Fresh novel picks are being queued"
-          description="Open Search or Rankings for ready-to-read stories in this mode."
+          title="A shorter shelf, chosen on purpose."
+          description="Open Search or Rankings to move from tonight's lead novel into another story without losing the quieter pace."
           actionHref="/search?type=novel"
         />
       )}
@@ -787,7 +844,7 @@ export default function NovelsLandingPage({
           {model.latest.length > 0 ? (
             <NovelUpdateFeed items={model.latest} />
           ) : (
-            <ShelfFallbackNotice text="Fresh chapter drops will settle here once another late-night update lands." />
+            <ShelfFallbackNotice text="Tonight's shelf is leaning on finished pacing over fresh-drop noise." />
           )}
         </section>
       ) : null}
@@ -801,12 +858,17 @@ export default function NovelsLandingPage({
         />
         <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045)_0%,rgba(255,255,255,0.02)_100%)] p-4 shadow-[var(--gush-shadow-panel)] sm:p-5">
           {model.novelShelf.length > 0 ? (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div
+              className={`grid gap-4 ${
+                model.novelShelf.length === 1 ? "grid-cols-1" : "lg:grid-cols-2"
+              }`}
+            >
               {model.novelShelf.slice(0, 2).map((series, index) => (
                 <NovelEditorialCard
                   key={series.id}
                   series={series}
                   description={
+                    CURATED_SHELF_COPY[String(series?.title || "").trim()] ||
                     NOVEL_EDITORIAL_COPY[String(series?.title || "").trim()] ||
                     buildCardHook(series, 156)
                   }
@@ -832,7 +894,7 @@ export default function NovelsLandingPage({
           {model.novelShelf.length === 0 && model.shelfSmall.length === 0 ? (
             <CompactShelfPlaceholder
               title="A smaller shelf can still feel intentional."
-              description="This lane stays selective until a few more novel picks are ready to stack here."
+              description="One or two strong editorial picks read better here than a padded row of filler cards."
               label="Curated shelf"
             />
           ) : null}
@@ -888,7 +950,7 @@ export default function NovelsLandingPage({
               />
             )
           ) : (
-            <ShelfFallbackNotice text="Shorter late-night picks will collect here once a faster read joins the shelf." />
+            <ShelfFallbackNotice text="The shelf is staying focused on longer pulls tonight, not quick samplers." />
           )}
         </section>
       ) : null}
@@ -897,7 +959,7 @@ export default function NovelsLandingPage({
         <SectionHeading
           eyebrow="Complete arcs"
           title="Finished Stories"
-          description="No waiting, no cliffhanger gap - start and finish the full run tonight."
+          description="No waiting, no cliffhanger gap — start and finish the full run tonight."
           tone="channel"
         />
         {model.finishedStories.length > 0 ? (
@@ -915,12 +977,7 @@ export default function NovelsLandingPage({
             ))}
           </div>
         ) : (
-          <StorefrontNoCoverCard
-            title="Completed runs stay selective."
-            description="When the first binge-ready novel lands, it gets a full editorial slot instead of filler tiles."
-            label="Completed shelf"
-            className="shadow-none"
-          />
+          <FeaturedFinishedStoryFallback />
         )}
       </section>
 

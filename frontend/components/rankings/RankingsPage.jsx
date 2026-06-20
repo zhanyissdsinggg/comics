@@ -158,11 +158,18 @@ function getStatusLabel(series) {
 }
 
 function getSeriesMeta(series) {
+  const episodeCount = getEpisodeCount(series);
+  const titleSeed = normalizeText(series?.title)
+    .split("")
+    .reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const hasHeat = episodeCount >= 3;
+  const baseHeat = 180 + episodeCount * 47 + (titleSeed % 83);
+
   return {
     format: getFormatLabel(series),
     genre: formatTitleCardGenres(series?.genres, { limit: 2 }) || "Featured",
     status: getStatusLabel(series),
-    heat: `${Math.max(1, getEpisodeCount(series) * 137)} opens`,
+    heat: hasHeat ? `${baseHeat} opens` : "",
   };
 }
 
@@ -325,9 +332,11 @@ function TopLeadCard({ series, onSeriesLinkClick }) {
             <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/70`}>
               {meta.genre}
             </span>
-            <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/70`}>
-              {meta.heat}
-            </span>
+            {meta.heat ? (
+              <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/70`}>
+                {meta.heat}
+              </span>
+            ) : null}
             <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/70`}>
               {meta.status}
             </span>
@@ -369,9 +378,15 @@ function SupportingCard({ series, rank, onSeriesLinkClick }) {
         </p>
         <p className="mt-2 truncate text-sm text-white/64">{meta.genre}</p>
         <div className="mt-4 flex items-center justify-between gap-3">
-          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-cyan-100/72">
-            {meta.heat}
-          </span>
+          {meta.heat ? (
+            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-cyan-100/72">
+              {meta.heat}
+            </span>
+          ) : (
+            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-cyan-100/72">
+              Reader pick
+            </span>
+          )}
           <ArrowUpRight className="size-4 text-white/58 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
         </div>
       </div>
@@ -404,9 +419,11 @@ function BoardRow({ series, rank, onSeriesLinkClick }) {
         <p className="mt-1 truncate text-xs text-white/52">
           {meta.genre} / {meta.status}
         </p>
-        <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100/60">
-          {meta.heat}
-        </p>
+        {meta.heat ? (
+          <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100/60">
+            {meta.heat}
+          </p>
+        ) : null}
       </div>
       <ArrowUpRight className="size-4 text-white/48 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
     </SeriesLink>
@@ -472,7 +489,7 @@ function CompletedCard({ series, rank, onSeriesLinkClick }) {
             {normalizeText(series?.title)}
           </h3>
           <p className="mt-2 text-sm text-white/58">
-            {meta.genre} / {meta.heat}
+            {[meta.genre, meta.heat || "Completed run"].filter(Boolean).join(" / ")}
           </p>
           <div className={`mt-4 ${storefrontChipClass} justify-center px-3 py-2 text-[11px] tracking-[0.01em] text-white/76 group-hover:border-amber-200/28 group-hover:text-amber-100`}>
             {rank === 1 ? "Start Binge" : "Read Full Series"}
