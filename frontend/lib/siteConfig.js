@@ -5,15 +5,15 @@ function clean(value) {
 function normalizeCompanyName(value) {
   const raw = clean(value);
   if (!raw) {
-    return "Targaryen Technology Co., Limited.";
+    return "Targaryen Technology Co., Limited";
   }
 
   const normalized = raw.toLowerCase().replace(/\.+$/, "");
   if (normalized === "targaryen technology co., limited") {
-    return "Targaryen Technology Co., Limited.";
+    return "Targaryen Technology Co., Limited";
   }
 
-  return raw;
+  return raw.replace(/\.+$/, "");
 }
 
 const publicEnvFlags = {
@@ -82,16 +82,18 @@ function normalizeSiteUrl(value) {
 }
 
 export const siteConfig = {
-  siteName: clean(process.env.NEXT_PUBLIC_SITE_NAME) || "Gush",
+  siteName:
+    clean(process.env.NEXT_PUBLIC_SITE_NAME) || "Gush Comics & Novels",
   companyName: normalizeCompanyName(process.env.NEXT_PUBLIC_COMPANY_NAME),
   siteUrl: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
   defaultDescription:
     clean(process.env.NEXT_PUBLIC_SITE_DESCRIPTION) ||
-    "Read comics and novels on Gush.",
-  tagline: clean(process.env.NEXT_PUBLIC_SITE_TAGLINE) || "Comics and novels.",
+    "Read comics, novels, and interactive stories on Gush Comics & Novels.",
+  tagline:
+    clean(process.env.NEXT_PUBLIC_SITE_TAGLINE) || "Comics, novels, and routes.",
   aboutSummary:
     clean(process.env.NEXT_PUBLIC_ABOUT_SUMMARY) ||
-    "Gush brings comics and novels together in one reading home.",
+    "Gush Comics & Novels brings comics, novels, and routes together in one reading home.",
   supportEmail:
     clean(process.env.NEXT_PUBLIC_SUPPORT_EMAIL) || "support@gushcomics.com",
   privacyEmail:

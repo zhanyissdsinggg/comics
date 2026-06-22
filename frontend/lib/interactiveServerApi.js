@@ -39,6 +39,11 @@ function buildCookieHeader(cookieStore) {
 }
 
 export async function apiGetServer(path) {
+  const response = await apiGetServerResponse(path);
+  return response.ok ? response.data : null;
+}
+
+export async function apiGetServerResponse(path) {
   try {
     const cookieStore = await cookies();
     const baseUrl = await getBaseUrl();
@@ -48,12 +53,32 @@ export async function apiGetServer(path) {
         Cookie: buildCookieHeader(cookieStore),
       },
     });
+    const payload = await response.json().catch(() => null);
     if (!response.ok) {
-      return null;
+      if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+        return {
+          ok: false,
+          status: response.status,
+          ...payload,
+        };
+      }
+      return {
+        ok: false,
+        status: response.status,
+        error: response.statusText || "REQUEST_FAILED",
+      };
     }
-    return await response.json();
+    return {
+      ok: true,
+      status: response.status,
+      data: payload,
+    };
   } catch {
-    return null;
+    return {
+      ok: false,
+      status: 0,
+      error: "NETWORK_ERROR",
+    };
   }
 }
 
@@ -99,14 +124,43 @@ export async function getInteractiveNavigationAvailabilityServer() {
 }
 
 export async function getInteractiveStoryServer(slug) {
+  const state = await getInteractiveStoryServerState(slug);
+  return state.story;
+}
+
+export async function getInteractiveStoryServerState(slug) {
   const normalizedSlug = String(slug || "").trim();
   if (!normalizedSlug) {
-    return null;
+    return { story: null, accessState: null };
   }
-  const payload = await apiGetServer(
+
+  const response = await apiGetServerResponse(
     `/api/interactive-stories/slug/${encodeURIComponent(normalizedSlug)}`,
   );
-  return payload?.story || null;
+
+  if (response.ok) {
+    return {
+      story: response.data?.story || null,
+      accessState: null,
+    };
+  }
+
+  if (response.status === 402) {
+    return {
+      story: null,
+      accessState: {
+        status: response.status,
+        reason: response.reason || "",
+        error: response.error || "",
+        message: response.message || "",
+      },
+    };
+  }
+
+  return {
+    story: null,
+    accessState: null,
+  };
 }
 
 export async function getInteractiveProgressServer(slug) {
@@ -118,4 +172,39 @@ export async function getInteractiveProgressServer(slug) {
     `/api/interactive-stories/slug/${encodeURIComponent(normalizedSlug)}/current`,
   );
   return payload?.progress || null;
+}
+
+export async function getInteractiveProgressServerState(slug) {
+  const normalizedSlug = String(slug || "").trim();
+  if (!normalizedSlug) {
+    return { progress: null, accessState: null };
+  }
+
+  const response = await apiGetServerResponse(
+    `/api/interactive-stories/slug/${encodeURIComponent(normalizedSlug)}/current`,
+  );
+
+  if (response.ok) {
+    return {
+      progress: response.data?.progress || null,
+      accessState: null,
+    };
+  }
+
+  if (response.status === 402) {
+    return {
+      progress: null,
+      accessState: {
+        status: response.status,
+        reason: response.reason || "",
+        error: response.error || "",
+        message: response.message || "",
+      },
+    };
+  }
+
+  return {
+    progress: null,
+    accessState: null,
+  };
 }

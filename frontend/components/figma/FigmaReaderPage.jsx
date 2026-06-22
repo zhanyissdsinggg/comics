@@ -47,6 +47,8 @@ import {
 import { siteConfig } from "../../lib/siteConfig";
 import { cn, isAdultContent } from "./figma-utils";
 
+const READER_LOADING_TIMEOUT_MS = 15000;
+
 function createIdempotencyKey() {
   if (
     typeof crypto !== "undefined" &&
@@ -486,6 +488,7 @@ function ReaderContent({
   const [hasReachedPreviewEnd, setHasReachedPreviewEnd] = useState(false);
   const [hasReachedChapterEnd, setHasReachedChapterEnd] = useState(false);
   const [activeAttribution, setActiveAttribution] = useState(null);
+  const loadingTimeoutRef = useRef(null);
   const entitlement = bySeriesId[seriesId] || { unlockedEpisodeIds: [] };
   const routeAttribution = useMemo(
     () => readPaymentAttributionFromSearchParams(searchParams),
@@ -708,6 +711,32 @@ function ReaderContent({
   }, []);
 
   useEffect(() => {
+    if (!loading) {
+      if (loadingTimeoutRef.current) {
+        window.clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
+      return undefined;
+    }
+
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    loadingTimeoutRef.current = window.setTimeout(() => {
+      setError((current) => current || "READER_LOAD_TIMEOUT");
+      setLoading(false);
+    }, READER_LOADING_TIMEOUT_MS);
+
+    return () => {
+      if (loadingTimeoutRef.current) {
+        window.clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
+    };
+  }, [loading]);
+
+  useEffect(() => {
     if (!toast) {
       return undefined;
     }
@@ -872,6 +901,11 @@ function ReaderContent({
   const fallbackEpisodeTitle =
     String(fallbackData?.episodeTitle || "Preparing chapter").trim() ||
     "Preparing chapter";
+  const handleReaderRetry = useCallback(() => {
+    setError("");
+    setLoading(true);
+    router.refresh();
+  }, [router]);
   const novelTheme = nightMode ? "dark" : theme || "light";
   const novelShellClass =
     "overflow-x-hidden bg-[radial-gradient(circle_at_top,rgba(255,79,154,0.12),transparent_26%),radial-gradient(circle_at_82%_16%,rgba(103,232,249,0.1),transparent_24%),linear-gradient(180deg,#05060a_0%,#0a0d16_46%,#05060a_100%)] text-white";
@@ -1504,6 +1538,7 @@ function ReaderContent({
     return (
       <ReaderErrorState
         isComic={loadingIsComic}
+        installmentNoun={installmentNoun}
         rootClassName={loadingRootClass}
         heroClassName={
           loadingIsComic ? cn(palette.surface, palette.border) : novelHeroClass
@@ -1519,7 +1554,7 @@ function ReaderContent({
             ? "border-white/10 text-gray-300 hover:bg-white/5 hover:text-white"
             : `${novelBorderClass} bg-white/5 text-white hover:bg-white/10`,
         )}
-        onRetry={() => router.refresh()}
+        onRetry={handleReaderRetry}
         onBack={() => router.push(backToSeriesHref)}
       />
     );

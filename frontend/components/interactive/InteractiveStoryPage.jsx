@@ -59,6 +59,50 @@ function openAuthModal() {
   window.dispatchEvent(new CustomEvent("auth:open"));
 }
 
+function getResponseReason(response) {
+  return normalizeText(
+    response?.reason || response?.error || response?.message || "",
+  ).toUpperCase();
+}
+
+function buildInteractiveAccessState({
+  response,
+  isSignedIn = false,
+  returnHref = "/interactive",
+}) {
+  const reason = getResponseReason(response);
+  const premiumRequired = reason.includes("PREMIUM");
+  const tokenRequired =
+    reason.includes("TOKEN") ||
+    reason.includes("POINT") ||
+    reason.includes("INSUFFICIENT");
+  const actionHref = premiumRequired
+    ? `/subscribe?returnTo=${encodeURIComponent(returnHref)}`
+    : `/store?returnTo=${encodeURIComponent(returnHref)}`;
+
+  return {
+    reason,
+    eyebrow: premiumRequired
+      ? "Premium route"
+      : tokenRequired
+        ? "Paid unlock"
+        : "Access required",
+    title: premiumRequired
+      ? "This route needs premium access before it can open."
+      : tokenRequired
+        ? "This route needs a paid unlock before it can open."
+        : "This route needs story access before it can open.",
+    description: premiumRequired
+      ? "Sign in to check your plan, then open Store to review the active membership pricing and return to this route."
+      : tokenRequired
+        ? "Sign in to verify your account, then open Store to review current point pricing and return to this route."
+        : "Sign in to verify your account, then open Store to review current access rules and pricing before you come back to this route.",
+    actionHref,
+    actionLabel: premiumRequired ? "View plans" : "Open Store",
+    showSignIn: !isSignedIn,
+  };
+}
+
 function toStateRows(state) {
   if (!state || typeof state !== "object") {
     return [];
@@ -249,15 +293,19 @@ export default function InteractiveStoryPage({
   mode = "play",
   initialStory = null,
   initialProgress = null,
+  initialAccessState = null,
   initialContentMode = "normal",
 }) {
   const [loading, setLoading] = useState(
-    () => !initialStory || (mode === "play" && !initialProgress),
+    () =>
+      !initialStory ||
+      (mode === "play" && !initialProgress && !initialAccessState),
   );
   const [story, setStory] = useState(initialStory);
   const [progress, setProgress] = useState(initialProgress);
   const [error, setError] = useState("");
   const [authRequired, setAuthRequired] = useState(false);
+  const [accessState, setAccessState] = useState(initialAccessState);
   const [submittingChoiceId, setSubmittingChoiceId] = useState("");
   const [unlockingChoiceId, setUnlockingChoiceId] = useState("");
   const [degradedNotice, setDegradedNotice] = useState("");
@@ -269,6 +317,8 @@ export default function InteractiveStoryPage({
 
   const normalizedSlug = normalizeText(storySlug);
   const resolvedContentMode = normalizeText(contentMode || initialContentMode || "normal").toLowerCase();
+  const detailHref = `/interactive/${encodeURIComponent(normalizedSlug)}`;
+  const playHref = `${detailHref}/play`;
 
   const loadStory = useCallback(async () => {
     if (!normalizedSlug) {
@@ -282,15 +332,29 @@ export default function InteractiveStoryPage({
         cacheMs: 0,
       },
     );
+    if (response.status === 402) {
+      setStory(null);
+      setAccessState(
+        buildInteractiveAccessState({
+          response,
+          isSignedIn,
+          returnHref: mode === "play" ? playHref : detailHref,
+        }),
+      );
+      setError("");
+      return null;
+    }
     if (!response.ok || !response.data?.story) {
       setStory(null);
+      setAccessState(null);
       setError("Interactive story isn't available.");
       return null;
     }
     setStory(response.data.story);
+    setAccessState(null);
     setError("");
     return response.data.story;
-  }, [normalizedSlug]);
+  }, [detailHref, isSignedIn, mode, normalizedSlug, playHref]);
 
   const loadProgress = useCallback(async () => {
     if (!normalizedSlug) {
@@ -307,6 +371,7 @@ export default function InteractiveStoryPage({
     if (response.ok && response.data?.progress) {
       setProgress(response.data.progress);
       setAuthRequired(false);
+      setAccessState(null);
       setError("");
       return response.data.progress;
     }
@@ -320,15 +385,31 @@ export default function InteractiveStoryPage({
       return null;
     }
 
+    if (response.status === 402) {
+      setProgress(null);
+      setAuthRequired(false);
+      setAccessState(
+        buildInteractiveAccessState({
+          response,
+          isSignedIn,
+          returnHref: mode === "play" ? playHref : detailHref,
+        }),
+      );
+      setError("");
+      return null;
+    }
+
     if (response.status === 404) {
       setProgress(null);
+      setAccessState(null);
       setError("Interactive story isn't available.");
       return null;
     }
 
+    setAccessState(null);
     setError("Couldn't load your progress.");
     return null;
-  }, [mode, normalizedSlug]);
+  }, [detailHref, isSignedIn, mode, normalizedSlug, playHref]);
 
   useEffect(() => {
     if (!hydrated) {
@@ -337,9 +418,12 @@ export default function InteractiveStoryPage({
 
     let active = true;
     async function bootstrap() {
-      setLoading(!initialStory || (mode === "play" && !initialProgress));
+      setLoading(
+        !initialStory || (mode === "play" && !initialProgress && !initialAccessState),
+      );
       setError("");
       setDegradedNotice("");
+      setAccessState(initialAccessState || null);
 
       const storyPayload = initialStory || (await loadStory());
       if (!active || !storyPayload) {
@@ -347,7 +431,7 @@ export default function InteractiveStoryPage({
         return;
       }
 
-      if (mode === "play" && !initialProgress) {
+      if (mode === "play" && !initialProgress && !initialAccessState) {
         await loadProgress();
       }
 
@@ -360,7 +444,15 @@ export default function InteractiveStoryPage({
     return () => {
       active = false;
     };
-  }, [hydrated, initialProgress, initialStory, loadProgress, loadStory, mode]);
+  }, [
+    hydrated,
+    initialAccessState,
+    initialProgress,
+    initialStory,
+    loadProgress,
+    loadStory,
+    mode,
+  ]);
 
   useEffect(() => {
     if (!story?.id && !progress?.story?.id) {
@@ -482,10 +574,10 @@ export default function InteractiveStoryPage({
             contentMode: resolvedContentMode,
             sourceSection: "interactive_play",
           }),
-          reason: response.data?.reason || choice.lockedReason || "LOCKED",
+          reason: response.reason || choice.lockedReason || "LOCKED",
         });
         setDegradedNotice(
-          response.data?.reason === "TOKEN_UNLOCK_COMING_SOON"
+          response.reason === "TOKEN_UNLOCK_COMING_SOON"
             ? "This choice unlocks later."
             : "That choice is still locked for this account.",
         );
@@ -556,7 +648,7 @@ export default function InteractiveStoryPage({
 
       if (response.status === 403) {
         setDegradedNotice(
-          response.data?.reason === "TOKEN_UNLOCK_COMING_SOON"
+          response.reason === "TOKEN_UNLOCK_COMING_SOON"
             ? "This choice unlocks later."
             : "That choice is locked right now.",
         );
@@ -566,9 +658,9 @@ export default function InteractiveStoryPage({
 
       if (response.status === 409) {
         setDegradedNotice(
-          response.data?.reason === "TARGET_NODE_NOT_AVAILABLE"
+          response.reason === "TARGET_NODE_NOT_AVAILABLE"
             ? "That path isn't open yet."
-            : response.data?.reason === "REQUEST_IN_PROGRESS"
+            : response.reason === "REQUEST_IN_PROGRESS"
               ? "That choice is already being processed. Give it a second."
               : "Synced your latest scene.",
         );
@@ -617,6 +709,20 @@ export default function InteractiveStoryPage({
     setDegradedNotice("Couldn't restart right now.");
   }, [progress, resolvedContentMode, story, submittingChoiceId, unlockingChoiceId]);
 
+  const handleRetryAccess = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    setDegradedNotice("");
+    setAccessState(null);
+
+    const storyPayload = story || (await loadStory());
+    if (mode === "play" && storyPayload) {
+      await loadProgress();
+    }
+
+    setLoading(false);
+  }, [loadProgress, loadStory, mode, story]);
+
   const storyStateRows = useMemo(() => toStateRows(progress?.state), [progress?.state]);
   const node = progress?.node || null;
   const storyTitle = normalizeText(story?.title || progress?.story?.title || "Interactive");
@@ -625,9 +731,8 @@ export default function InteractiveStoryPage({
   const path = Array.isArray(progress?.path) ? progress.path : [];
   const routeDepth = Math.max(1, getRouteDepth(progress));
   const continueLabel = progress?.node?.id ? "Continue Reading" : "Start Reading";
-  const detailHref = `/interactive/${encodeURIComponent(normalizedSlug)}`;
-  const playHref = `${detailHref}/play`;
-  const showSignInStart = authRequired && !node?.id;
+  const showSignInStart = authRequired && !node?.id && !accessState;
+  const showAccessGate = mode === "play" && Boolean(accessState) && !node?.id;
   const showRawState = isInteractiveDebugEnabled();
   const whyPlayItems = useMemo(() => getStoryWhyPlayItems(story), [story]);
   const storyVisual = useMemo(() => getStoryVisual(story), [story]);
@@ -671,6 +776,64 @@ export default function InteractiveStoryPage({
 
   if (loading) {
     return <LoadingShell />;
+  }
+
+  if (mode !== "play" && !story && accessState) {
+    return (
+      <StorefrontPage accentClass="from-[rgba(255,79,154,0.14)] via-[rgba(167,139,250,0.08)] to-[rgba(103,232,249,0.14)]">
+        <SurfacePanel
+          tone="highlight"
+          accent="amber"
+          appearance="dark"
+          className="min-h-[320px]"
+        >
+          <div className="grid min-h-[260px] gap-5">
+            <div>
+              <p className={panelEyebrowClass}>{accessState.eyebrow}</p>
+              <h1 className="mt-2 max-w-3xl font-display text-[2.3rem] font-semibold leading-[0.94] tracking-[-0.06em] text-white">
+                {accessState.title}
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-[1.72] text-white/74">
+                {accessState.description}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {accessState.showSignIn ? (
+                <button
+                  type="button"
+                  onClick={openAuthModal}
+                  className={storefrontPrimaryButtonClass}
+                >
+                  Sign in
+                </button>
+              ) : null}
+              <Link
+                href={accessState.actionHref}
+                className={
+                  accessState.showSignIn
+                    ? storefrontSecondaryButtonClass
+                    : storefrontPrimaryButtonClass
+                }
+              >
+                {accessState.actionLabel}
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  void handleRetryAccess();
+                }}
+                className={storefrontSecondaryButtonClass}
+              >
+                Retry access
+              </button>
+              <Link href="/interactive" className={storefrontSecondaryButtonClass}>
+                Back to Interactive
+              </Link>
+            </div>
+          </div>
+        </SurfacePanel>
+      </StorefrontPage>
+    );
   }
 
   if (mode !== "play" && !story) {
@@ -1015,7 +1178,50 @@ export default function InteractiveStoryPage({
                 accent={isEnding ? "rose" : storyVisual.accent}
                 appearance="dark"
               >
-                {showSignInStart ? (
+                {showAccessGate ? (
+                  <div className="grid gap-4">
+                    <p className={panelEyebrowClass}>{accessState.eyebrow}</p>
+                    <h2 className="max-w-3xl font-display text-[2rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
+                      {accessState.title}
+                    </h2>
+                    <p className="max-w-2xl text-sm leading-[1.72] text-white/80">
+                      {accessState.description}
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      {accessState.showSignIn ? (
+                        <button
+                          type="button"
+                          onClick={openAuthModal}
+                          className={storefrontPrimaryButtonClass}
+                        >
+                          Sign in
+                        </button>
+                      ) : null}
+                      <Link
+                        href={accessState.actionHref}
+                        className={
+                          accessState.showSignIn
+                            ? storefrontSecondaryButtonClass
+                            : storefrontPrimaryButtonClass
+                        }
+                      >
+                        {accessState.actionLabel}
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void handleRetryAccess();
+                        }}
+                        className={storefrontSecondaryButtonClass}
+                      >
+                        Retry access
+                      </button>
+                      <Link href={detailHref} className={storefrontSecondaryButtonClass}>
+                        Back to overview
+                      </Link>
+                    </div>
+                  </div>
+                ) : showSignInStart ? (
                   <div className="grid gap-4">
                     <p className={panelEyebrowClass}>
                       Sign in to start reading
@@ -1094,7 +1300,7 @@ export default function InteractiveStoryPage({
               </SurfacePanel>
             </div>
 
-            {!isEnding && !showSignInStart ? (
+            {!isEnding && !showSignInStart && !showAccessGate ? (
               <SurfacePanel tone="muted" accent="amber" appearance="dark">
                 <div className="flex items-center justify-between gap-3">
                   <h2 className="text-base font-semibold tracking-[-0.02em] text-white">

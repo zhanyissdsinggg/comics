@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo } from "react";
 import Link from "next/link";
@@ -77,12 +77,6 @@ const CURATED_SHELF_COPY = {
     "A signal in deep space keeps tugging the crew back toward the one route they should have left alone.",
   "Neon Nights":
     "A noir trail of clubs, glitches, and missing names keeps every next chapter feeling like a bad idea worth following.",
-};
-const FINISHED_STORY_FALLBACK = {
-  title: "Moonlight Sonata",
-  genre: "Romance / Drama",
-  hook:
-    "A quiet romance with one final performance, one last letter, and a clean ending worth reading tonight.",
 };
 const FINISHED_STORY_CTA_LABEL = "Start Full Story";
 const FINISHED_STORY_STATUS_LABEL = "Completed";
@@ -575,7 +569,11 @@ function FinishedStoryCard({ series, position = 0, titleOverride = "", genreOver
   );
 }
 
-function FeaturedFinishedStoryFallback() {
+function FeaturedFinishedStoryCard({ series }) {
+  if (!series) {
+    return null;
+  }
+
   return (
     <article className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(145deg,rgba(24,17,35,0.98)_0%,rgba(10,11,20,0.98)_56%,rgba(21,15,31,0.98)_100%)] p-5 shadow-[0_28px_90px_rgba(0,0,0,0.32)] sm:p-6">
       <div
@@ -584,8 +582,8 @@ function FeaturedFinishedStoryFallback() {
       />
       <div className="relative grid gap-5 sm:grid-cols-[124px_minmax(0,1fr)] sm:items-center">
         <StorefrontNoCoverCard
-          title={FINISHED_STORY_FALLBACK.title}
-          description={FINISHED_STORY_FALLBACK.hook}
+          title={series.title}
+          description={buildCardHook(series, 132)}
           label="Featured completed novel"
           compact
           className="min-h-[192px] rounded-[24px] border-white/12 shadow-none"
@@ -593,7 +591,7 @@ function FeaturedFinishedStoryFallback() {
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`${storefrontBadgeClass} px-3 py-1.5 text-white/70`}>
-              {FINISHED_STORY_FALLBACK.genre}
+              {buildGenreLabel(series, 2) || "Novel"}
             </span>
             <span className={`${storefrontBadgeClass} px-3 py-1.5 text-fuchsia-100`}>
               {FINISHED_STORY_STATUS_LABEL}
@@ -603,17 +601,18 @@ function FeaturedFinishedStoryFallback() {
             Featured Completed Novel
           </p>
           <h3 className="mt-2 font-display text-[2rem] font-semibold leading-[0.96] tracking-[-0.05em] text-white">
-            {FINISHED_STORY_FALLBACK.title}
+            {series.title}
           </h3>
           <p className="mt-3 max-w-[34rem] text-sm leading-7 text-white/66">
-            {FINISHED_STORY_FALLBACK.hook}
+            {buildCardHook(series, 170)}
           </p>
-          <div
+          <Link
+            href={buildReadHref(series)}
             className={`mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-fuchsia-200/24 bg-fuchsia-300/[0.12] px-4 text-sm font-semibold text-fuchsia-50`}
           >
             {FINISHED_STORY_CTA_LABEL}
             <ArrowRight className="size-4" />
-          </div>
+          </Link>
         </div>
       </div>
     </article>
@@ -955,31 +954,39 @@ export default function NovelsLandingPage({
         </section>
       ) : null}
 
-      <section className="space-y-4">
-        <SectionHeading
-          eyebrow="Complete arcs"
-          title="Finished Stories"
-          description="No waiting, no cliffhanger gap — start and finish the full run tonight."
-          tone="channel"
-        />
-        {model.finishedStories.length > 0 ? (
-          <div
-            className={`grid gap-3 ${
-              model.finishedStories.length >= 3 ? "lg:grid-cols-3" : "lg:grid-cols-2"
-            }`}
-          >
-            {model.finishedStories.slice(0, 3).map((series, index) => (
-              <FinishedStoryCard
-                key={`${series.id}-${index}`}
-                series={series}
-                position={index + 1}
-              />
-            ))}
-          </div>
-        ) : (
-          <FeaturedFinishedStoryFallback />
-        )}
-      </section>
+      {model.finishedStories.length > 0 ? (
+        <section className="space-y-4">
+          <SectionHeading
+            eyebrow="Complete arcs"
+            title="Finished Stories"
+            description="No waiting, no cliffhanger gap - start and finish the full run tonight."
+            tone="channel"
+          />
+          {model.finishedStories.length === 1 ? (
+            <FeaturedFinishedStoryCard series={model.finishedStories[0]} />
+          ) : model.finishedStories.length === 2 ? (
+            <div className="grid gap-3 lg:grid-cols-2">
+              {model.finishedStories.map((series, index) => (
+                <FinishedStoryCard
+                  key={`${series.id}-${index}`}
+                  series={series}
+                  position={index + 1}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-3 lg:grid-cols-3">
+              {model.finishedStories.slice(0, 3).map((series, index) => (
+                <FinishedStoryCard
+                  key={`${series.id}-${index}`}
+                  series={series}
+                  position={index + 1}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      ) : null}
 
       {showNightstandSection ? <NightstandPicks items={model.rankings} /> : null}
     </StorefrontPage>

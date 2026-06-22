@@ -36,7 +36,7 @@ const readerFont = Literata({
 });
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
-const defaultTitle = `${siteConfig.siteName} | Comics, novels, and interactive stories`;
+const defaultTitle = siteConfig.siteName;
 const BUILD_REVISION =
   process.env.NEXT_PUBLIC_COMMIT_SHA ||
   process.env.VERCEL_GIT_COMMIT_SHA ||
@@ -85,7 +85,7 @@ export const metadata = {
     title: defaultTitle,
     description: siteConfig.defaultDescription,
     url: siteConfig.siteUrl,
-    siteName: siteConfig.companyName,
+    siteName: siteConfig.siteName,
     images: [defaultSocialImage],
     locale: "en_US",
     type: "website",

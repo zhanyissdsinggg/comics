@@ -4,6 +4,7 @@ import { cn } from "../../lib/utils";
 
 export default function ReaderErrorState({
   isComic = false,
+  installmentNoun = "",
   rootClassName = "",
   heroClassName = "",
   mutedClassName = "",
@@ -12,6 +13,10 @@ export default function ReaderErrorState({
   onRetry,
   onBack,
 }) {
+  const resolvedInstallment = String(
+    installmentNoun || (isComic ? "chapter" : "episode"),
+  ).trim();
+
   return (
     <main
       className={cn(
@@ -32,7 +37,7 @@ export default function ReaderErrorState({
             mutedClassName,
           )}
         >
-          Chapter Error
+          Reader Error
         </p>
         <h1
           className={cn(
@@ -40,7 +45,7 @@ export default function ReaderErrorState({
             isComic ? "text-white" : "text-current",
           )}
         >
-          We couldn&apos;t load this chapter.
+          We couldn&apos;t load this {resolvedInstallment}.
         </h1>
         <p
           className={cn(
@@ -48,8 +53,8 @@ export default function ReaderErrorState({
             mutedClassName,
           )}
         >
-          Try again in a moment, or head back to the series page and reopen this
-          chapter from there.
+          Try again in a moment, or head back to the series page and reopen this{" "}
+          {resolvedInstallment} from there.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <button

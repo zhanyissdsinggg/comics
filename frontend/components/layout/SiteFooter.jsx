@@ -18,7 +18,7 @@ const footerLinks = [
   { label: "Terms", href: "/terms-of-service" },
 ];
 
-const footerLegalStatement = `Gush Comics is operated by ${siteConfig.companyName}`;
+const footerLegalStatement = `${siteConfig.siteName} is operated by ${siteConfig.companyName}`;
 const footerCopyright = `Copyright 2026 ${siteConfig.companyName}`;
 
 export default function SiteFooter({

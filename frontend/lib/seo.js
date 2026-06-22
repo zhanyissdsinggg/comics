@@ -4,7 +4,7 @@ export const defaultSocialImage = {
   url: "/og-image.jpg",
   width: 1200,
   height: 630,
-  alt: `${siteConfig.companyName} preview image`,
+  alt: `${siteConfig.siteName} preview image`,
 };
 
 function resolveSocialImage(image) {
@@ -80,7 +80,7 @@ export function createPageMetadata({
       title: pageTitle,
       description: summary,
       url: absoluteUrl(canonicalPath || path),
-      siteName: siteConfig.companyName,
+      siteName: siteConfig.siteName,
       type: openGraphType,
       locale: "en_US",
       images: [socialImage],

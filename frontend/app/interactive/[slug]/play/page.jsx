@@ -1,6 +1,6 @@
 import InteractiveStoryPage from "../../../../components/interactive/InteractiveStoryPage";
 import {
-  getInteractiveProgressServer,
+  getInteractiveProgressServerState,
   getInteractiveServerAccess,
   getInteractiveStoryServer,
 } from "../../../../lib/interactiveServerApi";
@@ -24,9 +24,9 @@ export async function generateMetadata({ params }) {
 export default async function InteractiveStoryPlayPage({ params }) {
   const resolved = await Promise.resolve(params);
   const slug = String(resolved?.slug || "").trim();
-  const [story, progress, access] = await Promise.all([
+  const [story, progressState, access] = await Promise.all([
     getInteractiveStoryServer(slug),
-    getInteractiveProgressServer(slug),
+    getInteractiveProgressServerState(slug),
     getInteractiveServerAccess(),
   ]);
 
@@ -34,7 +34,8 @@ export default async function InteractiveStoryPlayPage({ params }) {
     <InteractiveStoryPage
       storySlug={slug}
       initialStory={story}
-      initialProgress={progress}
+      initialProgress={progressState.progress}
+      initialAccessState={progressState.accessState}
       initialContentMode={access.contentMode}
       mode="play"
     />

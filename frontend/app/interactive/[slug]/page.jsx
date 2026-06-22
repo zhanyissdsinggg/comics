@@ -2,6 +2,7 @@ import InteractiveStoryPage from "../../../components/interactive/InteractiveSto
 import {
   getInteractiveServerAccess,
   getInteractiveStoryServer,
+  getInteractiveStoryServerState,
 } from "../../../lib/interactiveServerApi";
 import { createPageMetadata } from "../../../lib/seo";
 import { buildInteractiveLandingRobots } from "../../../lib/interactiveSeo";
@@ -24,15 +25,16 @@ export async function generateMetadata({ params }) {
 export default async function InteractiveStoryDetailPage({ params }) {
   const resolved = await Promise.resolve(params);
   const slug = String(resolved?.slug || "").trim();
-  const [story, access] = await Promise.all([
-    getInteractiveStoryServer(slug),
+  const [storyState, access] = await Promise.all([
+    getInteractiveStoryServerState(slug),
     getInteractiveServerAccess(),
   ]);
 
   return (
     <InteractiveStoryPage
       storySlug={slug}
-      initialStory={story}
+      initialStory={storyState.story}
+      initialAccessState={storyState.accessState}
       initialContentMode={access.contentMode}
       mode="detail"
     />
