@@ -99,9 +99,7 @@ export default function AppProviders({
   const isReaderRoute = pathname?.startsWith("/read");
   const isStandaloneAuthActionRoute =
     pathname === "/auth/reset" || pathname?.startsWith("/auth/reset/");
-  // PublicHeader stays off immersive and standalone account-action routes.
-  const shouldShowPublicHeader =
-    !isAdminRoute && !isReaderRoute && !isStandaloneAuthActionRoute;
+  const shouldShowPublicHeader = !isAdminRoute && !isStandaloneAuthActionRoute;
   const shouldShowPublicFooter = !isAdminRoute && !isStandaloneAuthActionRoute;
 
   return (

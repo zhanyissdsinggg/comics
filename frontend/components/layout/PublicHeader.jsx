@@ -12,11 +12,13 @@ export default function PublicHeader({ initialShowInteractiveNav = true }) {
     typeof showInteractiveNav === "boolean"
       ? showInteractiveNav
       : initialShowInteractiveNav;
+  const showMobileBottomNav = !pathname?.startsWith("/read");
 
   return (
     <SiteHeader
       variant={variant}
       showInteractiveNav={resolvedShowInteractiveNav}
+      showMobileBottomNav={showMobileBottomNav}
     />
   );
 }
